@@ -1,0 +1,206 @@
+"use client";
+
+import { use, useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Separator } from "@/components/ui/separator";
+import { PageHeader } from "@/components/shared/page-header";
+import { StatusBadge } from "@/components/shared/status-badge";
+import { StatusAction } from "@/components/shared/status-action";
+import { ConfirmDialog } from "@/components/shared/confirm-dialog";
+import { PageSkeleton } from "@/components/shared/loading-skeleton";
+import { useApi } from "@/hooks/use-api";
+import { GoodsReceipt } from "@/types/api";
+import { fetchApi } from "@/lib/api";
+import { formatDate, formatCurrency, formatQuantity } from "@/lib/utils";
+import { ArrowLeft, Trash2 } from "lucide-react";
+import { toast } from "sonner";
+
+export default function GoodsReceiptDetailPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = use(params);
+  const router = useRouter();
+  const { data: gr, isLoading, refetch } = useApi<GoodsReceipt>(
+    `/goods-receipts/${id}`
+  );
+  const [showDelete, setShowDelete] = useState(false);
+
+  if (isLoading) return <PageSkeleton />;
+  if (!gr) return <div>Goods Receipt not found</div>;
+
+  async function handleDelete() {
+    try {
+      await fetchApi(`/goods-receipts/${id}`, { method: "DELETE" });
+      toast.success("Goods Receipt deleted");
+      router.push("/goods-receipts");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to delete");
+    }
+  }
+
+  return (
+    <div className="space-y-6">
+      <PageHeader
+        title={`GR: ${gr.grNumber}`}
+        actions={
+          <div className="flex items-center gap-2">
+            <Button variant="outline" asChild>
+              <Link href="/goods-receipts">
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Back
+              </Link>
+            </Button>
+            {gr.status === "DRAFT" && (
+              <Button variant="destructive" onClick={() => setShowDelete(true)}>
+                <Trash2 className="mr-2 h-4 w-4" />
+                Delete
+              </Button>
+            )}
+            <StatusAction
+              currentStatus={gr.status}
+              endpoint={`/goods-receipts/${id}/status`}
+              onSuccess={refetch}
+            />
+          </div>
+        }
+      />
+
+      <div className="grid gap-6 md:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>Receipt Information</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Status</span>
+              <StatusBadge status={gr.status} />
+            </div>
+            <Separator />
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Purchase Order</span>
+              <Link
+                href={`/purchase-orders/${gr.purchaseOrderId}`}
+                className="text-primary underline"
+              >
+                {gr.purchaseOrder?.poNumber || gr.purchaseOrderId}
+              </Link>
+            </div>
+            <Separator />
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Warehouse</span>
+              <span className="font-medium">{gr.warehouse?.name || "—"}</span>
+            </div>
+            <Separator />
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Receipt Date</span>
+              <span>{formatDate(gr.receiptDate)}</span>
+            </div>
+            <Separator />
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Total Amount</span>
+              <span className="text-lg font-bold">
+                {formatCurrency(gr.totalAmount)}
+              </span>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Additional Info</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Created</span>
+              <span>{formatDate(gr.createdAt)}</span>
+            </div>
+            {gr.notes && (
+              <>
+                <Separator />
+                <div>
+                  <span className="text-muted-foreground">Notes</span>
+                  <p className="mt-1">{gr.notes}</p>
+                </div>
+              </>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Line Items</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="rounded-md border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>#</TableHead>
+                  <TableHead>Item</TableHead>
+                  <TableHead className="text-right">Qty</TableHead>
+                  <TableHead>UOM</TableHead>
+                  <TableHead className="text-right">Unit Cost</TableHead>
+                  <TableHead className="text-right">Total</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {gr.lines?.map((line, idx) => (
+                  <TableRow key={line.id || idx}>
+                    <TableCell>{idx + 1}</TableCell>
+                    <TableCell>
+                      <span className="font-medium">
+                        {line.item?.code || "—"}
+                      </span>
+                      <span className="ml-2 text-muted-foreground">
+                        {line.item?.name}
+                      </span>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {formatQuantity(line.quantity)}
+                    </TableCell>
+                    <TableCell>{line.uomName}</TableCell>
+                    <TableCell className="text-right">
+                      {formatCurrency(line.unitCost)}
+                    </TableCell>
+                    <TableCell className="text-right font-medium">
+                      {formatCurrency(line.totalCost)}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
+
+      <ConfirmDialog
+        open={showDelete}
+        onOpenChange={setShowDelete}
+        title="Delete Goods Receipt"
+        description="Are you sure you want to delete this goods receipt?"
+        onConfirm={handleDelete}
+        variant="destructive"
+        confirmLabel="Delete"
+      />
+    </div>
+  );
+}
