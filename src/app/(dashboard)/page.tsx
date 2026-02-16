@@ -11,20 +11,25 @@ import {
 import { PageHeader } from "@/components/shared/page-header";
 import { CardSkeleton } from "@/components/shared/loading-skeleton";
 import { formatCurrency } from "@/lib/utils";
-import { fetchPaginated, fetchApi } from "@/lib/api";
+import { fetchPaginated } from "@/lib/api";
 import {
   BarChart,
   Bar,
   XAxis,
   YAxis,
   CartesianGrid,
-  ResponsiveContainer,
   PieChart,
   Pie,
   Cell,
-  Tooltip,
-  Legend,
 } from "recharts";
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  ChartLegend,
+  ChartLegendContent,
+  type ChartConfig,
+} from "@/components/ui/chart";
 import {
   Layers,
   Package,
@@ -44,12 +49,30 @@ interface KPIData {
 }
 
 const CHART_COLORS = [
-  "hsl(var(--chart-1))",
-  "hsl(var(--chart-2))",
-  "hsl(var(--chart-3))",
-  "hsl(var(--chart-4))",
-  "hsl(var(--chart-5))",
+  "var(--color-chart-1)",
+  "var(--color-chart-2)",
+  "var(--color-chart-3)",
+  "var(--color-chart-4)",
+  "var(--color-chart-5)",
 ];
+
+const barChartConfig = {
+  Purchasing: {
+    label: "Purchasing",
+    color: "var(--color-chart-1)",
+  },
+  Sales: {
+    label: "Sales",
+    color: "var(--color-chart-2)",
+  },
+} satisfies ChartConfig;
+
+function formatCompactNumber(value: number): string {
+  if (value >= 1_000_000_000) return `${(value / 1_000_000_000).toFixed(1)}B`;
+  if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(1)}M`;
+  if (value >= 1_000) return `${(value / 1_000).toFixed(0)}K`;
+  return value.toString();
+}
 
 export default function DashboardPage() {
   const [kpi, setKpi] = useState<KPIData | null>(null);
@@ -223,7 +246,7 @@ export default function DashboardPage() {
                 <CardDescription>Total value comparison</CardDescription>
               </CardHeader>
               <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
+                <ChartContainer config={barChartConfig} className="h-[300px] w-full">
                   <BarChart
                     data={[
                       {
@@ -233,17 +256,33 @@ export default function DashboardPage() {
                       },
                     ]}
                   >
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
-                    <YAxis />
-                    <Tooltip
-                      formatter={(value: number) => formatCurrency(value)}
+                    <CartesianGrid vertical={false} strokeDasharray="3 3" />
+                    <XAxis dataKey="name" tickLine={false} axisLine={false} />
+                    <YAxis
+                      tickLine={false}
+                      axisLine={false}
+                      tickFormatter={formatCompactNumber}
                     />
-                    <Legend />
-                    <Bar dataKey="Purchasing" fill="hsl(var(--chart-1))" />
-                    <Bar dataKey="Sales" fill="hsl(var(--chart-2))" />
+                    <ChartTooltip
+                      content={
+                        <ChartTooltipContent
+                          formatter={(value) => formatCurrency(Number(value))}
+                        />
+                      }
+                    />
+                    <ChartLegend content={<ChartLegendContent />} />
+                    <Bar
+                      dataKey="Purchasing"
+                      fill="var(--color-Purchasing)"
+                      radius={[4, 4, 0, 0]}
+                    />
+                    <Bar
+                      dataKey="Sales"
+                      fill="var(--color-Sales)"
+                      radius={[4, 4, 0, 0]}
+                    />
                   </BarChart>
-                </ResponsiveContainer>
+                </ChartContainer>
               </CardContent>
             </Card>
 
@@ -256,15 +295,29 @@ export default function DashboardPage() {
               </CardHeader>
               <CardContent>
                 {statusData.length > 0 ? (
-                  <ResponsiveContainer width="100%" height={300}>
+                  <ChartContainer
+                    config={Object.fromEntries(
+                      statusData.map((item, index) => [
+                        item.name,
+                        {
+                          label: item.name,
+                          color: CHART_COLORS[index % CHART_COLORS.length],
+                        },
+                      ])
+                    )}
+                    className="h-[300px] w-full"
+                  >
                     <PieChart>
+                      <ChartTooltip content={<ChartTooltipContent hideLabel />} />
                       <Pie
                         data={statusData}
                         cx="50%"
                         cy="50%"
+                        innerRadius={60}
                         outerRadius={100}
                         dataKey="value"
-                        label={({ name, value }) => `${name}: ${value}`}
+                        nameKey="name"
+                        strokeWidth={2}
                       >
                         {statusData.map((_, index) => (
                           <Cell
@@ -273,10 +326,9 @@ export default function DashboardPage() {
                           />
                         ))}
                       </Pie>
-                      <Tooltip />
-                      <Legend />
+                      <ChartLegend content={<ChartLegendContent nameKey="name" />} />
                     </PieChart>
-                  </ResponsiveContainer>
+                  </ChartContainer>
                 ) : (
                   <div className="flex h-[300px] items-center justify-center text-muted-foreground">
                     No document data available
