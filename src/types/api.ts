@@ -365,6 +365,33 @@ export interface BatchPnlDetail extends BatchPnlSummary {
   revenueBreakdown: BatchPnlRevenueItem[];
 }
 
+// Goods Transfer
+export interface GoodsTransferLine {
+  id: string;
+  itemId: string;
+  batchId: string | null;
+  quantity: string;
+  uomName: string;
+  unitCost: string;
+  totalCost: string;
+  item: Item;
+  batch: Batch | null;
+}
+
+export interface GoodsTransfer {
+  id: string;
+  gtNumber: string;
+  fromWarehouseId: string;
+  toWarehouseId: string;
+  transferDate: string;
+  status: DocumentStatus;
+  notes: string | null;
+  createdAt: string;
+  fromWarehouse: Warehouse;
+  toWarehouse: Warehouse;
+  lines: GoodsTransferLine[];
+}
+
 // Payment
 export type PaymentType = "INCOMING" | "OUTGOING";
 export type PaymentMethod = "CASH" | "BANK_TRANSFER" | "CHECK";

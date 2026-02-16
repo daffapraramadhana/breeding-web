@@ -1,4 +1,5 @@
 import {
+  ArrowLeftRight,
   BarChart3,
   Building2,
   ClipboardList,
@@ -43,6 +44,7 @@ export const NAV_ITEMS: NavItem[] = [
       { title: "Categories", url: "/item-categories", icon: FolderTree },
       { title: "Warehouses", url: "/warehouses", icon: Warehouse },
       { title: "Stock Summary", url: "/inventory", icon: BarChart3 },
+      { title: "Goods Transfers", url: "/goods-transfers", icon: ArrowLeftRight },
     ],
   },
   {
