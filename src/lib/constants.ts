@@ -1,6 +1,7 @@
 import {
   ArrowLeftRight,
   BarChart3,
+  BrainCircuit,
   Building2,
   ClipboardList,
   CreditCard,
@@ -71,6 +72,12 @@ export const NAV_ITEMS: NavItem[] = [
     title: "Reports",
     items: [
       { title: "Batch P&L", url: "/reports/batch-pnl", icon: LineChart },
+    ],
+  },
+  {
+    title: "Analitik",
+    items: [
+      { title: "AI Insights", url: "/ai-insights", icon: BrainCircuit },
     ],
   },
   {

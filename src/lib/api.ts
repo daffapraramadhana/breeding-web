@@ -1,4 +1,13 @@
-import { PaginatedResponse } from "@/types/api";
+import {
+  PaginatedResponse,
+  AiInsightResponse,
+  BatchPnlAnalysis,
+  ProductionForecast,
+  DashboardSummary,
+  BatchAnalysisRequest,
+  ProductionForecastRequest,
+  DashboardSummaryRequest,
+} from "@/types/api";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api";
 
@@ -39,6 +48,28 @@ export async function fetchApi<T>(
 
   const json = await res.json();
   return json.data;
+}
+
+// AI Insights
+export async function analyzeBatchPnl(params: BatchAnalysisRequest) {
+  return fetchApi<AiInsightResponse<BatchPnlAnalysis>>(
+    "/ai-insights/batch-pnl-analysis",
+    { method: "POST", body: JSON.stringify(params) }
+  );
+}
+
+export async function getProductionForecast(params: ProductionForecastRequest) {
+  return fetchApi<AiInsightResponse<ProductionForecast>>(
+    "/ai-insights/production-forecast",
+    { method: "POST", body: JSON.stringify(params) }
+  );
+}
+
+export async function getDashboardSummary(params: DashboardSummaryRequest) {
+  return fetchApi<AiInsightResponse<DashboardSummary>>(
+    "/ai-insights/dashboard-summary",
+    { method: "POST", body: JSON.stringify(params) }
+  );
 }
 
 export async function fetchPaginated<T>(

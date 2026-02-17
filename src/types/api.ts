@@ -392,6 +392,93 @@ export interface GoodsTransfer {
   lines: GoodsTransferLine[];
 }
 
+// AI Insights
+export interface AiInsightResponse<T> {
+  insight: T;
+  cached: boolean;
+  generatedAt: string;
+  expiresAt?: string;
+}
+
+export interface BatchPnlAnalysis {
+  ringkasan: string;
+  metrik_utama: {
+    total_pendapatan: string;
+    total_biaya: string;
+    total_laba_kotor: string;
+    margin_rata_rata: string;
+  };
+  analisis_batch: Array<{
+    batch_number: string;
+    penilaian: "BAIK" | "CUKUP" | "BURUK";
+    catatan: string;
+  }>;
+  tren: string[];
+  rekomendasi: string[];
+  peringatan: string[];
+}
+
+export interface ProductionForecast {
+  ringkasan: string;
+  jadwal_produksi: Array<{
+    bulan: number;
+    spesies: string;
+    jumlah_batch: number;
+    estimasi_qty_per_batch: number;
+    kandang_rekomendasi: string;
+    estimasi_biaya: string;
+    estimasi_pendapatan: string;
+    catatan: string;
+  }>;
+  proyeksi_tahunan: {
+    total_estimasi_pendapatan: string;
+    total_estimasi_biaya: string;
+    estimasi_laba_kotor: string;
+    estimasi_margin: string;
+  };
+  pertimbangan_musiman: string[];
+  risiko: string[];
+  rekomendasi_tambahan: string[];
+}
+
+export interface DashboardSummary {
+  ringkasan_eksekutif: string;
+  metrik_kunci: {
+    pendapatan: string;
+    biaya: string;
+    laba_kotor: string;
+    margin: string;
+    batch_aktif: number;
+    batch_selesai_periode: number;
+  };
+  highlights: string[];
+  perhatian: string[];
+  cash_flow_insight: string;
+  aksi_prioritas: Array<{
+    prioritas: "TINGGI" | "SEDANG" | "RENDAH";
+    aksi: string;
+    alasan: string;
+  }>;
+}
+
+export interface BatchAnalysisRequest {
+  status?: "ACTIVE" | "CLOSED";
+  startDateFrom?: string;
+  startDateTo?: string;
+  farmId?: string;
+}
+
+export interface ProductionForecastRequest {
+  forecastYear: number;
+  species?: string;
+  farmId?: string;
+}
+
+export interface DashboardSummaryRequest {
+  periodStart?: string;
+  periodEnd?: string;
+}
+
 // Payment
 export type PaymentType = "INCOMING" | "OUTGOING";
 export type PaymentMethod = "CASH" | "BANK_TRANSFER" | "CHECK";

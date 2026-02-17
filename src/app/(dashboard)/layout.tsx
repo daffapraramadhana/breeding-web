@@ -6,6 +6,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/layout/app-sidebar";
 import { Header } from "@/components/layout/header";
+import { ChatWidget } from "@/components/chat/chat-widget";
 
 export default function DashboardLayout({
   children,
@@ -38,6 +39,7 @@ export default function DashboardLayout({
         <Header />
         <main className="flex-1 overflow-auto p-6">{children}</main>
       </SidebarInset>
+      <ChatWidget />
     </SidebarProvider>
   );
 }
