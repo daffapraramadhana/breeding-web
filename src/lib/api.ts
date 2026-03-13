@@ -1,10 +1,10 @@
 import {
   PaginatedResponse,
   AiInsightResponse,
-  BatchPnlAnalysis,
+  ProjectPnlAnalysis,
   ProductionForecast,
   DashboardSummary,
-  BatchAnalysisRequest,
+  ProjectAnalysisRequest,
   ProductionForecastRequest,
   DashboardSummaryRequest,
 } from "@/types/api";
@@ -51,8 +51,8 @@ export async function fetchApi<T>(
 }
 
 // AI Insights
-export async function analyzeBatchPnl(params: BatchAnalysisRequest) {
-  return fetchApi<AiInsightResponse<BatchPnlAnalysis>>(
+export async function analyzeProjectPnl(params: ProjectAnalysisRequest) {
+  return fetchApi<AiInsightResponse<ProjectPnlAnalysis>>(
     "/ai-insights/batch-pnl-analysis",
     { method: "POST", body: JSON.stringify(params) }
   );

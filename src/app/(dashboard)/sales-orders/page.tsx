@@ -10,30 +10,37 @@ import { DataTable, Column } from "@/components/shared/data-table";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { usePaginated } from "@/hooks/use-api";
 import { SalesOrder } from "@/types/api";
-import { formatDate, formatCurrency } from "@/lib/utils";
+import { formatDate } from "@/lib/utils";
 
 const columns: Column<SalesOrder>[] = [
   {
-    header: "SO Number",
-    cell: (row) => <span className="font-medium">{row.soNumber}</span>,
-  },
-  { header: "Customer", accessorKey: "customerName" as keyof SalesOrder },
-  {
-    header: "Order Date",
-    cell: (row) => formatDate(row.orderDate),
+    header: "DO Number",
+    cell: (row) => (
+      <span className="font-medium">{row.doNumber || "—"}</span>
+    ),
   },
   {
-    header: "Expected Date",
-    cell: (row) => formatDate(row.expectedDate),
+    header: "Branch",
+    cell: (row) => row.branch?.name || "—",
   },
   {
-    header: "Total",
-    cell: (row) => formatCurrency(row.totalAmount),
-    className: "text-right",
+    header: "Customer / Breeder",
+    cell: (row) => {
+      if (row.recipientType === "BREEDER") return row.breeder?.name || "—";
+      return row.customer?.name || "—";
+    },
+  },
+  {
+    header: "Recipient Type",
+    cell: (row) => row.recipientType || "—",
   },
   {
     header: "Status",
     cell: (row) => <StatusBadge status={row.status} />,
+  },
+  {
+    header: "Created",
+    cell: (row) => formatDate(row.createdAt),
   },
 ];
 
@@ -51,7 +58,7 @@ export default function SalesOrdersPage() {
     <div className="space-y-6">
       <PageHeader
         title="Sales Orders"
-        description="Manage sales orders to customers"
+        description="Manage sales orders to customers and breeders"
         actions={
           <Button asChild>
             <Link href="/sales-orders/new">
@@ -67,7 +74,7 @@ export default function SalesOrdersPage() {
         isLoading={isLoading}
         search={search}
         onSearchChange={setSearch}
-        searchPlaceholder="Search by SO number or customer..."
+        searchPlaceholder="Search by DO number, customer, or breeder..."
         page={page}
         totalPages={meta?.totalPages || 1}
         total={meta?.total}

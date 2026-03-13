@@ -38,7 +38,7 @@ export default function NewGoodsTransferPage() {
     notes: "",
   });
   const [lines, setLines] = useState<LineItem[]>([
-    { itemId: "", quantity: "", uomName: "", unitPrice: "" },
+    { productId: "", uomId: "", quantity: "", unitPrice: "" },
   ]);
 
   useEffect(() => {
@@ -55,7 +55,7 @@ export default function NewGoodsTransferPage() {
       return;
     }
 
-    const validLines = lines.filter((l) => l.itemId && l.quantity);
+    const validLines = lines.filter((l) => l.productId && l.quantity);
     if (validLines.length === 0) {
       toast.error("Please add at least one line item");
       return;
@@ -69,10 +69,9 @@ export default function NewGoodsTransferPage() {
         transferDate: form.transferDate,
         notes: form.notes || undefined,
         lines: validLines.map((l) => ({
-          itemId: l.itemId,
+          productId: l.productId,
           quantity: l.quantity,
-          uomName: l.uomName,
-          ...(l.batchId && { batchId: l.batchId }),
+          uomId: l.uomId,
         })),
       };
 
@@ -185,7 +184,6 @@ export default function NewGoodsTransferPage() {
               lines={lines}
               onChange={setLines}
               showPrice={false}
-              showBatch
             />
           </CardContent>
         </Card>

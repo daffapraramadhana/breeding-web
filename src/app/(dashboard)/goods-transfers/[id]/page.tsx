@@ -23,11 +23,11 @@ import { PageHeader } from "@/components/shared/page-header";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { StatusAction } from "@/components/shared/status-action";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
-import { PageSkeleton } from "@/components/shared/loading-skeleton";
 import { useApi } from "@/hooks/use-api";
 import { GoodsTransfer } from "@/types/api";
+import { TRANSFER_STATUS_TRANSITIONS } from "@/lib/constants";
 import { fetchApi } from "@/lib/api";
-import { formatDate, formatCurrency, formatQuantity, parseDecimal } from "@/lib/utils";
+import { formatDate, formatQuantity } from "@/lib/utils";
 import { ArrowLeft, ArrowRight, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -43,8 +43,8 @@ export default function GoodsTransferDetailPage({
   );
   const [showDelete, setShowDelete] = useState(false);
 
-  if (isLoading) return <PageSkeleton />;
-  if (!gt) return <div>Goods Transfer not found</div>;
+  if (isLoading) return <div className="p-6">Loading...</div>;
+  if (!gt) return <div className="p-6">Goods Transfer not found</div>;
 
   async function handleDelete() {
     try {
@@ -56,15 +56,10 @@ export default function GoodsTransferDetailPage({
     }
   }
 
-  const grandTotal = gt.lines?.reduce(
-    (sum, line) => sum + parseDecimal(line.totalCost),
-    0
-  ) ?? 0;
-
   return (
     <div className="space-y-6">
       <PageHeader
-        title={`GT: ${gt.gtNumber}`}
+        title={`Transfer: ${gt.transferNumber}`}
         actions={
           <div className="flex items-center gap-2">
             <Button variant="outline" asChild>
@@ -73,7 +68,7 @@ export default function GoodsTransferDetailPage({
                 Back
               </Link>
             </Button>
-            {gt.status === "DRAFT" && (
+            {gt.status === "IN_TRANSIT" && (
               <Button
                 variant="destructive"
                 onClick={() => setShowDelete(true)}
@@ -84,6 +79,7 @@ export default function GoodsTransferDetailPage({
             )}
             <StatusAction
               currentStatus={gt.status}
+              transitions={TRANSFER_STATUS_TRANSITIONS}
               endpoint={`/goods-transfers/${id}/status`}
               onSuccess={refetch}
             />
@@ -113,14 +109,7 @@ export default function GoodsTransferDetailPage({
             <Separator />
             <div className="flex justify-between">
               <span className="text-muted-foreground">Transfer Date</span>
-              <span>{formatDate(gt.transferDate)}</span>
-            </div>
-            <Separator />
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Total</span>
-              <span className="text-lg font-bold">
-                {formatCurrency(grandTotal)}
-              </span>
+              <span>{gt.transferDate ? formatDate(gt.transferDate) : "—"}</span>
             </div>
           </CardContent>
         </Card>
@@ -157,12 +146,11 @@ export default function GoodsTransferDetailPage({
               <TableHeader>
                 <TableRow>
                   <TableHead>#</TableHead>
-                  <TableHead>Item</TableHead>
-                  <TableHead>Batch</TableHead>
-                  <TableHead className="text-right">Qty</TableHead>
+                  <TableHead>Product</TableHead>
+                  <TableHead className="text-right">Qty Sent</TableHead>
+                  <TableHead className="text-right">Qty Received</TableHead>
+                  <TableHead className="text-right">Qty Damaged</TableHead>
                   <TableHead>UOM</TableHead>
-                  <TableHead className="text-right">Unit Cost</TableHead>
-                  <TableHead className="text-right">Total</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -171,38 +159,24 @@ export default function GoodsTransferDetailPage({
                     <TableCell>{idx + 1}</TableCell>
                     <TableCell>
                       <span className="font-medium">
-                        {line.item?.code || "—"}
+                        {line.product?.code || "—"}
                       </span>
                       <span className="ml-2 text-muted-foreground">
-                        {line.item?.name}
+                        {line.product?.name}
                       </span>
                     </TableCell>
-                    <TableCell>
-                      {line.batch?.batchNumber || "—"}
+                    <TableCell className="text-right">
+                      {formatQuantity(line.quantitySent)}
                     </TableCell>
                     <TableCell className="text-right">
-                      {formatQuantity(line.quantity)}
+                      {line.quantityReceived ? formatQuantity(line.quantityReceived) : "—"}
                     </TableCell>
-                    <TableCell>{line.uomName}</TableCell>
                     <TableCell className="text-right">
-                      {formatCurrency(line.unitCost)}
+                      {line.quantityDamaged ? formatQuantity(line.quantityDamaged) : "—"}
                     </TableCell>
-                    <TableCell className="text-right font-medium">
-                      {formatCurrency(line.totalCost)}
-                    </TableCell>
+                    <TableCell>{line.uom?.name || "—"}</TableCell>
                   </TableRow>
                 ))}
-                <TableRow>
-                  <TableCell
-                    colSpan={6}
-                    className="text-right font-medium"
-                  >
-                    Grand Total
-                  </TableCell>
-                  <TableCell className="text-right text-lg font-bold">
-                    {formatCurrency(grandTotal)}
-                  </TableCell>
-                </TableRow>
               </TableBody>
             </Table>
           </div>

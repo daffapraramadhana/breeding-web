@@ -9,14 +9,23 @@ import { Plus, Pencil, Trash2 } from "lucide-react";
 import { DataTable, Column } from "@/components/shared/data-table";
 import { PageHeader } from "@/components/shared/page-header";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
+import { StatusBadge } from "@/components/shared/status-badge";
 import { usePaginated } from "@/hooks/use-api";
 import { fetchApi } from "@/lib/api";
 import { formatDate } from "@/lib/utils";
-import { Farm } from "@/types/api";
+import { Farm, FarmStatus } from "@/types/api";
+import { BranchCombobox } from "@/components/forms/branch-combobox";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -47,6 +56,9 @@ export default function FarmsPage() {
   const [editingFarm, setEditingFarm] = useState<Farm | null>(null);
   const [formName, setFormName] = useState("");
   const [formAddress, setFormAddress] = useState("");
+  const [formBranchId, setFormBranchId] = useState("");
+  const [formFarmType, setFormFarmType] = useState("");
+  const [formStatus, setFormStatus] = useState<FarmStatus | "">("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Delete state
@@ -60,8 +72,22 @@ export default function FarmsPage() {
       accessorKey: "name",
     },
     {
+      header: "Branch",
+      cell: (row) => row.branch?.name || "-",
+    },
+    {
       header: "Address",
       accessorKey: "address",
+    },
+    {
+      header: "Farm Type",
+      cell: (row) => row.farmType || "-",
+    },
+    {
+      header: "Status",
+      cell: (row) =>
+        row.status ? <StatusBadge status={row.status} /> : "-",
+      className: "w-[120px]",
     },
     {
       header: "Created",
@@ -103,6 +129,9 @@ export default function FarmsPage() {
     setEditingFarm(null);
     setFormName("");
     setFormAddress("");
+    setFormBranchId("");
+    setFormFarmType("");
+    setFormStatus("");
     setDialogOpen(true);
   }
 
@@ -111,6 +140,9 @@ export default function FarmsPage() {
     setEditingFarm(farm);
     setFormName(farm.name);
     setFormAddress(farm.address || "");
+    setFormBranchId(farm.branchId || "");
+    setFormFarmType(farm.farmType || "");
+    setFormStatus(farm.status || "");
     setDialogOpen(true);
   }
 
@@ -127,11 +159,19 @@ export default function FarmsPage() {
       return;
     }
 
+    if (!formBranchId) {
+      toast.error("Branch is required");
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       const body = {
         name: formName.trim(),
+        branchId: formBranchId,
         ...(formAddress.trim() && { address: formAddress.trim() }),
+        ...(formFarmType.trim() && { farmType: formFarmType.trim() }),
+        ...(formStatus && { status: formStatus }),
       };
 
       if (editingFarm) {
@@ -230,6 +270,13 @@ export default function FarmsPage() {
 
           <div className="space-y-4">
             <div className="space-y-2">
+              <Label htmlFor="farm-branch">Branch</Label>
+              <BranchCombobox
+                value={formBranchId}
+                onChange={setFormBranchId}
+              />
+            </div>
+            <div className="space-y-2">
               <Label htmlFor="farm-name">Name</Label>
               <Input
                 id="farm-name"
@@ -252,6 +299,34 @@ export default function FarmsPage() {
                   if (e.key === "Enter") handleSubmit();
                 }}
               />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="farm-type">Farm Type</Label>
+              <Input
+                id="farm-type"
+                placeholder="Enter farm type (optional)"
+                value={formFarmType}
+                onChange={(e) => setFormFarmType(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") handleSubmit();
+                }}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="farm-status">Status</Label>
+              <Select
+                value={formStatus}
+                onValueChange={(val) => setFormStatus(val as FarmStatus)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select status (optional)" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ACTIVE">Active</SelectItem>
+                  <SelectItem value="INACTIVE">Inactive</SelectItem>
+                  <SelectItem value="MAINTENANCE">Maintenance</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
 

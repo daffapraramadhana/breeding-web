@@ -18,9 +18,15 @@ export function formatCurrency(value: string | number): string {
   }).format(num);
 }
 
-export function formatDate(date: string | Date): string {
-  const d = typeof date === "string" ? parseISO(date) : date;
-  return format(d, "dd MMM yyyy", { locale: id });
+export function formatDate(date: string | Date | null | undefined): string {
+  if (!date) return "—";
+  try {
+    const d = typeof date === "string" ? parseISO(date) : date;
+    if (isNaN(d.getTime())) return "—";
+    return format(d, "dd MMM yyyy", { locale: id });
+  } catch {
+    return "—";
+  }
 }
 
 export function formatQuantity(value: string | number): string {

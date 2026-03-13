@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -11,19 +12,19 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Trash2, Plus } from "lucide-react";
-import { ItemCombobox } from "@/components/shared/item-combobox";
-import { BatchCombobox } from "@/components/shared/batch-combobox";
+import { ProductCombobox } from "@/components/forms/product-combobox";
 import { formatCurrency, parseDecimal } from "@/lib/utils";
-import { Item } from "@/types/api";
+import { Product, UnitOfMeasure } from "@/types/api";
+import { fetchPaginated } from "@/lib/api";
 
 export interface LineItem {
-  itemId: string;
-  itemCode?: string;
-  itemName?: string;
+  productId: string;
+  productCode?: string;
+  productName?: string;
+  uomId: string;
+  uomName?: string;
   quantity: string;
-  uomName: string;
   unitPrice: string;
-  batchId?: string;
 }
 
 interface LineItemsFieldProps {
@@ -31,7 +32,6 @@ interface LineItemsFieldProps {
   onChange: (lines: LineItem[]) => void;
   showPrice?: boolean;
   priceLabel?: string;
-  showBatch?: boolean;
   disabled?: boolean;
 }
 
@@ -40,13 +40,26 @@ export function LineItemsField({
   onChange,
   showPrice = true,
   priceLabel = "Unit Price",
-  showBatch = false,
   disabled = false,
 }: LineItemsFieldProps) {
+  const [uomMap, setUomMap] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    fetchPaginated<UnitOfMeasure>("/unit-of-measures", { limit: 100 })
+      .then((res) => {
+        const map: Record<string, string> = {};
+        for (const uom of res.data) {
+          map[uom.name.toUpperCase()] = uom.id;
+        }
+        setUomMap(map);
+      })
+      .catch(() => {});
+  }, []);
+
   function addLine() {
     onChange([
       ...lines,
-      { itemId: "", quantity: "", uomName: "", unitPrice: "", batchId: "" },
+      { productId: "", uomId: "", quantity: "", unitPrice: "" },
     ]);
   }
 
@@ -61,15 +74,16 @@ export function LineItemsField({
     onChange(updated);
   }
 
-  function handleItemSelect(index: number, itemId: string, item: Item) {
+  function handleProductSelect(index: number, productId: string, product: Product) {
     const updated = lines.map((line, i) =>
       i === index
         ? {
             ...line,
-            itemId,
-            itemCode: item.code,
-            itemName: item.name,
-            uomName: item.baseUom,
+            productId,
+            productCode: product.code,
+            productName: product.name,
+            uomId: product.baseUomId || uomMap[product.baseUom.toUpperCase()] || line.uomId,
+            uomName: product.baseUom,
           }
         : line
     );
@@ -80,13 +94,6 @@ export function LineItemsField({
     return sum + parseDecimal(line.quantity) * parseDecimal(line.unitPrice);
   }, 0);
 
-  function getColSpan() {
-    let cols = 5; // #, item, qty, uom, actions
-    if (showPrice) cols += 2;
-    if (showBatch) cols += 1;
-    return cols;
-  }
-
   return (
     <div className="space-y-3">
       <div className="rounded-md border">
@@ -94,7 +101,7 @@ export function LineItemsField({
           <TableHeader>
             <TableRow>
               <TableHead className="w-[40px]">#</TableHead>
-              <TableHead className="min-w-[250px]">Item</TableHead>
+              <TableHead className="min-w-[250px]">Product</TableHead>
               <TableHead className="w-[120px]">Qty</TableHead>
               <TableHead className="w-[100px]">UOM</TableHead>
               {showPrice && (
@@ -103,9 +110,6 @@ export function LineItemsField({
                   <TableHead className="w-[150px]">Total</TableHead>
                 </>
               )}
-              {showBatch && (
-                <TableHead className="min-w-[200px]">Batch</TableHead>
-              )}
               <TableHead className="w-[50px]" />
             </TableRow>
           </TableHeader>
@@ -113,7 +117,7 @@ export function LineItemsField({
             {lines.length === 0 ? (
               <TableRow>
                 <TableCell
-                  colSpan={getColSpan()}
+                  colSpan={showPrice ? 7 : 5}
                   className="text-center text-muted-foreground py-8"
                 >
                   No items added. Click &quot;Add Item&quot; to add a line.
@@ -129,10 +133,10 @@ export function LineItemsField({
                       {idx + 1}
                     </TableCell>
                     <TableCell>
-                      <ItemCombobox
-                        value={line.itemId}
-                        onChange={(itemId, item) =>
-                          handleItemSelect(idx, itemId, item)
+                      <ProductCombobox
+                        value={line.productId}
+                        onChange={(productId, product) =>
+                          handleProductSelect(idx, productId, product)
                         }
                         disabled={disabled}
                       />
@@ -152,7 +156,7 @@ export function LineItemsField({
                     </TableCell>
                     <TableCell>
                       <Input
-                        value={line.uomName}
+                        value={line.uomName || ""}
                         onChange={(e) =>
                           updateLine(idx, "uomName", e.target.value)
                         }
@@ -179,17 +183,6 @@ export function LineItemsField({
                           {formatCurrency(lineTotal)}
                         </TableCell>
                       </>
-                    )}
-                    {showBatch && (
-                      <TableCell>
-                        <BatchCombobox
-                          value={line.batchId || ""}
-                          onChange={(batchId) =>
-                            updateLine(idx, "batchId", batchId)
-                          }
-                          disabled={disabled}
-                        />
-                      </TableCell>
                     )}
                     <TableCell>
                       {!disabled && (

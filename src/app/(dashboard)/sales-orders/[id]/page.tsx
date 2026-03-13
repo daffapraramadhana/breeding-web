@@ -18,7 +18,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { PageHeader } from "@/components/shared/page-header";
 import { StatusBadge } from "@/components/shared/status-badge";
@@ -27,14 +26,10 @@ import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { PageSkeleton } from "@/components/shared/loading-skeleton";
 import { useApi } from "@/hooks/use-api";
 import { SalesOrder } from "@/types/api";
+import { SALES_STATUS_TRANSITIONS } from "@/lib/constants";
 import { fetchApi } from "@/lib/api";
-import {
-  formatDate,
-  formatCurrency,
-  formatQuantity,
-  parseDecimal,
-} from "@/lib/utils";
-import { ArrowLeft, Pencil, Trash2 } from "lucide-react";
+import { formatDate, formatCurrency } from "@/lib/utils";
+import { ArrowLeft, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 export default function SalesOrderDetailPage({
@@ -62,10 +57,15 @@ export default function SalesOrderDetailPage({
     }
   }
 
+  const recipientName =
+    so.recipientType === "BREEDER"
+      ? so.breeder?.name
+      : so.customer?.name;
+
   return (
     <div className="space-y-6">
       <PageHeader
-        title={`SO: ${so.soNumber}`}
+        title={`SO: ${so.doNumber || so.id.slice(0, 8)}`}
         actions={
           <div className="flex items-center gap-2">
             <Button variant="outline" asChild>
@@ -74,25 +74,18 @@ export default function SalesOrderDetailPage({
                 Back
               </Link>
             </Button>
-            {so.status === "DRAFT" && (
-              <>
-                <Button variant="outline" asChild>
-                  <Link href={`/sales-orders/${id}/edit`}>
-                    <Pencil className="mr-2 h-4 w-4" />
-                    Edit
-                  </Link>
-                </Button>
-                <Button
-                  variant="destructive"
-                  onClick={() => setShowDelete(true)}
-                >
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  Delete
-                </Button>
-              </>
+            {so.status === "PENDING_APPROVAL" && (
+              <Button
+                variant="destructive"
+                onClick={() => setShowDelete(true)}
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                Delete
+              </Button>
             )}
             <StatusAction
               currentStatus={so.status}
+              transitions={SALES_STATUS_TRANSITIONS}
               endpoint={`/sales-orders/${id}/status`}
               onSuccess={refetch}
             />
@@ -112,25 +105,25 @@ export default function SalesOrderDetailPage({
             </div>
             <Separator />
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Customer</span>
-              <span className="font-medium">{so.customerName}</span>
+              <span className="text-muted-foreground">DO Number</span>
+              <span className="font-medium">{so.doNumber || "—"}</span>
             </div>
             <Separator />
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Order Date</span>
-              <span>{formatDate(so.orderDate)}</span>
+              <span className="text-muted-foreground">Branch</span>
+              <span className="font-medium">{so.branch?.name || "—"}</span>
             </div>
             <Separator />
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Expected Date</span>
-              <span>{formatDate(so.expectedDate)}</span>
+              <span className="text-muted-foreground">Recipient Type</span>
+              <span>{so.recipientType || "—"}</span>
             </div>
             <Separator />
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Total Amount</span>
-              <span className="text-lg font-bold">
-                {formatCurrency(so.totalAmount)}
+              <span className="text-muted-foreground">
+                {so.recipientType === "BREEDER" ? "Breeder" : "Customer"}
               </span>
+              <span className="font-medium">{recipientName || "—"}</span>
             </div>
           </CardContent>
         </Card>
@@ -140,6 +133,21 @@ export default function SalesOrderDetailPage({
             <CardTitle>Additional Info</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Contract Price</span>
+              <span>{so.contractPrice ? formatCurrency(so.contractPrice) : "—"}</span>
+            </div>
+            <Separator />
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Market Price</span>
+              <span>{so.marketPrice ? formatCurrency(so.marketPrice) : "—"}</span>
+            </div>
+            <Separator />
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Payment Method</span>
+              <span>{so.paymentMethod || "—"}</span>
+            </div>
+            <Separator />
             <div className="flex justify-between">
               <span className="text-muted-foreground">Created</span>
               <span>{formatDate(so.createdAt)}</span>
@@ -167,71 +175,36 @@ export default function SalesOrderDetailPage({
               <TableHeader>
                 <TableRow>
                   <TableHead>#</TableHead>
-                  <TableHead>Item</TableHead>
-                  <TableHead className="text-right">Qty</TableHead>
-                  <TableHead>UOM</TableHead>
+                  <TableHead>Product Description</TableHead>
+                  <TableHead className="text-right">Bird Count</TableHead>
+                  <TableHead className="text-right">Weight (kg)</TableHead>
                   <TableHead className="text-right">Unit Price</TableHead>
-                  <TableHead className="text-right">Total</TableHead>
-                  <TableHead className="text-right">Delivered</TableHead>
-                  <TableHead>Fulfillment</TableHead>
+                  <TableHead className="text-right">Total Price</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {so.lines?.map((line, idx) => {
-                  const qty = parseDecimal(line.quantity);
-                  const delivered = parseDecimal(line.deliveredQty);
-                  const pct =
-                    qty > 0 ? Math.round((delivered / qty) * 100) : 0;
-                  return (
-                    <TableRow key={line.id || idx}>
-                      <TableCell>{idx + 1}</TableCell>
-                      <TableCell>
-                        <span className="font-medium">
-                          {line.item?.code || "—"}
-                        </span>
-                        <span className="ml-2 text-muted-foreground">
-                          {line.item?.name}
-                        </span>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        {formatQuantity(line.quantity)}
-                      </TableCell>
-                      <TableCell>{line.uomName}</TableCell>
-                      <TableCell className="text-right">
-                        {formatCurrency(line.unitPrice)}
-                      </TableCell>
-                      <TableCell className="text-right font-medium">
-                        {formatCurrency(line.totalPrice)}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        {formatQuantity(line.deliveredQty)}
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          variant={
-                            pct >= 100
-                              ? "default"
-                              : pct > 0
-                                ? "secondary"
-                                : "outline"
-                          }
-                        >
-                          {pct}%
-                        </Badge>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
+                {so.lines?.map((line, idx) => (
+                  <TableRow key={line.id || idx}>
+                    <TableCell>{idx + 1}</TableCell>
+                    <TableCell className="font-medium">
+                      {line.productDescription || "—"}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {line.birdCount ?? "—"}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {line.totalWeightKg || "—"}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {line.unitPrice ? formatCurrency(line.unitPrice) : "—"}
+                    </TableCell>
+                    <TableCell className="text-right font-medium">
+                      {line.totalPrice ? formatCurrency(line.totalPrice) : "—"}
+                    </TableCell>
+                  </TableRow>
+                ))}
               </TableBody>
             </Table>
-          </div>
-          <div className="mt-4 flex justify-end">
-            <div className="text-right">
-              <span className="text-muted-foreground mr-2">Grand Total:</span>
-              <span className="text-xl font-bold">
-                {formatCurrency(so.totalAmount)}
-              </span>
-            </div>
           </div>
         </CardContent>
       </Card>

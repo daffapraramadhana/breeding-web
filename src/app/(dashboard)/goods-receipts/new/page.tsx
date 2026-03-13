@@ -22,8 +22,11 @@ import {
 } from "@/components/ui/select";
 import { PageHeader } from "@/components/shared/page-header";
 import { LineItemsField, LineItem } from "@/components/forms/line-items-field";
+import { BranchCombobox } from "@/components/forms/branch-combobox";
+import { SupplierCombobox } from "@/components/forms/supplier-combobox";
+import { WarehouseCombobox } from "@/components/forms/warehouse-combobox";
 import { fetchApi, fetchPaginated } from "@/lib/api";
-import { PurchaseOrder, Warehouse } from "@/types/api";
+import { PurchaseOrder } from "@/types/api";
 import { toast } from "sonner";
 import { ArrowLeft } from "lucide-react";
 
@@ -31,21 +34,18 @@ export default function NewGoodsReceiptPage() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [purchaseOrders, setPurchaseOrders] = useState<PurchaseOrder[]>([]);
-  const [warehouses, setWarehouses] = useState<Warehouse[]>([]);
   const [form, setForm] = useState({
     purchaseOrderId: "",
+    branchId: "",
+    supplierId: "",
     warehouseId: "",
-    receiptDate: "",
     notes: "",
   });
   const [lines, setLines] = useState<LineItem[]>([]);
 
   useEffect(() => {
     fetchPaginated<PurchaseOrder>("/purchase-orders", { limit: 100 })
-      .then((res) => setPurchaseOrders(res.data.filter((po) => po.status === "APPROVED" || po.status === "PROCESSED")))
-      .catch(() => {});
-    fetchPaginated<Warehouse>("/warehouses", { limit: 100 })
-      .then((res) => setWarehouses(res.data))
+      .then((res) => setPurchaseOrders(res.data.filter((po) => po.status === "ORDERED" || po.status === "RECEIVED")))
       .catch(() => {});
   }, []);
 
@@ -57,14 +57,22 @@ export default function NewGoodsReceiptPage() {
         if (po.lines) {
           setLines(
             po.lines.map((line) => ({
-              itemId: line.itemId,
-              itemCode: line.item?.code,
-              itemName: line.item?.name,
+              productId: line.productId,
+              productCode: line.product?.code,
+              productName: line.product?.name,
+              uomId: line.uomId,
+              uomName: line.uom?.name,
               quantity: line.quantity,
-              uomName: line.uomName,
               unitPrice: line.unitPrice,
             }))
           );
+        }
+        // Auto-fill supplier and branch from PO
+        if (po.supplierId) {
+          setForm((prev) => ({ ...prev, supplierId: po.supplierId }));
+        }
+        if (po.branchId) {
+          setForm((prev) => ({ ...prev, branchId: po.branchId }));
         }
       })
       .catch(() => {});
@@ -73,7 +81,7 @@ export default function NewGoodsReceiptPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
-    const validLines = lines.filter((l) => l.itemId && l.quantity);
+    const validLines = lines.filter((l) => l.productId && l.quantity);
     if (validLines.length === 0) {
       toast.error("Please add at least one line item");
       return;
@@ -83,15 +91,16 @@ export default function NewGoodsReceiptPage() {
     try {
       const body = {
         purchaseOrderId: form.purchaseOrderId,
+        branchId: form.branchId,
+        supplierId: form.supplierId || undefined,
         warehouseId: form.warehouseId,
-        receiptDate: form.receiptDate,
         notes: form.notes || undefined,
         lines: validLines.map((l) => ({
-          itemId: l.itemId,
-          quantity: l.quantity,
-          uomName: l.uomName,
-          unitCost: l.unitPrice,
-          ...(l.batchId && { batchId: l.batchId }),
+          productId: l.productId,
+          uomId: l.uomId,
+          quantitySent: l.quantity,
+          quantityReceived: l.quantity,
+          quantityDamaged: "0",
         })),
       };
 
@@ -143,7 +152,7 @@ export default function NewGoodsReceiptPage() {
                 <SelectContent>
                   {purchaseOrders.map((po) => (
                     <SelectItem key={po.id} value={po.id}>
-                      {po.poNumber} - {po.supplierName}
+                      {po.poNumber} - {po.supplier?.name || "—"}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -151,35 +160,26 @@ export default function NewGoodsReceiptPage() {
             </div>
             <div className="space-y-2">
               <Label>Warehouse *</Label>
-              <Select
+              <WarehouseCombobox
                 value={form.warehouseId}
-                onValueChange={(v) => setForm({ ...form, warehouseId: v })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select warehouse..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {warehouses.map((wh) => (
-                    <SelectItem key={wh.id} value={wh.id}>
-                      {wh.code} - {wh.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="receiptDate">Receipt Date *</Label>
-              <Input
-                id="receiptDate"
-                type="date"
-                value={form.receiptDate}
-                onChange={(e) =>
-                  setForm({ ...form, receiptDate: e.target.value })
-                }
-                required
+                onChange={(id) => setForm({ ...form, warehouseId: id })}
               />
             </div>
             <div className="space-y-2">
+              <Label>Branch *</Label>
+              <BranchCombobox
+                value={form.branchId}
+                onChange={(id) => setForm({ ...form, branchId: id })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Supplier</Label>
+              <SupplierCombobox
+                value={form.supplierId}
+                onChange={(id) => setForm({ ...form, supplierId: id })}
+              />
+            </div>
+            <div className="md:col-span-2 space-y-2">
               <Label htmlFor="notes">Notes</Label>
               <Textarea
                 id="notes"
@@ -201,7 +201,6 @@ export default function NewGoodsReceiptPage() {
               onChange={setLines}
               showPrice
               priceLabel="Unit Cost"
-              showBatch
             />
           </CardContent>
         </Card>

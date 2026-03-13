@@ -15,19 +15,18 @@ import { fetchPaginated } from "@/lib/api";
 import type { ContextType, ContextTypeOption, AttachedContext } from "@/types/chat";
 
 export const CONTEXT_TYPES: ContextTypeOption[] = [
-  { type: "batch", label: "Batch Ternak", icon: "🐔", searchEndpoint: "/batches", displayField: "batchNumber" },
-  { type: "batch_pnl", label: "Batch P&L", icon: "📊", searchEndpoint: "/batches", displayField: "batchNumber" },
-  { type: "purchase_order", label: "Purchase Order", icon: "📦", searchEndpoint: "/purchase-orders", displayField: "poNumber" },
-  { type: "sales_order", label: "Sales Order", icon: "🛒", searchEndpoint: "/sales-orders", displayField: "soNumber" },
-  { type: "goods_receipt", label: "Goods Receipt", icon: "📥", searchEndpoint: "/goods-receipts", displayField: "grNumber" },
-  { type: "delivery_order", label: "Delivery Order", icon: "🚚", searchEndpoint: "/delivery-orders", displayField: "doNumber" },
-  { type: "production_order", label: "Production Order", icon: "🏭", searchEndpoint: "/production-orders", displayField: "prodNumber" },
-  { type: "item", label: "Item", icon: "📦", searchEndpoint: "/items", displayField: "name" },
-  { type: "inventory_stock", label: "Stok Inventori", icon: "📋", searchEndpoint: "/inventory/stocks", displayField: "itemName" },
-  { type: "journal_entry", label: "Jurnal", icon: "📒", searchEndpoint: "/journal-entries", displayField: "entryNumber" },
-  { type: "account_payable", label: "Hutang", icon: "💳", searchEndpoint: "/account-payables", displayField: "supplierName" },
-  { type: "account_receivable", label: "Piutang", icon: "💰", searchEndpoint: "/account-receivables", displayField: "customerName" },
-  { type: "payment", label: "Pembayaran", icon: "💸", searchEndpoint: "/payments", displayField: "paymentNumber" },
+  { type: "project", label: "Proyek", icon: "📋", searchEndpoint: "/projects", displayField: "id" },
+  { type: "coop", label: "Kandang", icon: "🏠", searchEndpoint: "/coops", displayField: "name" },
+  { type: "product", label: "Produk", icon: "📦", searchEndpoint: "/products", displayField: "name" },
+  { type: "purchase_order", label: "Purchase Order", icon: "🛒", searchEndpoint: "/purchase-orders", displayField: "poNumber" },
+  { type: "sales_order", label: "Sales Order", icon: "💰", searchEndpoint: "/sales-orders", displayField: "doNumber" },
+  { type: "goods_receipt", label: "Goods Receipt", icon: "📥", searchEndpoint: "/goods-receipts", displayField: "receiptNumber" },
+  { type: "delivery", label: "Delivery", icon: "🚚", searchEndpoint: "/deliveries", displayField: "id" },
+  { type: "goods_transfer", label: "Goods Transfer", icon: "🔄", searchEndpoint: "/goods-transfers", displayField: "transferNumber" },
+  { type: "goods_consumption", label: "Goods Consumption", icon: "📉", searchEndpoint: "/goods-consumptions", displayField: "consumptionNumber" },
+  { type: "goods_return", label: "Goods Return", icon: "↩️", searchEndpoint: "/goods-returns", displayField: "returnNumber" },
+  { type: "internal_trade", label: "Internal Trade", icon: "🔀", searchEndpoint: "/internal-trades", displayField: "tradeNumber" },
+  { type: "inventory_stock", label: "Stok Inventori", icon: "📊", searchEndpoint: "/inventory/stocks", displayField: "id" },
 ];
 
 interface ContextPickerProps {
@@ -51,23 +50,27 @@ function getDisplayValue(item: Record<string, unknown>, field: string): string {
 
 function getSubtitle(item: Record<string, unknown>, type: ContextType): string {
   switch (type) {
-    case "batch":
-    case "batch_pnl":
-      return [item.species, item.status, (item.kandang as Record<string, unknown>)?.name]
+    case "project":
+      return [item.status, (item.farm as Record<string, unknown>)?.name]
         .filter(Boolean)
         .join(" • ");
+    case "coop":
+      return [item.code, item.status, (item.farm as Record<string, unknown>)?.name]
+        .filter(Boolean)
+        .join(" • ");
+    case "product":
+      return [item.code, item.baseUom].filter(Boolean).join(" • ");
     case "purchase_order":
-      return [item.supplierName, item.status].filter(Boolean).join(" • ");
+      return [(item.supplier as Record<string, unknown>)?.name, item.status].filter(Boolean).join(" • ");
     case "sales_order":
-      return [item.customerName, item.status].filter(Boolean).join(" • ");
+      return [(item.customer as Record<string, unknown>)?.name, item.status].filter(Boolean).join(" • ");
+    case "delivery":
     case "goods_receipt":
-    case "delivery_order":
-    case "production_order":
+    case "goods_transfer":
+    case "goods_consumption":
+    case "goods_return":
+    case "internal_trade":
       return String(item.status || "");
-    case "item":
-      return [item.code, item.itemType].filter(Boolean).join(" • ");
-    case "payment":
-      return [item.paymentType, item.amount].filter(Boolean).join(" • ");
     default:
       return String(item.status || "");
   }

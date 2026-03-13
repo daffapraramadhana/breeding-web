@@ -144,7 +144,7 @@ export function ProductionForecastTab() {
       {/* Filters */}
       <Card>
         <CardContent className="pt-6">
-          <div className="grid gap-4 sm:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <Label>Tahun</Label>
               <Select
@@ -162,28 +162,6 @@ export function ProductionForecastTab() {
                       {y}
                     </SelectItem>
                   ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label>Spesies</Label>
-              <Select
-                value={filters.species || "ALL"}
-                onValueChange={(v) =>
-                  setFilters({
-                    ...filters,
-                    species: v === "ALL" ? undefined : v,
-                  })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Semua spesies" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="ALL">Semua Spesies</SelectItem>
-                  <SelectItem value="Ayam Broiler">Ayam Broiler</SelectItem>
-                  <SelectItem value="Ayam Layer">Ayam Layer</SelectItem>
-                  <SelectItem value="Bebek">Bebek</SelectItem>
                 </SelectContent>
               </Select>
             </div>

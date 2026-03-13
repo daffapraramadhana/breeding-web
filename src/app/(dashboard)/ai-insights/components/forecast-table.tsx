@@ -42,10 +42,9 @@ export function ForecastTable({ data }: ForecastTableProps) {
             <TableHeader>
               <TableRow>
                 <TableHead>Bulan</TableHead>
-                <TableHead>Spesies</TableHead>
-                <TableHead className="text-center">Batch</TableHead>
-                <TableHead className="text-center">Qty/Batch</TableHead>
-                <TableHead>Kandang</TableHead>
+                <TableHead className="text-center">Proyek</TableHead>
+                <TableHead className="text-center">Est. Populasi</TableHead>
+                <TableHead>Coop Rekomendasi</TableHead>
                 <TableHead className="text-right">Est. Biaya</TableHead>
                 <TableHead className="text-right">Est. Pendapatan</TableHead>
                 <TableHead>Catatan</TableHead>
@@ -57,14 +56,13 @@ export function ForecastTable({ data }: ForecastTableProps) {
                   <TableCell className="font-medium">
                     {MONTH_NAMES[row.bulan - 1] || row.bulan}
                   </TableCell>
-                  <TableCell>{row.spesies}</TableCell>
                   <TableCell className="text-center">
-                    {row.jumlah_batch}
+                    {row.jumlah_proyek}
                   </TableCell>
                   <TableCell className="text-center">
-                    {row.estimasi_qty_per_batch.toLocaleString("id-ID")}
+                    {row.estimasi_populasi.toLocaleString("id-ID")}
                   </TableCell>
-                  <TableCell>{row.kandang_rekomendasi}</TableCell>
+                  <TableCell>{row.coop_rekomendasi}</TableCell>
                   <TableCell className="text-right">
                     {row.estimasi_biaya}
                   </TableCell>

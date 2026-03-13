@@ -10,12 +10,12 @@ import { DataTable, Column } from "@/components/shared/data-table";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { usePaginated } from "@/hooks/use-api";
 import { GoodsTransfer } from "@/types/api";
-import { formatDate, formatCurrency, parseDecimal } from "@/lib/utils";
+import { formatDate } from "@/lib/utils";
 
 const columns: Column<GoodsTransfer>[] = [
   {
-    header: "GT Number",
-    cell: (row) => <span className="font-medium">{row.gtNumber}</span>,
+    header: "Transfer Number",
+    cell: (row) => <span className="font-medium">{row.transferNumber}</span>,
   },
   {
     header: "From Warehouse",
@@ -27,22 +27,15 @@ const columns: Column<GoodsTransfer>[] = [
   },
   {
     header: "Transfer Date",
-    cell: (row) => formatDate(row.transferDate),
-  },
-  {
-    header: "Total",
-    cell: (row) => {
-      const total = row.lines?.reduce(
-        (sum, line) => sum + parseDecimal(line.totalCost),
-        0
-      ) ?? 0;
-      return formatCurrency(total);
-    },
-    className: "text-right",
+    cell: (row) => row.transferDate ? formatDate(row.transferDate) : "—",
   },
   {
     header: "Status",
     cell: (row) => <StatusBadge status={row.status} />,
+  },
+  {
+    header: "Created",
+    cell: (row) => formatDate(row.createdAt),
   },
 ];
 
@@ -76,7 +69,7 @@ export default function GoodsTransfersPage() {
         isLoading={isLoading}
         search={search}
         onSearchChange={setSearch}
-        searchPlaceholder="Search by GT number..."
+        searchPlaceholder="Search transfers..."
         page={page}
         totalPages={meta?.totalPages || 1}
         total={meta?.total}
