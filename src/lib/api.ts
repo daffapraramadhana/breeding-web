@@ -8,6 +8,7 @@ import {
   ProductionForecastRequest,
   DashboardSummaryRequest,
 } from "@/types/api";
+import { forceLogout } from "@/lib/auth";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api";
 
@@ -36,6 +37,10 @@ export async function fetchApi<T>(
   });
 
   if (!res.ok) {
+    if (res.status === 401) {
+      forceLogout();
+      throw new ApiError("Session expired", 401);
+    }
     let message = "API Error";
     try {
       const error = await res.json();
@@ -100,6 +105,10 @@ export async function fetchPaginated<T>(
   });
 
   if (!res.ok) {
+    if (res.status === 401) {
+      forceLogout();
+      throw new ApiError("Session expired", 401);
+    }
     let message = "API Error";
     try {
       const error = await res.json();

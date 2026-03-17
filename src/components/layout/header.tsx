@@ -15,9 +15,14 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { DashboardBreadcrumbs } from "./breadcrumbs";
+import { ThemeToggle } from "./theme-toggle";
+import { LanguageToggle } from "./language-toggle";
+import { useTranslations } from "next-intl";
 
 export function Header() {
   const { user, logout } = useAuth();
+  const t = useTranslations('common');
+
 
   const initials = user?.name
     ? user.name
@@ -33,8 +38,11 @@ export function Header() {
       <SidebarTrigger />
       <Separator orientation="vertical" className="h-6" />
       <DashboardBreadcrumbs />
-      <div className="ml-auto">
+      <div className="ml-auto flex items-center gap-2">
+        <LanguageToggle />
+        <ThemeToggle />
         <DropdownMenu>
+
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="relative h-8 w-8 rounded-full">
               <Avatar className="h-8 w-8">
@@ -54,7 +62,7 @@ export function Header() {
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={logout}>
               <LogOut className="mr-2 h-4 w-4" />
-              Sign out
+              {t('logout')}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

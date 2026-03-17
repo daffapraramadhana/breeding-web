@@ -15,7 +15,10 @@ import {
   setToken,
   setUser as saveUser,
   removeToken,
+  isTokenExpired,
 } from "@/lib/auth";
+
+const TOKEN_CHECK_INTERVAL = 60 * 1000; // check every 60 seconds
 
 export interface AuthContextType {
   user: User | null;
@@ -36,14 +39,35 @@ export function useAuthProvider(): AuthContextType {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  const logout = useCallback(() => {
+    removeToken();
+    setUser(null);
+    window.location.href = "/login";
+  }, []);
+
+  // On mount: check token validity
   useEffect(() => {
     const token = getToken();
     const savedUser = getUser();
-    if (token && savedUser) {
+    if (token && savedUser && !isTokenExpired(token)) {
       setUser(savedUser);
+    } else if (token && isTokenExpired(token)) {
+      // Token exists but expired — clean up
+      removeToken();
     }
     setIsLoading(false);
   }, []);
+
+  // Periodic token expiration check
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const token = getToken();
+      if (token && isTokenExpired(token)) {
+        logout();
+      }
+    }, TOKEN_CHECK_INTERVAL);
+    return () => clearInterval(interval);
+  }, [logout]);
 
   const login = useCallback(async (email: string, password: string) => {
     const res = await fetchApi<LoginResponse>("/auth/login", {
@@ -53,12 +77,6 @@ export function useAuthProvider(): AuthContextType {
     setToken(res.accessToken);
     saveUser(res.user);
     setUser(res.user);
-  }, []);
-
-  const logout = useCallback(() => {
-    removeToken();
-    setUser(null);
-    window.location.href = "/login";
   }, []);
 
   return { user, isLoading, login, logout };
