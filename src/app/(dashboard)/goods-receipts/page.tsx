@@ -10,29 +10,28 @@ import { DataTable, Column } from "@/components/shared/data-table";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { usePaginated } from "@/hooks/use-api";
 import { GoodsReceipt } from "@/types/api";
-import { formatDate, formatCurrency } from "@/lib/utils";
+import { formatDate } from "@/lib/utils";
 
 const columns: Column<GoodsReceipt>[] = [
   {
-    header: "GR Number",
-    cell: (row) => <span className="font-medium">{row.grNumber}</span>,
+    header: "Receipt Number",
+    cell: (row) => <span className="font-medium">{row.receiptNumber}</span>,
   },
   {
     header: "PO Number",
     cell: (row) => row.purchaseOrder?.poNumber || "—",
   },
   {
+    header: "Supplier",
+    cell: (row) => row.supplier?.name || "—",
+  },
+  {
     header: "Warehouse",
     cell: (row) => row.warehouse?.name || "—",
   },
   {
-    header: "Receipt Date",
-    cell: (row) => formatDate(row.receiptDate),
-  },
-  {
-    header: "Total",
-    cell: (row) => formatCurrency(row.totalAmount),
-    className: "text-right",
+    header: "Created",
+    cell: (row) => formatDate(row.createdAt),
   },
   {
     header: "Status",
@@ -70,7 +69,7 @@ export default function GoodsReceiptsPage() {
         isLoading={isLoading}
         search={search}
         onSearchChange={setSearch}
-        searchPlaceholder="Search by GR number..."
+        searchPlaceholder="Search by receipt number..."
         page={page}
         totalPages={meta?.totalPages || 1}
         total={meta?.total}

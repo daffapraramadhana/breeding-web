@@ -1,6 +1,7 @@
 "use client";
 
 import { ReactNode } from "react";
+import { ThemeProvider } from "next-themes";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { AuthContext, useAuthProvider } from "@/hooks/use-auth";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -11,12 +12,19 @@ export function Providers({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider value={auth}>
-      <NuqsAdapter>
-        <TooltipProvider>
-          {children}
-          <Toaster richColors position="top-right" />
-        </TooltipProvider>
-      </NuqsAdapter>
+      <ThemeProvider
+        attribute="class"
+        defaultTheme="system"
+        themes={["light", "dark", "emerald"]}
+        enableSystem
+      >
+        <NuqsAdapter>
+          <TooltipProvider>
+            {children}
+            <Toaster richColors position="top-right" />
+          </TooltipProvider>
+        </NuqsAdapter>
+      </ThemeProvider>
     </AuthContext.Provider>
   );
 }

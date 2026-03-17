@@ -7,7 +7,6 @@ import { Plus, Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
   DialogContent,
@@ -15,13 +14,21 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { DataTable, Column } from "@/components/shared/data-table";
 import { PageHeader } from "@/components/shared/page-header";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
+import { BranchCombobox } from "@/components/forms/branch-combobox";
 import { usePaginated } from "@/hooks/use-api";
 import { fetchApi } from "@/lib/api";
 import { formatDate } from "@/lib/utils";
-import { Warehouse } from "@/types/api";
+import { Warehouse, WarehouseOwnerType } from "@/types/api";
 
 const LIMIT = 10;
 
@@ -40,7 +47,9 @@ export default function WarehousesPage() {
   const [formData, setFormData] = useState({
     code: "",
     name: "",
-    address: "",
+    branchId: "",
+    ownerType: "" as WarehouseOwnerType | "",
+    ownerId: "",
   });
   const [saving, setSaving] = useState(false);
 
@@ -50,7 +59,7 @@ export default function WarehousesPage() {
 
   function openCreate() {
     setEditing(null);
-    setFormData({ code: "", name: "", address: "" });
+    setFormData({ code: "", name: "", branchId: "", ownerType: "", ownerId: "" });
     setDialogOpen(true);
   }
 
@@ -59,7 +68,9 @@ export default function WarehousesPage() {
     setFormData({
       code: warehouse.code,
       name: warehouse.name,
-      address: warehouse.address || "",
+      branchId: warehouse.branchId || "",
+      ownerType: warehouse.ownerType || "",
+      ownerId: warehouse.ownerId || "",
     });
     setDialogOpen(true);
   }
@@ -76,8 +87,14 @@ export default function WarehousesPage() {
         code: formData.code,
         name: formData.name,
       };
-      if (formData.address.trim()) {
-        body.address = formData.address;
+      if (formData.branchId) {
+        body.branchId = formData.branchId;
+      }
+      if (formData.ownerType) {
+        body.ownerType = formData.ownerType;
+      }
+      if (formData.ownerId.trim()) {
+        body.ownerId = formData.ownerId;
       }
 
       if (editing) {
@@ -129,8 +146,12 @@ export default function WarehousesPage() {
     { header: "Code", accessorKey: "code" },
     { header: "Name", accessorKey: "name" },
     {
-      header: "Address",
-      cell: (row) => row.address || "-",
+      header: "Branch",
+      cell: (row) => row.branch?.name || "—",
+    },
+    {
+      header: "Owner Type",
+      cell: (row) => row.ownerType || "—",
     },
     {
       header: "Created",
@@ -238,13 +259,42 @@ export default function WarehousesPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="address">Address</Label>
-              <Textarea
-                id="address"
-                placeholder="Warehouse address (optional)"
-                value={formData.address}
+              <Label>Branch</Label>
+              <BranchCombobox
+                value={formData.branchId}
+                onChange={(id) =>
+                  setFormData((prev) => ({ ...prev, branchId: id }))
+                }
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Owner Type</Label>
+              <Select
+                value={formData.ownerType}
+                onValueChange={(v) =>
+                  setFormData((prev) => ({ ...prev, ownerType: v as WarehouseOwnerType }))
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select owner type..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="BRANCH">Branch</SelectItem>
+                  <SelectItem value="FARM">Farm</SelectItem>
+                  <SelectItem value="COOP">Coop</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="ownerId">Owner ID</Label>
+              <Input
+                id="ownerId"
+                placeholder="Owner ID"
+                value={formData.ownerId}
                 onChange={(e) =>
-                  setFormData((prev) => ({ ...prev, address: e.target.value }))
+                  setFormData((prev) => ({ ...prev, ownerId: e.target.value }))
                 }
               />
             </div>

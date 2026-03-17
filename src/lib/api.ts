@@ -1,13 +1,14 @@
 import {
   PaginatedResponse,
   AiInsightResponse,
-  BatchPnlAnalysis,
+  ProjectPnlAnalysis,
   ProductionForecast,
   DashboardSummary,
-  BatchAnalysisRequest,
+  ProjectAnalysisRequest,
   ProductionForecastRequest,
   DashboardSummaryRequest,
 } from "@/types/api";
+import { forceLogout } from "@/lib/auth";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api";
 
@@ -36,6 +37,10 @@ export async function fetchApi<T>(
   });
 
   if (!res.ok) {
+    if (res.status === 401) {
+      forceLogout();
+      throw new ApiError("Session expired", 401);
+    }
     let message = "API Error";
     try {
       const error = await res.json();
@@ -51,8 +56,8 @@ export async function fetchApi<T>(
 }
 
 // AI Insights
-export async function analyzeBatchPnl(params: BatchAnalysisRequest) {
-  return fetchApi<AiInsightResponse<BatchPnlAnalysis>>(
+export async function analyzeProjectPnl(params: ProjectAnalysisRequest) {
+  return fetchApi<AiInsightResponse<ProjectPnlAnalysis>>(
     "/ai-insights/batch-pnl-analysis",
     { method: "POST", body: JSON.stringify(params) }
   );
@@ -100,6 +105,10 @@ export async function fetchPaginated<T>(
   });
 
   if (!res.ok) {
+    if (res.status === 401) {
+      forceLogout();
+      throw new ApiError("Session expired", 401);
+    }
     let message = "API Error";
     try {
       const error = await res.json();

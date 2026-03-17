@@ -26,8 +26,9 @@ import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { PageSkeleton } from "@/components/shared/loading-skeleton";
 import { useApi } from "@/hooks/use-api";
 import { GoodsReceipt } from "@/types/api";
+import { RECEIPT_STATUS_TRANSITIONS } from "@/lib/constants";
 import { fetchApi } from "@/lib/api";
-import { formatDate, formatCurrency, formatQuantity } from "@/lib/utils";
+import { formatDate, formatQuantity } from "@/lib/utils";
 import { ArrowLeft, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -59,7 +60,7 @@ export default function GoodsReceiptDetailPage({
   return (
     <div className="space-y-6">
       <PageHeader
-        title={`GR: ${gr.grNumber}`}
+        title={`Receipt: ${gr.receiptNumber}`}
         actions={
           <div className="flex items-center gap-2">
             <Button variant="outline" asChild>
@@ -68,7 +69,7 @@ export default function GoodsReceiptDetailPage({
                 Back
               </Link>
             </Button>
-            {gr.status === "DRAFT" && (
+            {gr.status === "PROCESSING" && (
               <Button variant="destructive" onClick={() => setShowDelete(true)}>
                 <Trash2 className="mr-2 h-4 w-4" />
                 Delete
@@ -76,6 +77,7 @@ export default function GoodsReceiptDetailPage({
             )}
             <StatusAction
               currentStatus={gr.status}
+              transitions={RECEIPT_STATUS_TRANSITIONS}
               endpoint={`/goods-receipts/${id}/status`}
               onSuccess={refetch}
             />
@@ -105,20 +107,18 @@ export default function GoodsReceiptDetailPage({
             </div>
             <Separator />
             <div className="flex justify-between">
+              <span className="text-muted-foreground">Supplier</span>
+              <span className="font-medium">{gr.supplier?.name || "—"}</span>
+            </div>
+            <Separator />
+            <div className="flex justify-between">
               <span className="text-muted-foreground">Warehouse</span>
               <span className="font-medium">{gr.warehouse?.name || "—"}</span>
             </div>
             <Separator />
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Receipt Date</span>
-              <span>{formatDate(gr.receiptDate)}</span>
-            </div>
-            <Separator />
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Total Amount</span>
-              <span className="text-lg font-bold">
-                {formatCurrency(gr.totalAmount)}
-              </span>
+              <span className="text-muted-foreground">Created</span>
+              <span>{formatDate(gr.createdAt)}</span>
             </div>
           </CardContent>
         </Card>
@@ -129,8 +129,8 @@ export default function GoodsReceiptDetailPage({
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Created</span>
-              <span>{formatDate(gr.createdAt)}</span>
+              <span className="text-muted-foreground">Updated</span>
+              <span>{formatDate(gr.updatedAt)}</span>
             </div>
             {gr.notes && (
               <>
@@ -155,11 +155,11 @@ export default function GoodsReceiptDetailPage({
               <TableHeader>
                 <TableRow>
                   <TableHead>#</TableHead>
-                  <TableHead>Item</TableHead>
-                  <TableHead className="text-right">Qty</TableHead>
+                  <TableHead>Product</TableHead>
+                  <TableHead className="text-right">Qty Sent</TableHead>
+                  <TableHead className="text-right">Qty Received</TableHead>
+                  <TableHead className="text-right">Qty Damaged</TableHead>
                   <TableHead>UOM</TableHead>
-                  <TableHead className="text-right">Unit Cost</TableHead>
-                  <TableHead className="text-right">Total</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -168,22 +168,22 @@ export default function GoodsReceiptDetailPage({
                     <TableCell>{idx + 1}</TableCell>
                     <TableCell>
                       <span className="font-medium">
-                        {line.item?.code || "—"}
+                        {line.product?.code || "—"}
                       </span>
                       <span className="ml-2 text-muted-foreground">
-                        {line.item?.name}
+                        {line.product?.name}
                       </span>
                     </TableCell>
                     <TableCell className="text-right">
-                      {formatQuantity(line.quantity)}
+                      {formatQuantity(line.quantitySent)}
                     </TableCell>
-                    <TableCell>{line.uomName}</TableCell>
                     <TableCell className="text-right">
-                      {formatCurrency(line.unitCost)}
+                      {formatQuantity(line.quantityReceived)}
                     </TableCell>
-                    <TableCell className="text-right font-medium">
-                      {formatCurrency(line.totalCost)}
+                    <TableCell className="text-right">
+                      {formatQuantity(line.quantityDamaged)}
                     </TableCell>
+                    <TableCell>{line.uom?.name || "—"}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>

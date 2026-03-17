@@ -3,53 +3,46 @@
 import { useQueryState, parseAsInteger } from "nuqs";
 import { PageHeader } from "@/components/shared/page-header";
 import { DataTable, Column } from "@/components/shared/data-table";
+import { StatusBadge } from "@/components/shared/status-badge";
 import { usePaginated } from "@/hooks/use-api";
 import { InventoryStock } from "@/types/api";
 import { formatQuantity } from "@/lib/utils";
-import { Badge } from "@/components/ui/badge";
 
 const columns: Column<InventoryStock>[] = [
   {
-    header: "Item Code",
-    cell: (row) => <span className="font-medium">{row.itemCode}</span>,
-  },
-  {
-    header: "Item Name",
-    accessorKey: "itemName" as keyof InventoryStock,
-  },
-  {
-    header: "Category",
-    cell: (row) =>
-      row.category ? <Badge variant="outline">{row.category.name}</Badge> : "—",
-  },
-  {
-    header: "Base UOM",
-    accessorKey: "baseUom" as keyof InventoryStock,
-  },
-  {
-    header: "Total Quantity",
+    header: "Product",
     cell: (row) => (
-      <span className="font-medium">{formatQuantity(row.totalQuantity)}</span>
+      <span className="font-medium">
+        {row.product?.code || "—"} - {row.product?.name || "—"}
+      </span>
     ),
+  },
+  {
+    header: "Warehouse",
+    cell: (row) => row.warehouse?.name || "—",
+  },
+  {
+    header: "UOM",
+    cell: (row) => row.uom?.name || "—",
+  },
+  {
+    header: "On Hand",
+    cell: (row) => formatQuantity(row.quantityOnHand),
     className: "text-right",
   },
   {
-    header: "Warehouses",
-    cell: (row) =>
-      row.warehouses?.length > 0 ? (
-        <div className="space-y-1">
-          {row.warehouses.map((wh) => (
-            <div key={wh.warehouseId} className="text-xs">
-              <span className="text-muted-foreground">
-                {wh.warehouseName}:
-              </span>{" "}
-              <span className="font-medium">{formatQuantity(wh.quantity)}</span>
-            </div>
-          ))}
-        </div>
-      ) : (
-        "—"
-      ),
+    header: "Available",
+    cell: (row) => formatQuantity(row.quantityAvailable),
+    className: "text-right",
+  },
+  {
+    header: "Allocated",
+    cell: (row) => formatQuantity(row.quantityAllocated),
+    className: "text-right",
+  },
+  {
+    header: "Status",
+    cell: (row) => <StatusBadge status={row.stockStatus} />,
   },
 ];
 
@@ -58,7 +51,7 @@ export default function InventoryPage() {
   const [search, setSearch] = useQueryState("search", { defaultValue: "" });
 
   const { data, meta, isLoading } = usePaginated<InventoryStock>(
-    "/inventory-stocks/summary",
+    "/inventory-stocks",
     { page, limit: 20, search }
   );
 
@@ -66,7 +59,7 @@ export default function InventoryPage() {
     <div className="space-y-6">
       <PageHeader
         title="Stock Summary"
-        description="Cross-warehouse inventory stock overview"
+        description="Inventory stock overview"
       />
       <DataTable
         columns={columns}
@@ -74,13 +67,13 @@ export default function InventoryPage() {
         isLoading={isLoading}
         search={search}
         onSearchChange={setSearch}
-        searchPlaceholder="Search by item code or name..."
+        searchPlaceholder="Search by product..."
         page={page}
         totalPages={meta?.totalPages || 1}
         total={meta?.total}
         onPageChange={setPage}
         emptyTitle="No inventory data"
-        emptyDescription="Stock data will appear after processing goods receipts or production orders."
+        emptyDescription="Stock data will appear after processing goods receipts."
       />
     </div>
   );

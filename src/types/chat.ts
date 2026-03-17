@@ -43,19 +43,18 @@ export interface AttachedContext {
 }
 
 export type ContextType =
-  | "batch"
-  | "batch_pnl"
+  | "project"
+  | "coop"
+  | "product"
   | "purchase_order"
   | "sales_order"
   | "goods_receipt"
-  | "delivery_order"
-  | "production_order"
-  | "item"
-  | "inventory_stock"
-  | "journal_entry"
-  | "account_payable"
-  | "account_receivable"
-  | "payment";
+  | "delivery"
+  | "goods_transfer"
+  | "goods_consumption"
+  | "goods_return"
+  | "internal_trade"
+  | "inventory_stock";
 
 export interface ContextTypeOption {
   type: ContextType;

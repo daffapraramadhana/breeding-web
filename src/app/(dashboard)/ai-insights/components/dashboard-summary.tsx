@@ -206,19 +206,19 @@ export function DashboardSummaryTab() {
               </Card>
               <Card>
                 <CardContent className="pt-6">
-                  <p className="text-sm text-muted-foreground">Batch Aktif</p>
+                  <p className="text-sm text-muted-foreground">Proyek Aktif</p>
                   <p className="text-2xl font-bold">
-                    {insight.metrik_kunci.batch_aktif}
+                    {insight.metrik_kunci.proyek_aktif}
                   </p>
                 </CardContent>
               </Card>
               <Card>
                 <CardContent className="pt-6">
                   <p className="text-sm text-muted-foreground">
-                    Batch Selesai Periode
+                    Proyek Selesai Periode
                   </p>
                   <p className="text-2xl font-bold">
-                    {insight.metrik_kunci.batch_selesai_periode}
+                    {insight.metrik_kunci.proyek_selesai_periode}
                   </p>
                 </CardContent>
               </Card>

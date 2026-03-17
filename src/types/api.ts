@@ -33,366 +33,787 @@ export interface User {
   role: string;
 }
 
-// Farm
-export interface Farm {
+// --- Status Enums ---
+export type FarmStatus = "ACTIVE" | "INACTIVE" | "MAINTENANCE";
+export type CoopStatus = "ACTIVE" | "INACTIVE" | "MAINTENANCE";
+export type EmployeeStatus = "ACTIVE" | "INACTIVE" | "ON_LEAVE" | "TERMINATED";
+export type PurchaseStatus = "ORDERED" | "RECEIVED" | "PROCESSING" | "VERIFIED" | "REJECTED";
+export type ReceiptStatus = "PROCESSING" | "PARTIAL" | "COMPLETE" | "PENDING_VERIFICATION" | "REJECTED";
+export type TransferStatus = "IN_TRANSIT" | "RECEIVED" | "PARTIAL" | "DAMAGED_IN_TRANSIT" | "CANCELLED";
+export type ConsumptionStatus = "PROCESSING" | "APPROVED" | "CONSUMED" | "REJECTED" | "CANCELLED";
+export type ReturnStatus = "PROCESSING" | "SUPPLIER_APPROVED" | "SUPPLIER_REJECTED" | "RETURNED" | "CANCELLED";
+export type InternalTradeStatus = "PROCESSING" | "IN_TRANSIT" | "PARTIAL" | "RECEIVED" | "REJECTED";
+export type SalesStatus = "PENDING_APPROVAL" | "APPROVED" | "REALIZATION_APPROVAL" | "REALIZING" | "REALIZING_DO_LIMIT" | "CREDIT_LIMIT_PROCESSING" | "CREDIT_LIMIT_APPROVED" | "CREDIT_LIMIT_REJECTED" | "REJECTED" | "CANCELLED";
+export type DeliveryStatus = "PREPARING" | "IN_DELIVERY" | "PARTIAL_RECEIVED" | "FULLY_RECEIVED" | "CANCELLED";
+export type PaymentStatus = "PENDING" | "VERIFIED" | "REJECTED";
+export type InvoicePaymentStatus = "UNPAID" | "PARTIAL" | "PAID" | "OVERPAID";
+export type DriverBonusPaymentStatus = "PENDING" | "PAID";
+export type VerificationStatus = "PENDING" | "VERIFIED" | "REJECTED";
+export type BonusStatus = "ACTIVE" | "INACTIVE";
+export type StockStatus = "NORMAL" | "LOW" | "OUT_OF_STOCK" | "OVER_STOCK";
+export type WarehouseOwnerType = "BRANCH" | "FARM" | "COOP";
+export type PurchaseDestinationType = "BRANCH" | "FARM" | "COOP";
+export type PurchaseSalesTarget = "INTERNAL" | "EXTERNAL";
+export type RecipientType = "CUSTOMER" | "BREEDER";
+export type ConsumptionPurpose = "PRODUCTION" | "MAINTENANCE" | "OTHER";
+export type PaymentMethod = "CASH" | "BANK_TRANSFER" | "CHECK" | "GIRO";
+export type BonusUnitOption = "PER_KG" | "PER_BIRD" | "FLAT";
+
+// --- Organization ---
+export interface Branch {
   id: string;
+  code: string;
   name: string;
-  address?: string;
-  kandangs?: Kandang[];
+  region?: string;
   createdAt: string;
   updatedAt: string;
 }
 
-// Kandang
-export type KandangStatus = "ACTIVE" | "INACTIVE" | "MAINTENANCE";
+export interface Farm {
+  id: string;
+  branchId: string;
+  branch?: Branch;
+  name: string;
+  address?: string;
+  farmType?: string;
+  status?: FarmStatus;
+  coops?: Coop[];
+  createdAt: string;
+  updatedAt: string;
+}
 
-export interface Kandang {
+export interface Coop {
   id: string;
   farmId: string;
   farm?: Farm;
-  name: string;
-  capacity: number;
-  status: KandangStatus;
-  createdAt: string;
-  updatedAt: string;
-}
-
-// Batch
-export type BatchStatus = "ACTIVE" | "CLOSED";
-
-export interface Batch {
-  id: string;
-  kandangId: string;
-  kandang?: Kandang;
-  batchNumber: string;
-  species: string;
-  initialQty: number;
-  startDate: string;
-  notes?: string;
-  status: BatchStatus;
-  createdAt: string;
-  updatedAt: string;
-}
-
-// Item Category
-export interface ItemCategory {
-  id: string;
+  branchId: string;
   code: string;
   name: string;
-  parentId?: string;
-  parent?: ItemCategory;
-  children?: ItemCategory[];
-  createdAt: string;
-  updatedAt: string;
-}
-
-// Item
-export type ItemType = "RAW_MATERIAL" | "FINISHED_GOOD" | "CONSUMABLE" | "FEED" | "MEDICINE";
-
-export interface ItemUom {
-  id: string;
-  uomName: string;
-  conversionFactor: string;
-}
-
-export interface Item {
-  id: string;
-  code: string;
-  name: string;
-  itemType: ItemType;
-  baseUom: string;
-  categoryId?: string;
-  category?: ItemCategory;
   description?: string;
-  isBatchTracked?: boolean;
-  uoms?: ItemUom[];
+  capacity: number;
+  status: CoopStatus;
+  isOwnFarm?: boolean;
+  floors?: CoopFloor[];
   createdAt: string;
   updatedAt: string;
 }
 
-// Warehouse
-export interface Warehouse {
+export interface CoopFloor {
+  id: string;
+  coopId: string;
+  coop?: Coop;
+  floorNumber: number;
+  description?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// --- Master Data ---
+export interface ProductCategory {
+  id: string;
+  name: string;
+  purchasePurpose?: string;
+  overheadCategory?: string;
+  priceType?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Product {
   id: string;
   code: string;
   name: string;
+  baseUom: string;
+  baseUomId?: string;
+  categoryId?: string;
+  category?: ProductCategory;
+  minStock?: number;
+  vendor?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface UnitOfMeasure {
+  id: string;
+  name: string;
+  description?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Supplier {
+  id: string;
+  name: string;
+  contactPerson?: string;
+  phone?: string;
+  email?: string;
   address?: string;
   createdAt: string;
   updatedAt: string;
 }
 
-// Inventory
-export interface InventoryStock {
-  itemId: string;
-  itemCode: string;
-  itemName: string;
-  baseUom: string;
-  category?: ItemCategory;
-  totalQuantity: string;
-  warehouses: {
-    warehouseId: string;
-    warehouseName: string;
-    quantity: string;
-  }[];
+export interface Customer {
+  id: string;
+  name: string;
+  contactPerson?: string;
+  phone?: string;
+  email?: string;
+  address?: string;
+  creditLimit?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
-// Document Status
-export type DocumentStatus = "DRAFT" | "SUBMITTED" | "APPROVED" | "PROCESSED" | "CLOSED" | "CANCELLED";
+export interface Breeder {
+  id: string;
+  name: string;
+  cardTypeId?: string;
+  cardType?: BreederCardType;
+  phone?: string;
+  address?: string;
+  createdAt: string;
+  updatedAt: string;
+}
 
-// Purchase Order
+export interface BreederCardType {
+  id: string;
+  name: string;
+  description?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Employee {
+  id: string;
+  name: string;
+  employeeNumber?: string;
+  phone?: string;
+  position?: string;
+  status: EmployeeStatus;
+  branchId?: string;
+  branch?: Branch;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Vehicle {
+  id: string;
+  plateNumber: string;
+  type?: string;
+  capacity?: string;
+  description?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface MatureBirdType {
+  id: string;
+  type: string;
+  description?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// --- Inventory ---
+export interface Warehouse {
+  id: string;
+  branchId: string;
+  branch?: Branch;
+  code: string;
+  name: string;
+  ownerType: WarehouseOwnerType;
+  ownerId: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface InventoryStock {
+  id: string;
+  warehouseId: string;
+  warehouse?: Warehouse;
+  productId: string;
+  product?: Product;
+  uomId: string;
+  uom?: UnitOfMeasure;
+  quantityOnHand: string;
+  quantityAllocated: string;
+  quantityAvailable: string;
+  quantityMin?: string;
+  quantityMax?: string;
+  stockStatus: StockStatus;
+  lastUpdatedAt: string;
+}
+
+// --- Purchasing ---
 export interface PurchaseOrderLine {
   id: string;
-  itemId: string;
-  item?: Item;
+  productId: string;
+  product?: Product;
+  uomId: string;
+  uom?: UnitOfMeasure;
   quantity: string;
-  uomName: string;
   unitPrice: string;
   totalPrice: string;
-  receivedQty: string;
 }
 
 export interface PurchaseOrder {
   id: string;
   poNumber: string;
-  supplierName: string;
+  branchId: string;
+  branch?: Branch;
+  supplierId: string;
+  supplier?: Supplier;
+  productCategoryId?: string;
+  destinationType?: PurchaseDestinationType;
+  destinationWarehouseId?: string;
+  salesTarget?: PurchaseSalesTarget;
   orderDate: string;
-  expectedDate: string;
+  expectedArrivalDate?: string;
   notes?: string;
-  status: DocumentStatus;
+  status: PurchaseStatus;
   totalAmount: string;
   lines: PurchaseOrderLine[];
   createdAt: string;
   updatedAt: string;
 }
 
-// Goods Receipt
 export interface GoodsReceiptLine {
   id: string;
-  itemId: string;
-  item?: Item;
-  quantity: string;
-  uomName: string;
-  unitCost: string;
-  totalCost: string;
+  purchaseOrderLineId?: string;
+  productId: string;
+  product?: Product;
+  uomId: string;
+  uom?: UnitOfMeasure;
+  quantitySent: string;
+  quantityReceived: string;
+  quantityDamaged: string;
+  receiptDate?: string;
+  notes?: string;
 }
 
 export interface GoodsReceipt {
   id: string;
-  grNumber: string;
+  receiptNumber: string;
   purchaseOrderId: string;
   purchaseOrder?: PurchaseOrder;
+  branchId: string;
+  supplierId?: string;
+  supplier?: Supplier;
   warehouseId: string;
   warehouse?: Warehouse;
-  receiptDate: string;
   notes?: string;
-  status: DocumentStatus;
-  totalAmount: string;
+  status: ReceiptStatus;
   lines: GoodsReceiptLine[];
   createdAt: string;
   updatedAt: string;
 }
 
-// Sales Order
+// --- Sales & Marketing ---
 export interface SalesOrderLine {
   id: string;
-  itemId: string;
-  item?: Item;
-  quantity: string;
-  uomName: string;
-  unitPrice: string;
-  totalPrice: string;
-  deliveredQty: string;
+  productCode?: string;
+  productDescription?: string;
+  birdCount?: number;
+  totalWeightKg?: string;
+  unitPrice?: string;
+  totalPrice?: string;
 }
 
 export interface SalesOrder {
   id: string;
-  soNumber: string;
-  customerName: string;
-  orderDate: string;
-  expectedDate: string;
+  doNumber?: string;
+  branchId: string;
+  branch?: Branch;
+  projectId?: string;
+  customerId?: string;
+  customer?: Customer;
+  breederId?: string;
+  breeder?: Breeder;
+  recipientType?: RecipientType;
+  contractPrice?: string;
+  marketPrice?: string;
+  paymentMethod?: PaymentMethod;
   notes?: string;
-  status: DocumentStatus;
-  totalAmount: string;
+  status: SalesStatus;
   lines: SalesOrderLine[];
+  deliveries?: Delivery[];
   createdAt: string;
   updatedAt: string;
 }
 
-// Delivery Order
-export interface DeliveryOrderLine {
+export interface DeliveryLine {
   id: string;
-  itemId: string;
-  item?: Item;
-  quantity: string;
-  uomName: string;
+  salesOrderLineId?: string;
+  customerDoNumber?: string;
+  birdCount?: number;
+  weightKg?: string;
+  deliveryNotes?: string;
 }
 
-export interface DeliveryOrder {
+export interface Delivery {
   id: string;
-  doNumber: string;
+  branchId: string;
   salesOrderId: string;
   salesOrder?: SalesOrder;
-  warehouseId: string;
-  warehouse?: Warehouse;
-  deliveryDate: string;
+  customerId?: string;
+  customer?: Customer;
+  breederId?: string;
+  vehicleId?: string;
+  vehicle?: Vehicle;
+  driverEmployeeId?: string;
+  driver?: Employee;
+  helperEmployeeId?: string;
+  deliveryDate?: string;
+  destinationCity?: string;
+  driverBonus?: string;
+  helperBonus?: string;
+  totalBirdCount?: number;
+  totalWeightKg?: string;
+  deliveryRoute?: string;
+  status: DeliveryStatus;
   notes?: string;
-  status: DocumentStatus;
+  lines: DeliveryLine[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SalesInvoice {
+  id: string;
+  invoiceNumber: string;
+  salesOrderId?: string;
+  deliveryId?: string;
+  customerId?: string;
+  customer?: Customer;
+  breederId?: string;
+  invoiceDate: string;
+  dueDate?: string;
   totalAmount: string;
-  lines: DeliveryOrderLine[];
-  createdAt: string;
-  updatedAt: string;
-}
-
-// Production Order
-export interface ProductionOrderInput {
-  id: string;
-  itemId: string;
-  item?: Item;
-  quantity: string;
-  uomName: string;
-}
-
-export interface ProductionOrderOutput {
-  id: string;
-  itemId: string;
-  item?: Item;
-  quantity: string;
-  uomName: string;
-  unitCost?: string;
-}
-
-export interface ProductionOrder {
-  id: string;
-  prodNumber: string;
-  warehouseId: string;
-  warehouse?: Warehouse;
-  productionDate: string;
+  paidAmount: string;
+  remainingAmount: string;
+  paymentStatus: InvoicePaymentStatus;
   notes?: string;
-  status: DocumentStatus;
-  inputs: ProductionOrderInput[];
-  outputs: ProductionOrderOutput[];
   createdAt: string;
   updatedAt: string;
 }
 
-// Chart of Accounts
-export type AccountType = "ASSET" | "LIABILITY" | "EQUITY" | "REVENUE" | "EXPENSE";
-
-export interface ChartOfAccount {
+export interface SalesPayment {
   id: string;
-  code: string;
-  name: string;
-  accountType: AccountType;
-  parentId?: string;
-  parent?: ChartOfAccount;
-  children?: ChartOfAccount[];
-  isActive: boolean;
+  invoiceId: string;
+  invoice?: SalesInvoice;
+  amount: string;
+  paymentDate: string;
+  paymentMethod?: PaymentMethod;
+  reference?: string;
+  status: PaymentStatus;
+  notes?: string;
   createdAt: string;
   updatedAt: string;
 }
 
-// Journal Entry
-export interface JournalEntryLine {
+export interface DeliveryShippingCost {
   id: string;
-  accountId: string;
-  account?: ChartOfAccount;
-  debit: string;
-  credit: string;
-  description?: string;
-}
-
-export interface JournalEntry {
-  id: string;
-  entryNumber: string;
-  entryDate: string;
-  description: string;
-  sourceType?: string;
-  sourceId?: string;
-  lines: JournalEntryLine[];
-  createdAt: string;
-  updatedAt: string;
-}
-
-// Batch P&L Report
-export interface BatchPnlSummary {
-  batch: {
-    id: string;
-    batchNumber: string;
-    species: string;
-    initialQty: number;
-    currentQty: number;
-    startDate: string;
-    endDate: string | null;
-    status: "ACTIVE" | "CLOSED";
-    kandang: { id: string; name: string };
-    farm: { id: string; name: string };
-  };
-  revenue: string;
-  costs: {
-    purchase: string;
-    productionConsume: string;
-    totalCost: string;
-  };
-  cogs: string;
-  grossProfit: string;
-  margin: string;
-}
-
-export interface BatchPnlMovement {
-  id: string;
-  movementNumber: string;
-  movementType: "IN" | "OUT";
-  movementSource: "PURCHASE" | "SALES" | "PRODUCTION_CONSUME" | "PRODUCTION_OUTPUT";
-  itemName: string;
-  quantity: string;
-  unitCost: string;
+  deliveryId: string;
+  delivery?: Delivery;
+  fuelCost?: string;
+  tollCost?: string;
+  otherCost?: string;
   totalCost: string;
+  notes?: string;
   createdAt: string;
+  updatedAt: string;
 }
 
-export interface BatchPnlRevenueItem {
-  deliveryOrderId: string;
-  itemId: string;
-  itemName: string;
-  quantity: string;
-  unitPrice: string;
-  revenue: string;
-  unitCost: string;
-  totalCost: string;
+export interface DriverBonus {
+  id: string;
+  deliveryId: string;
+  delivery?: Delivery;
+  employeeId: string;
+  employee?: Employee;
+  amount: string;
+  paymentStatus: DriverBonusPaymentStatus;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
-export interface BatchPnlDetail extends BatchPnlSummary {
-  movements: BatchPnlMovement[];
-  revenueBreakdown: BatchPnlRevenueItem[];
-}
-
-// Goods Transfer
+// --- Logistics ---
 export interface GoodsTransferLine {
   id: string;
-  itemId: string;
-  batchId: string | null;
-  quantity: string;
-  uomName: string;
-  unitCost: string;
-  totalCost: string;
-  item: Item;
-  batch: Batch | null;
+  productId: string;
+  product?: Product;
+  uomId: string;
+  uom?: UnitOfMeasure;
+  quantitySent: string;
+  quantityReceived?: string;
+  quantityDamaged?: string;
+  valueAmount?: string;
+  notes?: string;
 }
 
 export interface GoodsTransfer {
   id: string;
-  gtNumber: string;
+  transferNumber: string;
+  branchId: string;
   fromWarehouseId: string;
   toWarehouseId: string;
-  transferDate: string;
-  status: DocumentStatus;
-  notes: string | null;
-  createdAt: string;
-  fromWarehouse: Warehouse;
-  toWarehouse: Warehouse;
+  fromWarehouse?: Warehouse;
+  toWarehouse?: Warehouse;
+  transferDate?: string;
+  estimatedReceiptDate?: string;
+  actualReceiptDate?: string;
+  reason?: string;
+  status: TransferStatus;
+  notes?: string;
   lines: GoodsTransferLine[];
+  createdAt: string;
+  updatedAt: string;
 }
 
-// AI Insights
+export interface GoodsConsumptionLine {
+  id: string;
+  productId: string;
+  product?: Product;
+  uomId: string;
+  uom?: UnitOfMeasure;
+  quantity: string;
+  unitCost?: string;
+  totalCost?: string;
+  notes?: string;
+}
+
+export interface GoodsConsumption {
+  id: string;
+  consumptionNumber: string;
+  branchId: string;
+  warehouseId: string;
+  warehouse?: Warehouse;
+  purpose?: ConsumptionPurpose;
+  consumptionDate?: string;
+  status: ConsumptionStatus;
+  notes?: string;
+  lines: GoodsConsumptionLine[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface GoodsReturnLine {
+  id: string;
+  productId: string;
+  product?: Product;
+  uomId: string;
+  uom?: UnitOfMeasure;
+  quantity: string;
+  unitCost?: string;
+  totalCost?: string;
+  reason?: string;
+}
+
+export interface GoodsReturn {
+  id: string;
+  returnNumber: string;
+  branchId: string;
+  purchaseOrderId?: string;
+  supplierId?: string;
+  supplier?: Supplier;
+  warehouseId: string;
+  warehouse?: Warehouse;
+  status: ReturnStatus;
+  totalReturnValue?: string;
+  notes?: string;
+  lines: GoodsReturnLine[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface InternalTradeLine {
+  id: string;
+  productId: string;
+  product?: Product;
+  uomId: string;
+  uom?: UnitOfMeasure;
+  quantity: string;
+  unitPrice?: string;
+  totalValue?: string;
+}
+
+export interface InternalTrade {
+  id: string;
+  tradeNumber: string;
+  branchId: string;
+  fromWarehouseId: string;
+  toWarehouseId: string;
+  fromWarehouse?: Warehouse;
+  toWarehouse?: Warehouse;
+  status: InternalTradeStatus;
+  totalTradeValue?: string;
+  notes?: string;
+  lines: InternalTradeLine[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface LogisticsShippingCost {
+  id: string;
+  referenceType: string;
+  referenceId: string;
+  fuelCost?: string;
+  tollCost?: string;
+  otherCost?: string;
+  totalCost: string;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface LogisticsVerification {
+  id: string;
+  referenceType: string;
+  referenceId: string;
+  verificationType?: string;
+  status: VerificationStatus;
+  verifiedBy?: string;
+  verifiedAt?: string;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// --- Projects ---
+export interface Project {
+  id: string;
+  branchId: string;
+  branch?: Branch;
+  farmId: string;
+  farm?: Farm;
+  startDate?: string;
+  isOwnFarm?: boolean;
+  contractCategoryId?: string;
+  contractCategory?: ContractCategory;
+  fcrStandardId?: string;
+  fcrStandard?: FcrStandard;
+  productionDayEstimateId?: string;
+  productionDayEstimate?: ProductionDayEstimate;
+  supervisorIncentive?: string;
+  isActive?: boolean;
+  checkCulling?: boolean;
+  checkMortality?: boolean;
+  coopTypePercentage?: string;
+  cumulativeMultiplier?: string;
+  coopMultiplier?: string;
+  projectType?: number;
+  status?: string;
+  projectCoops?: ProjectCoop[];
+  projectBonusFcrDeffs?: ProjectBonusFcrDeff[];
+  projectBonusIps?: ProjectBonusIp[];
+  projectBonusMortalities?: ProjectBonusMortality[];
+  projectBudgets?: ProjectBudget[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ProjectCoop {
+  id: string;
+  projectId: string;
+  coopId: string;
+  coop?: Coop;
+  pplId?: string;
+  ppl?: Employee;
+  coopName?: string;
+  description?: string;
+  chickIns?: ProjectChickIn[];
+  workers?: ProjectWorker[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ProjectChickIn {
+  id: string;
+  projectCoopId: string;
+  population: number;
+  rearingStartDate?: string;
+  rearingEndDate?: string;
+  harvestStartDate?: string;
+  harvestEndDate?: string;
+  cleaningStartDate?: string;
+  cleaningEndDate?: string;
+  prepStartDate?: string;
+  prepEndDate?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ProjectWorker {
+  id: string;
+  projectCoopId: string;
+  employeeId: string;
+  employee?: Employee;
+  createdAt: string;
+}
+
+export interface ProjectBonusFcrDeff {
+  id: string;
+  projectId: string;
+  bonusUnitOption?: BonusUnitOption;
+  details?: { minFcr: string; maxFcr: string; bonus: string }[];
+}
+
+export interface ProjectBonusIp {
+  id: string;
+  projectId: string;
+  bonusUnitOption?: BonusUnitOption;
+  details?: { minIp: string; maxIp: string; bonus: string }[];
+}
+
+export interface ProjectBonusMortality {
+  id: string;
+  projectId: string;
+  bonusUnitOption?: BonusUnitOption;
+  details?: { minMortality: string; maxMortality: string; bonus: string }[];
+}
+
+export interface ProjectBudget {
+  id: string;
+  projectId: string;
+  description: string;
+  amount: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// --- Standards ---
+export interface ContractCategory {
+  id: string;
+  name: string;
+  description?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface FcrStandardDetail {
+  day: number;
+  fcr: string;
+}
+
+export interface FcrStandard {
+  id: string;
+  name: string;
+  description?: string;
+  details?: FcrStandardDetail[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ProductionDayEstimate {
+  id: string;
+  name: string;
+  days: number;
+  description?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface RecordingDeviation {
+  id: string;
+  maxDeviationDays: number;
+  description?: string;
+  updatedAt: string;
+}
+
+export interface CoopReadiness {
+  id: string;
+  daysBefore: number;
+  description?: string;
+  updatedAt: string;
+}
+
+export interface ChickInPlan {
+  id: string;
+  name: string;
+  plannedDate: string;
+  coopId?: string;
+  coop?: Coop;
+  population?: number;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface BudgetStandardDetail {
+  category: string;
+  amount: string;
+}
+
+export interface BudgetStandard {
+  id: string;
+  name: string;
+  description?: string;
+  details?: BudgetStandardDetail[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+// --- Bonus ---
+export interface BonusFcrDeff {
+  id: string;
+  name: string;
+  bonusUnitOption?: BonusUnitOption;
+  status: BonusStatus;
+  details?: { minFcr: string; maxFcr: string; bonus: string }[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface BonusIp {
+  id: string;
+  name: string;
+  bonusUnitOption?: BonusUnitOption;
+  status: BonusStatus;
+  details?: { minIp: string; maxIp: string; bonus: string }[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface BonusMortality {
+  id: string;
+  name: string;
+  bonusUnitOption?: BonusUnitOption;
+  status: BonusStatus;
+  details?: { minMortality: string; maxMortality: string; bonus: string }[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface TsIncentive {
+  id: string;
+  name: string;
+  amount: string;
+  description?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// --- Finance ---
+export interface BankAccount {
+  id: string;
+  branchId: string;
+  branch?: Branch;
+  bankName: string;
+  accountNumber: string;
+  accountHolder: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CashAccount {
+  id: string;
+  branchId: string;
+  branch?: Branch;
+  name: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// --- AI Insights (updated) ---
 export interface AiInsightResponse<T> {
   insight: T;
   cached: boolean;
@@ -400,7 +821,7 @@ export interface AiInsightResponse<T> {
   expiresAt?: string;
 }
 
-export interface BatchPnlAnalysis {
+export interface ProjectPnlAnalysis {
   ringkasan: string;
   metrik_utama: {
     total_pendapatan: string;
@@ -408,8 +829,8 @@ export interface BatchPnlAnalysis {
     total_laba_kotor: string;
     margin_rata_rata: string;
   };
-  analisis_batch: Array<{
-    batch_number: string;
+  analisis_proyek: Array<{
+    project_id: string;
     penilaian: "BAIK" | "CUKUP" | "BURUK";
     catatan: string;
   }>;
@@ -422,10 +843,9 @@ export interface ProductionForecast {
   ringkasan: string;
   jadwal_produksi: Array<{
     bulan: number;
-    spesies: string;
-    jumlah_batch: number;
-    estimasi_qty_per_batch: number;
-    kandang_rekomendasi: string;
+    jumlah_proyek: number;
+    estimasi_populasi: number;
+    coop_rekomendasi: string;
     estimasi_biaya: string;
     estimasi_pendapatan: string;
     catatan: string;
@@ -448,8 +868,8 @@ export interface DashboardSummary {
     biaya: string;
     laba_kotor: string;
     margin: string;
-    batch_aktif: number;
-    batch_selesai_periode: number;
+    proyek_aktif: number;
+    proyek_selesai_periode: number;
   };
   highlights: string[];
   perhatian: string[];
@@ -461,8 +881,8 @@ export interface DashboardSummary {
   }>;
 }
 
-export interface BatchAnalysisRequest {
-  status?: "ACTIVE" | "CLOSED";
+export interface ProjectAnalysisRequest {
+  projectId?: string;
   startDateFrom?: string;
   startDateTo?: string;
   farmId?: string;
@@ -470,30 +890,10 @@ export interface BatchAnalysisRequest {
 
 export interface ProductionForecastRequest {
   forecastYear: number;
-  species?: string;
   farmId?: string;
 }
 
 export interface DashboardSummaryRequest {
   periodStart?: string;
   periodEnd?: string;
-}
-
-// Payment
-export type PaymentType = "INCOMING" | "OUTGOING";
-export type PaymentMethod = "CASH" | "BANK_TRANSFER" | "CHECK";
-
-export interface Payment {
-  id: string;
-  paymentNumber: string;
-  paymentType: PaymentType;
-  paymentMethod: PaymentMethod;
-  accountPayableId?: string;
-  accountReceivableId?: string;
-  amount: string;
-  paymentDate: string;
-  reference?: string;
-  notes?: string;
-  createdAt: string;
-  updatedAt: string;
 }

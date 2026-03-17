@@ -17,23 +17,26 @@ const columns: Column<PurchaseOrder>[] = [
     header: "PO Number",
     cell: (row) => <span className="font-medium">{row.poNumber}</span>,
   },
-  { header: "Supplier", accessorKey: "supplierName" as keyof PurchaseOrder },
+  {
+    header: "Supplier",
+    cell: (row) => row.supplier?.name || "—",
+  },
+  {
+    header: "Branch",
+    cell: (row) => row.branch?.name || "—",
+  },
   {
     header: "Order Date",
     cell: (row) => formatDate(row.orderDate),
   },
   {
-    header: "Expected Date",
-    cell: (row) => formatDate(row.expectedDate),
+    header: "Status",
+    cell: (row) => <StatusBadge status={row.status} />,
   },
   {
     header: "Total",
     cell: (row) => formatCurrency(row.totalAmount),
     className: "text-right",
-  },
-  {
-    header: "Status",
-    cell: (row) => <StatusBadge status={row.status} />,
   },
 ];
 

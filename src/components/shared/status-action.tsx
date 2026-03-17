@@ -9,54 +9,44 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ConfirmDialog } from "./confirm-dialog";
-import { DocumentStatus } from "@/types/api";
-import { STATUS_TRANSITIONS } from "@/lib/constants";
 import { fetchApi } from "@/lib/api";
 import { toast } from "sonner";
 import { ChevronDown } from "lucide-react";
 
 interface StatusActionProps {
-  currentStatus: DocumentStatus;
+  currentStatus: string;
+  transitions: Record<string, string[]>;
   endpoint: string;
   onSuccess: () => void;
 }
 
-const ACTION_LABELS: Record<DocumentStatus, string> = {
-  DRAFT: "Draft",
-  SUBMITTED: "Submit",
-  APPROVED: "Approve",
-  PROCESSED: "Process",
-  CLOSED: "Close",
-  CANCELLED: "Cancel",
-};
-
-const ACTION_VARIANTS: Record<DocumentStatus, "default" | "destructive" | "outline" | "secondary"> = {
-  DRAFT: "outline",
-  SUBMITTED: "default",
-  APPROVED: "default",
-  PROCESSED: "default",
-  CLOSED: "secondary",
-  CANCELLED: "destructive",
-};
-
-export function StatusAction({ currentStatus, endpoint, onSuccess }: StatusActionProps) {
+export function StatusAction({ currentStatus, transitions, endpoint, onSuccess }: StatusActionProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const [confirmTarget, setConfirmTarget] = useState<DocumentStatus | null>(null);
+  const [confirmTarget, setConfirmTarget] = useState<string | null>(null);
 
-  const transitions = STATUS_TRANSITIONS[currentStatus];
-  if (!transitions || transitions.length === 0) return null;
+  const available = transitions[currentStatus];
+  if (!available || available.length === 0) return null;
 
-  const primaryAction = transitions[0];
-  const secondaryActions = transitions.slice(1);
+  const primaryAction = available[0];
+  const secondaryActions = available.slice(1);
 
-  async function handleTransition(targetStatus: DocumentStatus) {
+  function getLabel(status: string) {
+    return status.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+  }
+
+  function getVariant(status: string): "default" | "destructive" | "outline" | "secondary" {
+    if (status === "CANCELLED" || status === "REJECTED" || status === "SUPPLIER_REJECTED" || status === "CREDIT_LIMIT_REJECTED") return "destructive";
+    return "default";
+  }
+
+  async function handleTransition(targetStatus: string) {
     setIsLoading(true);
     try {
       await fetchApi(endpoint, {
         method: "PATCH",
         body: JSON.stringify({ targetStatus }),
       });
-      toast.success(`Status updated to ${targetStatus}`);
+      toast.success(`Status updated to ${getLabel(targetStatus)}`);
       onSuccess();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to update status");
@@ -69,11 +59,11 @@ export function StatusAction({ currentStatus, endpoint, onSuccess }: StatusActio
   return (
     <div className="flex items-center gap-2">
       <Button
-        variant={ACTION_VARIANTS[primaryAction]}
+        variant={getVariant(primaryAction)}
         onClick={() => setConfirmTarget(primaryAction)}
         disabled={isLoading}
       >
-        {ACTION_LABELS[primaryAction]}
+        {getLabel(primaryAction)}
       </Button>
 
       {secondaryActions.length > 0 && (
@@ -88,9 +78,9 @@ export function StatusAction({ currentStatus, endpoint, onSuccess }: StatusActio
               <DropdownMenuItem
                 key={status}
                 onClick={() => setConfirmTarget(status)}
-                className={status === "CANCELLED" ? "text-destructive" : ""}
+                className={getVariant(status) === "destructive" ? "text-destructive" : ""}
               >
-                {ACTION_LABELS[status]}
+                {getLabel(status)}
               </DropdownMenuItem>
             ))}
           </DropdownMenuContent>
@@ -100,10 +90,10 @@ export function StatusAction({ currentStatus, endpoint, onSuccess }: StatusActio
       <ConfirmDialog
         open={!!confirmTarget}
         onOpenChange={(open) => !open && setConfirmTarget(null)}
-        title={`Confirm ${confirmTarget ? ACTION_LABELS[confirmTarget] : ""}`}
-        description={`Are you sure you want to ${confirmTarget ? ACTION_LABELS[confirmTarget].toLowerCase() : ""} this document? This action cannot be undone.`}
+        title={`Confirm ${confirmTarget ? getLabel(confirmTarget) : ""}`}
+        description={`Are you sure you want to change status to ${confirmTarget ? getLabel(confirmTarget) : ""}? This action cannot be undone.`}
         onConfirm={() => confirmTarget && handleTransition(confirmTarget)}
-        variant={confirmTarget === "CANCELLED" ? "destructive" : "default"}
+        variant={confirmTarget && getVariant(confirmTarget) === "destructive" ? "destructive" : "default"}
       />
     </div>
   );

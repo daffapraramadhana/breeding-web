@@ -18,7 +18,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { PageHeader } from "@/components/shared/page-header";
 import { StatusBadge } from "@/components/shared/status-badge";
@@ -27,8 +26,9 @@ import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { PageSkeleton } from "@/components/shared/loading-skeleton";
 import { useApi } from "@/hooks/use-api";
 import { PurchaseOrder } from "@/types/api";
+import { PURCHASE_STATUS_TRANSITIONS } from "@/lib/constants";
 import { fetchApi } from "@/lib/api";
-import { formatDate, formatCurrency, formatQuantity, parseDecimal } from "@/lib/utils";
+import { formatDate, formatCurrency, formatQuantity } from "@/lib/utils";
 import { ArrowLeft, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { useState } from "react";
@@ -70,7 +70,7 @@ export default function PurchaseOrderDetailPage({
                 Back
               </Link>
             </Button>
-            {po.status === "DRAFT" && (
+            {po.status === "ORDERED" && (
               <>
                 <Button variant="outline" asChild>
                   <Link href={`/purchase-orders/${id}/edit`}>
@@ -89,6 +89,7 @@ export default function PurchaseOrderDetailPage({
             )}
             <StatusAction
               currentStatus={po.status}
+              transitions={PURCHASE_STATUS_TRANSITIONS}
               endpoint={`/purchase-orders/${id}/status`}
               onSuccess={refetch}
             />
@@ -109,7 +110,12 @@ export default function PurchaseOrderDetailPage({
             <Separator />
             <div className="flex justify-between">
               <span className="text-muted-foreground">Supplier</span>
-              <span className="font-medium">{po.supplierName}</span>
+              <span className="font-medium">{po.supplier?.name || "—"}</span>
+            </div>
+            <Separator />
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Branch</span>
+              <span className="font-medium">{po.branch?.name || "—"}</span>
             </div>
             <Separator />
             <div className="flex justify-between">
@@ -118,8 +124,8 @@ export default function PurchaseOrderDetailPage({
             </div>
             <Separator />
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Expected Date</span>
-              <span>{formatDate(po.expectedDate)}</span>
+              <span className="text-muted-foreground">Expected Arrival</span>
+              <span>{po.expectedArrivalDate ? formatDate(po.expectedArrivalDate) : "—"}</span>
             </div>
             <Separator />
             <div className="flex justify-between">
@@ -168,62 +174,39 @@ export default function PurchaseOrderDetailPage({
               <TableHeader>
                 <TableRow>
                   <TableHead>#</TableHead>
-                  <TableHead>Item</TableHead>
+                  <TableHead>Product</TableHead>
                   <TableHead className="text-right">Qty</TableHead>
                   <TableHead>UOM</TableHead>
                   <TableHead className="text-right">Unit Price</TableHead>
                   <TableHead className="text-right">Total</TableHead>
-                  <TableHead className="text-right">Received</TableHead>
-                  <TableHead>Fulfillment</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {po.lines?.map((line, idx) => {
-                  const qty = parseDecimal(line.quantity);
-                  const received = parseDecimal(line.receivedQty);
-                  const pct = qty > 0 ? Math.round((received / qty) * 100) : 0;
-                  return (
-                    <TableRow key={line.id || idx}>
-                      <TableCell>{idx + 1}</TableCell>
-                      <TableCell>
-                        <div>
-                          <span className="font-medium">
-                            {line.item?.code || "—"}
-                          </span>
-                          <span className="ml-2 text-muted-foreground">
-                            {line.item?.name}
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        {formatQuantity(line.quantity)}
-                      </TableCell>
-                      <TableCell>{line.uomName}</TableCell>
-                      <TableCell className="text-right">
-                        {formatCurrency(line.unitPrice)}
-                      </TableCell>
-                      <TableCell className="text-right font-medium">
-                        {formatCurrency(line.totalPrice)}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        {formatQuantity(line.receivedQty)}
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          variant={
-                            pct >= 100
-                              ? "default"
-                              : pct > 0
-                                ? "secondary"
-                                : "outline"
-                          }
-                        >
-                          {pct}%
-                        </Badge>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
+                {po.lines?.map((line, idx) => (
+                  <TableRow key={line.id || idx}>
+                    <TableCell>{idx + 1}</TableCell>
+                    <TableCell>
+                      <div>
+                        <span className="font-medium">
+                          {line.product?.code || "—"}
+                        </span>
+                        <span className="ml-2 text-muted-foreground">
+                          {line.product?.name}
+                        </span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {formatQuantity(line.quantity)}
+                    </TableCell>
+                    <TableCell>{line.uom?.name || "—"}</TableCell>
+                    <TableCell className="text-right">
+                      {formatCurrency(line.unitPrice)}
+                    </TableCell>
+                    <TableCell className="text-right font-medium">
+                      {formatCurrency(line.totalPrice)}
+                    </TableCell>
+                  </TableRow>
+                ))}
               </TableBody>
             </Table>
           </div>
