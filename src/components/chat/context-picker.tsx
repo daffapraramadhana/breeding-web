@@ -59,7 +59,7 @@ function getSubtitle(item: Record<string, unknown>, type: ContextType): string {
         .filter(Boolean)
         .join(" • ");
     case "product":
-      return [item.code, item.baseUom].filter(Boolean).join(" • ");
+      return [item.code, (item.baseUom as Record<string, unknown>)?.name].filter(Boolean).join(" • ");
     case "purchase_order":
       return [(item.supplier as Record<string, unknown>)?.name, item.status].filter(Boolean).join(" • ");
     case "sales_order":

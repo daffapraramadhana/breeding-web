@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useQueryState, parseAsInteger } from "nuqs";
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { DataTable, Column } from "@/components/shared/data-table";
 import { PageHeader } from "@/components/shared/page-header";
@@ -26,6 +27,9 @@ import {
 } from "@/components/ui/dialog";
 
 export default function MatureBirdTypesPage() {
+  const t = useTranslations('matureBirdTypes');
+  const tc = useTranslations('common');
+
   // URL state for pagination and search
   const [page, setPage] = useQueryState(
     "page",
@@ -53,20 +57,20 @@ export default function MatureBirdTypesPage() {
   // Table columns
   const columns: Column<MatureBirdType>[] = [
     {
-      header: "Type",
+      header: t('birdType'),
       accessorKey: "type",
     },
     {
-      header: "Description",
+      header: tc('description'),
       cell: (row) => row.description || "-",
     },
     {
-      header: "Created",
+      header: tc('created'),
       cell: (row) => formatDate(row.createdAt),
       className: "w-[150px]",
     },
     {
-      header: "Actions",
+      header: tc('actions'),
       cell: (row) => (
         <div className="flex items-center gap-1">
           <Button
@@ -120,7 +124,7 @@ export default function MatureBirdTypesPage() {
   // Submit create/edit
   async function handleSubmit() {
     if (!formType.trim()) {
-      toast.error("Bird type is required");
+      toast.error(tc('required', { field: t('birdType') }));
       return;
     }
 
@@ -136,20 +140,22 @@ export default function MatureBirdTypesPage() {
           method: "PATCH",
           body: JSON.stringify(body),
         });
-        toast.success("Bird type updated successfully");
+        toast.success(tc('entityUpdated', { entity: t('entity') }));
       } else {
         await fetchApi("/mature-bird-types", {
           method: "POST",
           body: JSON.stringify(body),
         });
-        toast.success("Bird type created successfully");
+        toast.success(tc('entityCreated', { entity: t('entity') }));
       }
 
       setDialogOpen(false);
       refetch();
     } catch (error) {
       toast.error(
-        editingBirdType ? "Failed to update bird type" : "Failed to create bird type"
+        editingBirdType
+          ? tc('entityUpdateFailed', { entity: t('entity') })
+          : tc('entityCreateFailed', { entity: t('entity') })
       );
     } finally {
       setIsSubmitting(false);
@@ -164,24 +170,24 @@ export default function MatureBirdTypesPage() {
       await fetchApi(`/mature-bird-types/${deletingBirdType.id}`, {
         method: "DELETE",
       });
-      toast.success("Bird type deleted successfully");
+      toast.success(tc('entityDeleted', { entity: t('entity') }));
       setDeleteDialogOpen(false);
       setDeletingBirdType(null);
       refetch();
     } catch (error) {
-      toast.error("Failed to delete bird type");
+      toast.error(tc('entityDeleteFailed', { entity: t('entity') }));
     }
   }
 
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Mature Bird Types"
-        description="Manage mature bird type classifications"
+        title={t('title')}
+        description={t('description')}
         actions={
           <Button onClick={handleCreate}>
             <Plus className="mr-2 h-4 w-4" />
-            New Bird Type
+            {tc('newEntity', { entity: t('entity') })}
           </Button>
         }
       />
@@ -195,17 +201,17 @@ export default function MatureBirdTypesPage() {
           setSearch(value);
           setPage(1);
         }}
-        searchPlaceholder="Search bird types..."
+        searchPlaceholder={tc('searchField', { field: t('title') })}
         page={page}
         totalPages={meta?.totalPages || 1}
         onPageChange={setPage}
         total={meta?.total}
-        emptyTitle="No bird types found"
-        emptyDescription="Get started by creating your first mature bird type."
+        emptyTitle={tc('noResults', { entity: t('entity') })}
+        emptyDescription={tc('getStarted', { entity: t('entity') })}
         emptyAction={
           <Button onClick={handleCreate}>
             <Plus className="mr-2 h-4 w-4" />
-            New Bird Type
+            {tc('newEntity', { entity: t('entity') })}
           </Button>
         }
       />
@@ -215,30 +221,32 @@ export default function MatureBirdTypesPage() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {editingBirdType ? "Edit Bird Type" : "New Bird Type"}
+              {editingBirdType
+                ? tc('editEntity', { entity: t('entity') })
+                : tc('newEntity', { entity: t('entity') })}
             </DialogTitle>
             <DialogDescription>
               {editingBirdType
-                ? "Update the bird type details below."
-                : "Fill in the details to create a new mature bird type."}
+                ? tc('updateDetails', { entity: t('entity') })
+                : tc('fillDetails', { entity: t('entity') })}
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="bird-type">Type</Label>
+              <Label htmlFor="bird-type">{t('birdType')}</Label>
               <Input
                 id="bird-type"
-                placeholder="Enter bird type name"
+                placeholder={tc('enterField', { field: t('birdType') })}
                 value={formType}
                 onChange={(e) => setFormType(e.target.value)}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="bird-type-description">Description</Label>
+              <Label htmlFor="bird-type-description">{tc('description')}</Label>
               <Input
                 id="bird-type-description"
-                placeholder="Enter description (optional)"
+                placeholder={tc('enterFieldOptional', { field: tc('description') })}
                 value={formDescription}
                 onChange={(e) => setFormDescription(e.target.value)}
                 onKeyDown={(e) => {
@@ -254,14 +262,14 @@ export default function MatureBirdTypesPage() {
               onClick={() => setDialogOpen(false)}
               disabled={isSubmitting}
             >
-              Cancel
+              {tc('cancel')}
             </Button>
             <Button onClick={handleSubmit} disabled={isSubmitting}>
               {isSubmitting
-                ? "Saving..."
+                ? tc('saving')
                 : editingBirdType
-                  ? "Update Bird Type"
-                  : "Create Bird Type"}
+                  ? tc('updateEntity', { entity: t('entity') })
+                  : tc('createEntity', { entity: t('entity') })}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -271,11 +279,11 @@ export default function MatureBirdTypesPage() {
       <ConfirmDialog
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
-        title="Delete Bird Type"
-        description={`Are you sure you want to delete "${deletingBirdType?.type}"? This action cannot be undone.`}
+        title={tc('deleteEntity', { entity: t('entity') })}
+        description={tc('confirmDelete', { name: deletingBirdType?.type || '' })}
         onConfirm={handleDelete}
         variant="destructive"
-        confirmLabel="Delete"
+        confirmLabel={tc('delete')}
       />
     </div>
   );

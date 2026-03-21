@@ -4,7 +4,49 @@
     "settings": "Settings",
     "logout": "Logout",
     "search": "Search...",
-    "language": "Language"
+    "language": "Language",
+    "cancel": "Cancel",
+    "saving": "Saving...",
+    "update": "Update",
+    "create": "Create",
+    "delete": "Delete",
+    "actions": "Actions",
+    "created": "Created",
+    "name": "Name",
+    "code": "Code",
+    "description": "Description",
+    "phone": "Phone",
+    "email": "Email",
+    "address": "Address",
+    "status": "Status",
+    "type": "Type",
+    "active": "Active",
+    "inactive": "Inactive",
+    "optional": "optional",
+    "required": "{field} is required",
+    "noResults": "No {entity} found",
+    "getStarted": "Get started by creating your first {entity}.",
+    "getStartedAlt": "Get started by adding your first {entity}.",
+    "newEntity": "New {entity}",
+    "addEntity": "Add {entity}",
+    "editEntity": "Edit {entity}",
+    "deleteEntity": "Delete {entity}",
+    "createEntity": "Create {entity}",
+    "updateEntity": "Update {entity}",
+    "entityCreated": "{entity} created successfully",
+    "entityUpdated": "{entity} updated successfully",
+    "entityDeleted": "{entity} deleted successfully",
+    "entityCreateFailed": "Failed to create {entity}",
+    "entityUpdateFailed": "Failed to update {entity}",
+    "entityDeleteFailed": "Failed to delete {entity}",
+    "fillDetails": "Fill in the details to create a new {entity}.",
+    "fillDetailsAlt": "Fill in the details to add a new {entity}.",
+    "updateDetails": "Update the {entity} details below.",
+    "confirmDelete": "Are you sure you want to delete \"{name}\"? This action cannot be undone.",
+    "enterField": "Enter {field}",
+    "enterFieldOptional": "Enter {field} (optional)",
+    "selectField": "Select {field}...",
+    "searchField": "Search {field}..."
   },
   "navigation": {
     "Dashboard": "Dashboard",
@@ -63,5 +105,94 @@
     "Cash Accounts": "Cash Accounts",
     "Analytics": "Analytics",
     "AI Insights": "AI Insights"
+  },
+  "products": {
+    "title": "Products",
+    "description": "Manage your products and inventory items",
+    "entity": "product",
+    "baseUom": "Base UOM",
+    "category": "Category",
+    "supplier": "Supplier",
+    "minStock": "Min Stock",
+    "unitOfMeasure": "unit of measure",
+    "units": "units",
+    "categories": "categories",
+    "suppliers": "suppliers",
+    "minimumStock": "minimum stock"
+  },
+  "productCategories": {
+    "title": "Product Categories",
+    "description": "Manage product categories and classifications",
+    "entity": "category",
+    "purchasePurpose": "Purchase Purpose",
+    "overheadCategory": "Overhead Category",
+    "priceType": "Price Type"
+  },
+  "suppliers": {
+    "title": "Suppliers",
+    "description": "Manage your suppliers and vendor contacts",
+    "entity": "supplier",
+    "contactPerson": "Contact Person"
+  },
+  "customers": {
+    "title": "Customers",
+    "description": "Manage your customers and their contact information",
+    "entity": "customer",
+    "contactPerson": "Contact Person",
+    "creditLimit": "Credit Limit"
+  },
+  "breeders": {
+    "title": "Breeders",
+    "description": "Manage your breeders and their information",
+    "entity": "breeder",
+    "cardType": "Card Type",
+    "cardTypes": "card types"
+  },
+  "breederCardTypes": {
+    "title": "Breeder Card Types",
+    "description": "Manage breeder card type classifications",
+    "entity": "card type"
+  },
+  "employees": {
+    "title": "Employees",
+    "description": "Manage your employees and their assignments",
+    "entity": "employee",
+    "employeeNumber": "Employee Number",
+    "position": "Position",
+    "branch": "Branch",
+    "onLeave": "On Leave",
+    "terminated": "Terminated"
+  },
+  "vehicles": {
+    "title": "Vehicles",
+    "description": "Manage your fleet vehicles and their details",
+    "entity": "vehicle",
+    "plateNumber": "Plate Number",
+    "capacity": "Capacity",
+    "vehicleType": "vehicle type"
+  },
+  "unitOfMeasures": {
+    "title": "Units of Measure",
+    "description": "Manage units of measure for your products",
+    "entity": "unit of measure",
+    "namePlaceholder": "e.g., kg, pcs, liter"
+  },
+  "matureBirdTypes": {
+    "title": "Mature Bird Types",
+    "description": "Manage mature bird type classifications",
+    "entity": "bird type",
+    "birdType": "Bird Type"
+  },
+  "warehouses": {
+    "title": "Warehouses",
+    "description": "Manage warehouses and storage locations",
+    "entity": "warehouse",
+    "branch": "Branch",
+    "ownerType": "Owner Type",
+    "owner": "Owner",
+    "codePlaceholder": "e.g. WH-001",
+    "warehouseName": "Warehouse name",
+    "codeAndNameRequired": "Code and name are required",
+    "failedToSave": "Failed to save warehouse"
   }
 }

@@ -4,7 +4,49 @@
     "settings": "Pengaturan",
     "logout": "Keluar",
     "search": "Cari...",
-    "language": "Bahasa"
+    "language": "Bahasa",
+    "cancel": "Batal",
+    "saving": "Menyimpan...",
+    "update": "Perbarui",
+    "create": "Buat",
+    "delete": "Hapus",
+    "actions": "Aksi",
+    "created": "Dibuat",
+    "name": "Nama",
+    "code": "Kode",
+    "description": "Deskripsi",
+    "phone": "Telepon",
+    "email": "Email",
+    "address": "Alamat",
+    "status": "Status",
+    "type": "Tipe",
+    "active": "Aktif",
+    "inactive": "Tidak Aktif",
+    "optional": "opsional",
+    "required": "{field} wajib diisi",
+    "noResults": "{entity} tidak ditemukan",
+    "getStarted": "Mulai dengan membuat {entity} pertama Anda.",
+    "getStartedAlt": "Mulai dengan menambahkan {entity} pertama Anda.",
+    "newEntity": "{entity} Baru",
+    "addEntity": "Tambah {entity}",
+    "editEntity": "Edit {entity}",
+    "deleteEntity": "Hapus {entity}",
+    "createEntity": "Buat {entity}",
+    "updateEntity": "Perbarui {entity}",
+    "entityCreated": "{entity} berhasil dibuat",
+    "entityUpdated": "{entity} berhasil diperbarui",
+    "entityDeleted": "{entity} berhasil dihapus",
+    "entityCreateFailed": "Gagal membuat {entity}",
+    "entityUpdateFailed": "Gagal memperbarui {entity}",
+    "entityDeleteFailed": "Gagal menghapus {entity}",
+    "fillDetails": "Isi detail untuk membuat {entity} baru.",
+    "fillDetailsAlt": "Isi detail untuk menambahkan {entity} baru.",
+    "updateDetails": "Perbarui detail {entity} di bawah ini.",
+    "confirmDelete": "Apakah Anda yakin ingin menghapus \"{name}\"? Tindakan ini tidak dapat dibatalkan.",
+    "enterField": "Masukkan {field}",
+    "enterFieldOptional": "Masukkan {field} (opsional)",
+    "selectField": "Pilih {field}...",
+    "searchField": "Cari {field}..."
   },
   "navigation": {
     "Dashboard": "Dasbor",
@@ -63,5 +105,94 @@
     "Cash Accounts": "Akun Kas",
     "Analytics": "Analitik",
     "AI Insights": "Wawasan AI"
+  },
+  "products": {
+    "title": "Produk",
+    "description": "Kelola produk dan item inventaris Anda",
+    "entity": "produk",
+    "baseUom": "Satuan Dasar",
+    "category": "Kategori",
+    "supplier": "Pemasok",
+    "minStock": "Stok Min",
+    "unitOfMeasure": "satuan ukur",
+    "units": "satuan",
+    "categories": "kategori",
+    "suppliers": "pemasok",
+    "minimumStock": "stok minimum"
+  },
+  "productCategories": {
+    "title": "Kategori Produk",
+    "description": "Kelola kategori dan klasifikasi produk",
+    "entity": "kategori",
+    "purchasePurpose": "Tujuan Pembelian",
+    "overheadCategory": "Kategori Overhead",
+    "priceType": "Tipe Harga"
+  },
+  "suppliers": {
+    "title": "Pemasok",
+    "description": "Kelola pemasok dan kontak vendor Anda",
+    "entity": "pemasok",
+    "contactPerson": "Kontak Person"
+  },
+  "customers": {
+    "title": "Pelanggan",
+    "description": "Kelola pelanggan dan informasi kontak mereka",
+    "entity": "pelanggan",
+    "contactPerson": "Kontak Person",
+    "creditLimit": "Batas Kredit"
+  },
+  "breeders": {
+    "title": "Peternak",
+    "description": "Kelola peternak dan informasi mereka",
+    "entity": "peternak",
+    "cardType": "Tipe Kartu",
+    "cardTypes": "tipe kartu"
+  },
+  "breederCardTypes": {
+    "title": "Tipe Kartu Peternak",
+    "description": "Kelola klasifikasi tipe kartu peternak",
+    "entity": "tipe kartu"
+  },
+  "employees": {
+    "title": "Karyawan",
+    "description": "Kelola karyawan dan penugasan mereka",
+    "entity": "karyawan",
+    "employeeNumber": "Nomor Karyawan",
+    "position": "Jabatan",
+    "branch": "Cabang",
+    "onLeave": "Cuti",
+    "terminated": "Diberhentikan"
+  },
+  "vehicles": {
+    "title": "Kendaraan",
+    "description": "Kelola armada kendaraan dan detailnya",
+    "entity": "kendaraan",
+    "plateNumber": "Nomor Plat",
+    "capacity": "Kapasitas",
+    "vehicleType": "tipe kendaraan"
+  },
+  "unitOfMeasures": {
+    "title": "Satuan Ukur",
+    "description": "Kelola satuan ukur untuk produk Anda",
+    "entity": "satuan ukur",
+    "namePlaceholder": "cth., kg, pcs, liter"
+  },
+  "matureBirdTypes": {
+    "title": "Tipe Unggas Dewasa",
+    "description": "Kelola klasifikasi tipe unggas dewasa",
+    "entity": "tipe unggas",
+    "birdType": "Tipe Unggas"
+  },
+  "warehouses": {
+    "title": "Gudang",
+    "description": "Kelola gudang dan lokasi penyimpanan",
+    "entity": "gudang",
+    "branch": "Cabang",
+    "ownerType": "Tipe Pemilik",
+    "owner": "Pemilik",
+    "codePlaceholder": "cth. WH-001",
+    "warehouseName": "Nama gudang",
+    "codeAndNameRequired": "Kode dan nama wajib diisi",
+    "failedToSave": "Gagal menyimpan gudang"
   }
 }

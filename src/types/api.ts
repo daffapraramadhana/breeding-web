@@ -123,12 +123,13 @@ export interface Product {
   id: string;
   code: string;
   name: string;
-  baseUom: string;
   baseUomId?: string;
+  baseUom?: UnitOfMeasure;
   categoryId?: string;
   category?: ProductCategory;
+  supplierId?: string;
+  supplier?: Supplier;
   minStock?: number;
-  vendor?: string;
   createdAt: string;
   updatedAt: string;
 }

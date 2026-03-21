@@ -33,15 +33,18 @@ export default function DashboardPage() {
   useEffect(() => {
     async function loadDashboard() {
       try {
-        const [projects, pos, sos, stocks] = await Promise.all([
-          fetchPaginated("/projects", { limit: 1, extra: { status: "ACTIVE" } }),
+        const [projects, pos, sos, stocks] = await Promise.allSettled([
+          fetchPaginated("/projects", { limit: 1 }),
           fetchPaginated<PurchaseOrder>("/purchase-orders", { limit: 100 }),
           fetchPaginated<SalesOrder>("/sales-orders", { limit: 100 }),
-          fetchPaginated("/inventory/stocks", { limit: 100, extra: { stockStatus: "LOW" } }),
+          fetchPaginated("/inventory-stocks", { limit: 100, extra: { stockStatus: "LOW" } }),
         ]);
 
-        const poData = pos.data;
-        const soData = sos.data;
+        const projectTotal = projects.status === "fulfilled" ? (projects.value.meta?.total || 0) : 0;
+
+        const poData = pos.status === "fulfilled" ? pos.value.data : [];
+        const soData = sos.status === "fulfilled" ? sos.value.data : [];
+        const stockTotal = stocks.status === "fulfilled" ? (stocks.value.meta?.total || 0) : 0;
 
         const openPOs = poData.filter(
           (po) => po.status === "ORDERED" || po.status === "PROCESSING"
@@ -52,13 +55,13 @@ export default function DashboardPage() {
         ).length;
 
         setStats({
-          activeProjects: projects.meta?.total || 0,
+          activeProjects: projectTotal,
           birdPopulation: 0, // Placeholder - requires special endpoint
           avgFcr: "-", // Placeholder - requires special endpoint
           mortalityRate: "-", // Placeholder - requires special endpoint
           openPOs,
           pendingSales,
-          stockAlerts: stocks.meta?.total || 0,
+          stockAlerts: stockTotal,
         });
       } catch {
         // silently fail - dashboard shows partial data
