@@ -33,9 +33,9 @@ export function CollapsibleSidebarGroup({
     >
       <SidebarMenuItem>
         <CollapsiblePrimitive.CollapsibleTrigger asChild>
-          <SidebarMenuButton tooltip={title} isActive={isActive}>
+          <SidebarMenuButton tooltip={title} isActive={isActive} className="rounded-xl">
             {Icon && <Icon />}
-            <span>{title}</span>
+            <span className="text-[9px] uppercase tracking-[1.5px] text-[var(--muted-foreground)]">{title}</span>
             <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
           </SidebarMenuButton>
         </CollapsiblePrimitive.CollapsibleTrigger>
