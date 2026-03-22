@@ -18,8 +18,8 @@ export function LanguageToggle() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon">
-          <Languages className="h-[1.2rem] w-[1.2rem]" />
+        <Button variant="ghost" className="h-8 rounded-[10px] bg-[var(--secondary)] px-2.5 text-[11px]">
+          <Languages className="h-3.5 w-3.5" />
           <span className="sr-only">{t('language')}</span>
         </Button>
       </DropdownMenuTrigger>

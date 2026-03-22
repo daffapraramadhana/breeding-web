@@ -1,16 +1,7 @@
 "use client";
 
-import { usePathname } from "next/navigation";
 import Link from "next/link";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
-import { Fragment } from "react";
+import { usePathname } from "next/navigation";
 
 const ROUTE_LABELS: Record<string, string> = {
   branches: "Branches",
@@ -65,38 +56,26 @@ export function DashboardBreadcrumbs() {
   const pathname = usePathname();
   const segments = pathname.split("/").filter(Boolean);
 
-  if (segments.length === 0) return null;
+  if (segments.length <= 1) return null;
 
-  const crumbs = segments.map((seg, i) => {
-    const href = "/" + segments.slice(0, i + 1).join("/");
-    const label = ROUTE_LABELS[seg] || seg;
-    const isLast = i === segments.length - 1;
-    return { href, label, isLast };
-  });
+  const parentSegment = segments[0];
+  const parentLabel =
+    ROUTE_LABELS[parentSegment] ||
+    parentSegment.replace(/-/g, " ");
 
   return (
-    <Breadcrumb>
-      <BreadcrumbList>
-        <BreadcrumbItem>
-          <BreadcrumbLink asChild>
-            <Link href="/">Dashboard</Link>
-          </BreadcrumbLink>
-        </BreadcrumbItem>
-        {crumbs.map((crumb) => (
-          <Fragment key={crumb.href}>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              {crumb.isLast ? (
-                <BreadcrumbPage>{crumb.label}</BreadcrumbPage>
-              ) : (
-                <BreadcrumbLink asChild>
-                  <Link href={crumb.href}>{crumb.label}</Link>
-                </BreadcrumbLink>
-              )}
-            </BreadcrumbItem>
-          </Fragment>
-        ))}
-      </BreadcrumbList>
-    </Breadcrumb>
+    <nav className="flex items-center gap-1.5 text-[11px] text-[var(--muted-foreground)] mb-1">
+      <Link
+        href={`/${parentSegment}`}
+        className="hover:text-[var(--foreground)] transition-colors capitalize"
+      >
+        {parentLabel}
+      </Link>
+      <span>/</span>
+      <span className="text-[var(--foreground)] capitalize">
+        {ROUTE_LABELS[segments[segments.length - 1]] ||
+          segments[segments.length - 1].replace(/-/g, " ")}
+      </span>
+    </nav>
   );
 }
