@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useQueryState, parseAsInteger } from "nuqs";
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -25,6 +26,7 @@ import { DataTable, Column } from "@/components/shared/data-table";
 import { PageHeader } from "@/components/shared/page-header";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { BranchCombobox } from "@/components/forms/branch-combobox";
+import { EntityCombobox } from "@/components/forms/entity-combobox";
 import { usePaginated } from "@/hooks/use-api";
 import { fetchApi } from "@/lib/api";
 import { formatDate } from "@/lib/utils";
@@ -33,6 +35,9 @@ import { Warehouse, WarehouseOwnerType } from "@/types/api";
 const LIMIT = 10;
 
 export default function WarehousesPage() {
+  const t = useTranslations('warehouses');
+  const tc = useTranslations('common');
+
   const [search, setSearch] = useQueryState("search", { defaultValue: "" });
   const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(1));
 
@@ -57,6 +62,12 @@ export default function WarehousesPage() {
   const [deleteTarget, setDeleteTarget] = useState<Warehouse | null>(null);
   const [deleting, setDeleting] = useState(false);
 
+  const ownerTypeLabels: Record<WarehouseOwnerType, string> = {
+    BRANCH: t('branch'),
+    FARM: "Farm",
+    COOP: "Coop",
+  };
+
   function openCreate() {
     setEditing(null);
     setFormData({ code: "", name: "", branchId: "", ownerType: "", ownerId: "" });
@@ -77,7 +88,7 @@ export default function WarehousesPage() {
 
   async function handleSubmit() {
     if (!formData.code.trim() || !formData.name.trim()) {
-      toast.error("Code and name are required");
+      toast.error(t('codeAndNameRequired'));
       return;
     }
 
@@ -102,20 +113,20 @@ export default function WarehousesPage() {
           method: "PATCH",
           body: JSON.stringify(body),
         });
-        toast.success("Warehouse updated successfully");
+        toast.success(tc('entityUpdated', { entity: t('entity') }));
       } else {
         await fetchApi("/warehouses", {
           method: "POST",
           body: JSON.stringify(body),
         });
-        toast.success("Warehouse created successfully");
+        toast.success(tc('entityCreated', { entity: t('entity') }));
       }
 
       setDialogOpen(false);
       refetch();
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : "Failed to save warehouse"
+        error instanceof Error ? error.message : t('failedToSave')
       );
     } finally {
       setSaving(false);
@@ -130,12 +141,12 @@ export default function WarehousesPage() {
       await fetchApi(`/warehouses/${deleteTarget.id}`, {
         method: "DELETE",
       });
-      toast.success("Warehouse deleted successfully");
+      toast.success(tc('entityDeleted', { entity: t('entity') }));
       setDeleteTarget(null);
       refetch();
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : "Failed to delete warehouse"
+        error instanceof Error ? error.message : tc('entityDeleteFailed', { entity: t('entity') })
       );
     } finally {
       setDeleting(false);
@@ -143,22 +154,22 @@ export default function WarehousesPage() {
   }
 
   const columns: Column<Warehouse>[] = [
-    { header: "Code", accessorKey: "code" },
-    { header: "Name", accessorKey: "name" },
+    { header: tc('code'), accessorKey: "code" },
+    { header: tc('name'), accessorKey: "name" },
     {
-      header: "Branch",
+      header: t('branch'),
       cell: (row) => row.branch?.name || "—",
     },
     {
-      header: "Owner Type",
-      cell: (row) => row.ownerType || "—",
+      header: t('ownerType'),
+      cell: (row) => row.ownerType ? ownerTypeLabels[row.ownerType] || row.ownerType : "—",
     },
     {
-      header: "Created",
+      header: tc('created'),
       cell: (row) => formatDate(row.createdAt),
     },
     {
-      header: "Actions",
+      header: tc('actions'),
       className: "w-[100px]",
       cell: (row) => (
         <div className="flex items-center gap-1">
@@ -190,12 +201,12 @@ export default function WarehousesPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Warehouses"
-        description="Manage warehouses and storage locations"
+        title={t('title')}
+        description={t('description')}
         actions={
           <Button onClick={openCreate}>
             <Plus className="mr-2 h-4 w-4" />
-            Add Warehouse
+            {tc('addEntity', { entity: t('entity') })}
           </Button>
         }
       />
@@ -209,17 +220,17 @@ export default function WarehousesPage() {
           setSearch(value);
           setPage(1);
         }}
-        searchPlaceholder="Search warehouses..."
+        searchPlaceholder={tc('searchField', { field: t('title') })}
         page={page}
         totalPages={meta?.totalPages || 1}
         onPageChange={setPage}
         total={meta?.total}
-        emptyTitle="No warehouses found"
-        emptyDescription="Get started by creating a new warehouse."
+        emptyTitle={tc('noResults', { entity: t('entity') })}
+        emptyDescription={tc('getStarted', { entity: t('entity') })}
         emptyAction={
           <Button onClick={openCreate}>
             <Plus className="mr-2 h-4 w-4" />
-            Add Warehouse
+            {tc('addEntity', { entity: t('entity') })}
           </Button>
         }
       />
@@ -229,16 +240,18 @@ export default function WarehousesPage() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {editing ? "Edit Warehouse" : "Create Warehouse"}
+              {editing
+                ? tc('editEntity', { entity: t('entity') })
+                : tc('createEntity', { entity: t('entity') })}
             </DialogTitle>
           </DialogHeader>
 
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="code">Code</Label>
+              <Label htmlFor="code">{tc('code')}</Label>
               <Input
                 id="code"
-                placeholder="e.g. WH-001"
+                placeholder={t('codePlaceholder')}
                 value={formData.code}
                 onChange={(e) =>
                   setFormData((prev) => ({ ...prev, code: e.target.value }))
@@ -247,10 +260,10 @@ export default function WarehousesPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="name">Name</Label>
+              <Label htmlFor="name">{tc('name')}</Label>
               <Input
                 id="name"
-                placeholder="Warehouse name"
+                placeholder={t('warehouseName')}
                 value={formData.name}
                 onChange={(e) =>
                   setFormData((prev) => ({ ...prev, name: e.target.value }))
@@ -259,7 +272,7 @@ export default function WarehousesPage() {
             </div>
 
             <div className="space-y-2">
-              <Label>Branch</Label>
+              <Label>{t('branch')}</Label>
               <BranchCombobox
                 value={formData.branchId}
                 onChange={(id) =>
@@ -269,35 +282,44 @@ export default function WarehousesPage() {
             </div>
 
             <div className="space-y-2">
-              <Label>Owner Type</Label>
+              <Label>{t('ownerType')}</Label>
               <Select
                 value={formData.ownerType}
                 onValueChange={(v) =>
-                  setFormData((prev) => ({ ...prev, ownerType: v as WarehouseOwnerType }))
+                  setFormData((prev) => ({ ...prev, ownerType: v as WarehouseOwnerType, ownerId: "" }))
                 }
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select owner type..." />
+                  <SelectValue placeholder={tc('selectField', { field: t('ownerType') })} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="BRANCH">Branch</SelectItem>
+                  <SelectItem value="BRANCH">{t('branch')}</SelectItem>
                   <SelectItem value="FARM">Farm</SelectItem>
                   <SelectItem value="COOP">Coop</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="ownerId">Owner ID</Label>
-              <Input
-                id="ownerId"
-                placeholder="Owner ID"
-                value={formData.ownerId}
-                onChange={(e) =>
-                  setFormData((prev) => ({ ...prev, ownerId: e.target.value }))
-                }
-              />
-            </div>
+            {formData.ownerType && (
+              <div className="space-y-2">
+                <Label>{t('owner')}</Label>
+                <EntityCombobox
+                  endpoint={
+                    formData.ownerType === "BRANCH"
+                      ? "/branches"
+                      : formData.ownerType === "FARM"
+                        ? "/farms"
+                        : "/coops"
+                  }
+                  value={formData.ownerId}
+                  onChange={(id) =>
+                    setFormData((prev) => ({ ...prev, ownerId: id }))
+                  }
+                  placeholder={tc('selectField', { field: ownerTypeLabels[formData.ownerType as WarehouseOwnerType] || formData.ownerType.toLowerCase() })}
+                  searchPlaceholder={tc('searchField', { field: ownerTypeLabels[formData.ownerType as WarehouseOwnerType] || formData.ownerType.toLowerCase() })}
+                />
+              </div>
+            )}
           </div>
 
           <DialogFooter>
@@ -306,10 +328,14 @@ export default function WarehousesPage() {
               onClick={() => setDialogOpen(false)}
               disabled={saving}
             >
-              Cancel
+              {tc('cancel')}
             </Button>
             <Button onClick={handleSubmit} disabled={saving}>
-              {saving ? "Saving..." : editing ? "Update" : "Create"}
+              {saving
+                ? tc('saving')
+                : editing
+                  ? tc('update')
+                  : tc('create')}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -319,11 +345,11 @@ export default function WarehousesPage() {
       <ConfirmDialog
         open={!!deleteTarget}
         onOpenChange={(open) => !open && setDeleteTarget(null)}
-        title="Delete Warehouse"
-        description={`Are you sure you want to delete "${deleteTarget?.name}"? This action cannot be undone.`}
+        title={tc('deleteEntity', { entity: t('entity') })}
+        description={tc('confirmDelete', { name: deleteTarget?.name || '' })}
         onConfirm={handleDelete}
         variant="destructive"
-        confirmLabel={deleting ? "Deleting..." : "Delete"}
+        confirmLabel={deleting ? tc('saving') : tc('delete')}
       />
     </div>
   );

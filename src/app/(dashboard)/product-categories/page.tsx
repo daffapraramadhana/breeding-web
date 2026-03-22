@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useQueryState, parseAsInteger } from "nuqs";
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { DataTable, Column } from "@/components/shared/data-table";
 import { PageHeader } from "@/components/shared/page-header";
@@ -26,6 +27,9 @@ import {
 } from "@/components/ui/dialog";
 
 export default function ProductCategoriesPage() {
+  const t = useTranslations('productCategories');
+  const tc = useTranslations('common');
+
   // URL state for pagination and search
   const [page, setPage] = useQueryState(
     "page",
@@ -55,20 +59,20 @@ export default function ProductCategoriesPage() {
   // Table columns
   const columns: Column<ProductCategory>[] = [
     {
-      header: "Name",
+      header: tc('name'),
       accessorKey: "name",
     },
     {
-      header: "Purchase Purpose",
+      header: t('purchasePurpose'),
       cell: (row) => row.purchasePurpose || "-",
     },
     {
-      header: "Created",
+      header: tc('created'),
       cell: (row) => formatDate(row.createdAt),
       className: "w-[150px]",
     },
     {
-      header: "Actions",
+      header: tc('actions'),
       cell: (row) => (
         <div className="flex items-center gap-1">
           <Button
@@ -126,7 +130,7 @@ export default function ProductCategoriesPage() {
   // Submit create/edit
   async function handleSubmit() {
     if (!formName.trim()) {
-      toast.error("Category name is required");
+      toast.error(tc('required', { field: tc('name') }));
       return;
     }
 
@@ -144,20 +148,20 @@ export default function ProductCategoriesPage() {
           method: "PATCH",
           body: JSON.stringify(body),
         });
-        toast.success("Category updated successfully");
+        toast.success(tc('entityUpdated', { entity: t('entity') }));
       } else {
         await fetchApi("/product-categories", {
           method: "POST",
           body: JSON.stringify(body),
         });
-        toast.success("Category created successfully");
+        toast.success(tc('entityCreated', { entity: t('entity') }));
       }
 
       setDialogOpen(false);
       refetch();
     } catch (error) {
       toast.error(
-        editingCategory ? "Failed to update category" : "Failed to create category"
+        editingCategory ? tc('entityUpdateFailed', { entity: t('entity') }) : tc('entityCreateFailed', { entity: t('entity') })
       );
     } finally {
       setIsSubmitting(false);
@@ -172,24 +176,24 @@ export default function ProductCategoriesPage() {
       await fetchApi(`/product-categories/${deletingCategory.id}`, {
         method: "DELETE",
       });
-      toast.success("Category deleted successfully");
+      toast.success(tc('entityDeleted', { entity: t('entity') }));
       setDeleteDialogOpen(false);
       setDeletingCategory(null);
       refetch();
     } catch (error) {
-      toast.error("Failed to delete category");
+      toast.error(tc('entityDeleteFailed', { entity: t('entity') }));
     }
   }
 
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Product Categories"
-        description="Manage product categories and classifications"
+        title={t('title')}
+        description={t('description')}
         actions={
           <Button onClick={handleCreate}>
             <Plus className="mr-2 h-4 w-4" />
-            New Category
+            {tc('newEntity', { entity: t('entity') })}
           </Button>
         }
       />
@@ -203,17 +207,17 @@ export default function ProductCategoriesPage() {
           setSearch(value);
           setPage(1);
         }}
-        searchPlaceholder="Search categories..."
+        searchPlaceholder={tc('searchField', { field: t('title') })}
         page={page}
         totalPages={meta?.totalPages || 1}
         onPageChange={setPage}
         total={meta?.total}
-        emptyTitle="No categories found"
-        emptyDescription="Get started by creating your first product category."
+        emptyTitle={tc('noResults', { entity: t('title') })}
+        emptyDescription={tc('getStarted', { entity: t('entity') })}
         emptyAction={
           <Button onClick={handleCreate}>
             <Plus className="mr-2 h-4 w-4" />
-            New Category
+            {tc('newEntity', { entity: t('entity') })}
           </Button>
         }
       />
@@ -223,48 +227,48 @@ export default function ProductCategoriesPage() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {editingCategory ? "Edit Category" : "New Category"}
+              {editingCategory ? tc('editEntity', { entity: t('entity') }) : tc('newEntity', { entity: t('entity') })}
             </DialogTitle>
             <DialogDescription>
               {editingCategory
-                ? "Update the category details below."
-                : "Fill in the details to create a new product category."}
+                ? tc('updateDetails', { entity: t('entity') })
+                : tc('fillDetails', { entity: t('entity') })}
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="category-name">Name</Label>
+              <Label htmlFor="category-name">{tc('name')}</Label>
               <Input
                 id="category-name"
-                placeholder="Enter category name"
+                placeholder={tc('enterField', { field: tc('name') })}
                 value={formName}
                 onChange={(e) => setFormName(e.target.value)}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="category-purchase-purpose">Purchase Purpose</Label>
+              <Label htmlFor="category-purchase-purpose">{t('purchasePurpose')}</Label>
               <Input
                 id="category-purchase-purpose"
-                placeholder="Enter purchase purpose (optional)"
+                placeholder={tc('enterFieldOptional', { field: t('purchasePurpose') })}
                 value={formPurchasePurpose}
                 onChange={(e) => setFormPurchasePurpose(e.target.value)}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="category-overhead">Overhead Category</Label>
+              <Label htmlFor="category-overhead">{t('overheadCategory')}</Label>
               <Input
                 id="category-overhead"
-                placeholder="Enter overhead category (optional)"
+                placeholder={tc('enterFieldOptional', { field: t('overheadCategory') })}
                 value={formOverheadCategory}
                 onChange={(e) => setFormOverheadCategory(e.target.value)}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="category-price-type">Price Type</Label>
+              <Label htmlFor="category-price-type">{t('priceType')}</Label>
               <Input
                 id="category-price-type"
-                placeholder="Enter price type (optional)"
+                placeholder={tc('enterFieldOptional', { field: t('priceType') })}
                 value={formPriceType}
                 onChange={(e) => setFormPriceType(e.target.value)}
                 onKeyDown={(e) => {
@@ -280,14 +284,14 @@ export default function ProductCategoriesPage() {
               onClick={() => setDialogOpen(false)}
               disabled={isSubmitting}
             >
-              Cancel
+              {tc('cancel')}
             </Button>
             <Button onClick={handleSubmit} disabled={isSubmitting}>
               {isSubmitting
-                ? "Saving..."
+                ? tc('saving')
                 : editingCategory
-                  ? "Update Category"
-                  : "Create Category"}
+                  ? tc('updateEntity', { entity: t('entity') })
+                  : tc('createEntity', { entity: t('entity') })}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -297,11 +301,11 @@ export default function ProductCategoriesPage() {
       <ConfirmDialog
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
-        title="Delete Category"
-        description={`Are you sure you want to delete "${deletingCategory?.name}"? This action cannot be undone.`}
+        title={tc('deleteEntity', { entity: t('entity') })}
+        description={tc('confirmDelete', { name: deletingCategory?.name ?? '' })}
         onConfirm={handleDelete}
         variant="destructive"
-        confirmLabel="Delete"
+        confirmLabel={tc('delete')}
       />
     </div>
   );

@@ -1,142 +1,67 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PageHeader } from "@/components/shared/page-header";
 import { CardSkeleton } from "@/components/shared/loading-skeleton";
-import { fetchPaginated } from "@/lib/api";
-import { PurchaseOrder, SalesOrder } from "@/types/api";
-import { formatQuantity } from "@/lib/utils";
-
-interface DashboardStats {
-  activeProjects: number;
-  birdPopulation: number;
-  avgFcr: string;
-  mortalityRate: string;
-  openPOs: number;
-  pendingSales: number;
-  stockAlerts: number;
-}
+import { useApi } from "@/hooks/use-api";
+import { DashboardStats, DashboardTrends } from "@/types/api";
+import { DashboardKpiBanner } from "./components/dashboard-kpi-banner";
+import { MortalityFcrChart } from "./components/mortality-fcr-chart";
+import { ProjectPhaseChart } from "./components/project-phase-chart";
+import { SalesTrendChart } from "./components/sales-trend-chart";
+import { StockAlertsList } from "./components/stock-alerts-list";
+import { OperationalCards } from "./components/operational-cards";
+import { useTranslations } from "next-intl";
 
 export default function DashboardPage() {
-  const [stats, setStats] = useState<DashboardStats>({
-    activeProjects: 0,
-    birdPopulation: 0,
-    avgFcr: "-",
-    mortalityRate: "-",
-    openPOs: 0,
-    pendingSales: 0,
-    stockAlerts: 0,
-  });
-  const [isLoading, setIsLoading] = useState(true);
+  const t = useTranslations("dashboard");
+  const { data: stats, isLoading: statsLoading } = useApi<DashboardStats>("/dashboard/stats");
+  const { data: trends, isLoading: trendsLoading } = useApi<DashboardTrends>("/dashboard/trends?days=30");
 
-  useEffect(() => {
-    async function loadDashboard() {
-      try {
-        const [projects, pos, sos, stocks] = await Promise.all([
-          fetchPaginated("/projects", { limit: 1, extra: { status: "ACTIVE" } }),
-          fetchPaginated<PurchaseOrder>("/purchase-orders", { limit: 100 }),
-          fetchPaginated<SalesOrder>("/sales-orders", { limit: 100 }),
-          fetchPaginated("/inventory/stocks", { limit: 100, extra: { stockStatus: "LOW" } }),
-        ]);
-
-        const poData = pos.data;
-        const soData = sos.data;
-
-        const openPOs = poData.filter(
-          (po) => po.status === "ORDERED" || po.status === "PROCESSING"
-        ).length;
-
-        const pendingSales = soData.filter(
-          (so) => so.status === "PENDING_APPROVAL" || so.status === "APPROVED"
-        ).length;
-
-        setStats({
-          activeProjects: projects.meta?.total || 0,
-          birdPopulation: 0, // Placeholder - requires special endpoint
-          avgFcr: "-", // Placeholder - requires special endpoint
-          mortalityRate: "-", // Placeholder - requires special endpoint
-          openPOs,
-          pendingSales,
-          stockAlerts: stocks.meta?.total || 0,
-        });
-      } catch {
-        // silently fail - dashboard shows partial data
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    loadDashboard();
-  }, []);
+  const isLoading = statsLoading || trendsLoading;
 
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Dashboard"
-        description="Overview of your farm operations"
+        title={t("title")}
+        description={t("description")}
       />
 
       {isLoading ? (
         <div className="space-y-6">
           <CardSkeleton />
-          <div className="grid grid-cols-3 gap-4">
-            {Array.from({ length: 3 }).map((_, i) => (
-              <CardSkeleton key={i} />
-            ))}
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <CardSkeleton />
+            <CardSkeleton />
+          </div>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <CardSkeleton />
+            <CardSkeleton />
+          </div>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+            <CardSkeleton />
+            <CardSkeleton />
+            <CardSkeleton />
           </div>
         </div>
       ) : (
         <>
-          {/* Hero Banner */}
-          <div className="rounded-xl bg-gradient-to-r from-slate-900 to-slate-700 p-6 text-white">
-            <div className="grid grid-cols-4 gap-6">
-              <div className="text-center">
-                <p className="text-sm text-slate-300">Active Projects</p>
-                <p className="text-3xl font-bold text-green-400">{stats.activeProjects}</p>
-              </div>
-              <div className="text-center">
-                <p className="text-sm text-slate-300">Bird Population</p>
-                <p className="text-3xl font-bold text-blue-400">{formatQuantity(stats.birdPopulation)}</p>
-              </div>
-              <div className="text-center">
-                <p className="text-sm text-slate-300">Avg FCR</p>
-                <p className="text-3xl font-bold text-amber-400">{stats.avgFcr}</p>
-              </div>
-              <div className="text-center">
-                <p className="text-sm text-slate-300">Mortality Rate</p>
-                <p className="text-3xl font-bold text-red-400">{stats.mortalityRate}%</p>
-              </div>
-            </div>
+          {/* KPI Banner */}
+          {stats && <DashboardKpiBanner stats={stats} />}
+
+          {/* Charts Row */}
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <MortalityFcrChart trends={trends} />
+            <ProjectPhaseChart stats={stats} />
+          </div>
+
+          {/* Sales + Stock Alerts Row */}
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <SalesTrendChart trends={trends} />
+            <StockAlertsList />
           </div>
 
           {/* Operational Cards */}
-          <div className="grid grid-cols-3 gap-4">
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">Open POs</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-2xl font-bold">{stats.openPOs}</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">Pending Sales</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-2xl font-bold">{stats.pendingSales}</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">Stock Alerts</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-2xl font-bold">{stats.stockAlerts}</p>
-              </CardContent>
-            </Card>
-          </div>
+          {stats && <OperationalCards stats={stats} />}
         </>
       )}
     </div>

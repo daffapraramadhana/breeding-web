@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useQueryState, parseAsInteger } from "nuqs";
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { DataTable, Column } from "@/components/shared/data-table";
 import { PageHeader } from "@/components/shared/page-header";
@@ -16,6 +17,7 @@ import { Product } from "@/types/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { EntityCombobox } from "@/components/forms/entity-combobox";
 import {
   Dialog,
   DialogContent,
@@ -26,6 +28,9 @@ import {
 } from "@/components/ui/dialog";
 
 export default function ProductsPage() {
+  const t = useTranslations('products');
+  const tc = useTranslations('common');
+
   // URL state for pagination and search
   const [page, setPage] = useQueryState(
     "page",
@@ -44,10 +49,10 @@ export default function ProductsPage() {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [formCode, setFormCode] = useState("");
   const [formName, setFormName] = useState("");
-  const [formBaseUom, setFormBaseUom] = useState("");
+  const [formBaseUomId, setFormBaseUomId] = useState("");
   const [formCategoryId, setFormCategoryId] = useState("");
+  const [formSupplierId, setFormSupplierId] = useState("");
   const [formMinStock, setFormMinStock] = useState("");
-  const [formVendor, setFormVendor] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Delete state
@@ -57,32 +62,36 @@ export default function ProductsPage() {
   // Table columns
   const columns: Column<Product>[] = [
     {
-      header: "Code",
+      header: tc('code'),
       accessorKey: "code",
     },
     {
-      header: "Name",
+      header: tc('name'),
       accessorKey: "name",
     },
     {
-      header: "Base UOM",
-      accessorKey: "baseUom",
+      header: t('baseUom'),
+      cell: (row) => row.baseUom?.name || "-",
     },
     {
-      header: "Category",
-      cell: (row) => row.category?.name || row.categoryId || "-",
+      header: t('category'),
+      cell: (row) => row.category?.name || "-",
     },
     {
-      header: "Min Stock",
+      header: t('supplier'),
+      cell: (row) => row.supplier?.name || "-",
+    },
+    {
+      header: t('minStock'),
       cell: (row) => row.minStock ?? "-",
     },
     {
-      header: "Created",
+      header: tc('created'),
       cell: (row) => formatDate(row.createdAt),
       className: "w-[150px]",
     },
     {
-      header: "Actions",
+      header: tc('actions'),
       cell: (row) => (
         <div className="flex items-center gap-1">
           <Button
@@ -116,10 +125,10 @@ export default function ProductsPage() {
     setEditingProduct(null);
     setFormCode("");
     setFormName("");
-    setFormBaseUom("");
+    setFormBaseUomId("");
     setFormCategoryId("");
+    setFormSupplierId("");
     setFormMinStock("");
-    setFormVendor("");
     setDialogOpen(true);
   }
 
@@ -128,10 +137,10 @@ export default function ProductsPage() {
     setEditingProduct(product);
     setFormCode(product.code);
     setFormName(product.name);
-    setFormBaseUom(product.baseUom);
+    setFormBaseUomId(product.baseUomId || "");
     setFormCategoryId(product.categoryId || "");
+    setFormSupplierId(product.supplierId || "");
     setFormMinStock(product.minStock?.toString() || "");
-    setFormVendor(product.vendor || "");
     setDialogOpen(true);
   }
 
@@ -144,27 +153,22 @@ export default function ProductsPage() {
   // Submit create/edit
   async function handleSubmit() {
     if (!formCode.trim()) {
-      toast.error("Product code is required");
+      toast.error(tc('required', { field: tc('code') }));
       return;
     }
     if (!formName.trim()) {
-      toast.error("Product name is required");
+      toast.error(tc('required', { field: tc('name') }));
       return;
     }
-    if (!formBaseUom.trim()) {
-      toast.error("Base UOM is required");
-      return;
-    }
-
     setIsSubmitting(true);
     try {
       const body = {
         code: formCode.trim(),
         name: formName.trim(),
-        baseUom: formBaseUom.trim(),
-        ...(formCategoryId.trim() && { categoryId: formCategoryId.trim() }),
+        ...(formBaseUomId && { baseUomId: formBaseUomId }),
+        ...(formCategoryId && { categoryId: formCategoryId }),
+        ...(formSupplierId && { supplierId: formSupplierId }),
         ...(formMinStock.trim() && { minStock: Number(formMinStock) }),
-        ...(formVendor.trim() && { vendor: formVendor.trim() }),
       };
 
       if (editingProduct) {
@@ -172,20 +176,20 @@ export default function ProductsPage() {
           method: "PATCH",
           body: JSON.stringify(body),
         });
-        toast.success("Product updated successfully");
+        toast.success(tc('entityUpdated', { entity: t('entity') }));
       } else {
         await fetchApi("/products", {
           method: "POST",
           body: JSON.stringify(body),
         });
-        toast.success("Product created successfully");
+        toast.success(tc('entityCreated', { entity: t('entity') }));
       }
 
       setDialogOpen(false);
       refetch();
     } catch (error) {
       toast.error(
-        editingProduct ? "Failed to update product" : "Failed to create product"
+        editingProduct ? tc('entityUpdateFailed', { entity: t('entity') }) : tc('entityCreateFailed', { entity: t('entity') })
       );
     } finally {
       setIsSubmitting(false);
@@ -200,24 +204,24 @@ export default function ProductsPage() {
       await fetchApi(`/products/${deletingProduct.id}`, {
         method: "DELETE",
       });
-      toast.success("Product deleted successfully");
+      toast.success(tc('entityDeleted', { entity: t('entity') }));
       setDeleteDialogOpen(false);
       setDeletingProduct(null);
       refetch();
     } catch (error) {
-      toast.error("Failed to delete product");
+      toast.error(tc('entityDeleteFailed', { entity: t('entity') }));
     }
   }
 
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Products"
-        description="Manage your products and inventory items"
+        title={t('title')}
+        description={t('description')}
         actions={
           <Button onClick={handleCreate}>
             <Plus className="mr-2 h-4 w-4" />
-            New Product
+            {tc('newEntity', { entity: t('entity') })}
           </Button>
         }
       />
@@ -231,17 +235,17 @@ export default function ProductsPage() {
           setSearch(value);
           setPage(1);
         }}
-        searchPlaceholder="Search products..."
+        searchPlaceholder={tc('searchField', { field: t('title') })}
         page={page}
         totalPages={meta?.totalPages || 1}
         onPageChange={setPage}
         total={meta?.total}
-        emptyTitle="No products found"
-        emptyDescription="Get started by creating your first product."
+        emptyTitle={tc('noResults', { entity: t('title') })}
+        emptyDescription={tc('getStarted', { entity: t('entity') })}
         emptyAction={
           <Button onClick={handleCreate}>
             <Plus className="mr-2 h-4 w-4" />
-            New Product
+            {tc('newEntity', { entity: t('entity') })}
           </Button>
         }
       />
@@ -251,72 +255,72 @@ export default function ProductsPage() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {editingProduct ? "Edit Product" : "New Product"}
+              {editingProduct ? tc('editEntity', { entity: t('entity') }) : tc('newEntity', { entity: t('entity') })}
             </DialogTitle>
             <DialogDescription>
               {editingProduct
-                ? "Update the product details below."
-                : "Fill in the details to create a new product."}
+                ? tc('updateDetails', { entity: t('entity') })
+                : tc('fillDetails', { entity: t('entity') })}
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="product-code">Code</Label>
+              <Label htmlFor="product-code">{tc('code')}</Label>
               <Input
                 id="product-code"
-                placeholder="Enter product code"
+                placeholder={tc('enterField', { field: tc('code') })}
                 value={formCode}
                 onChange={(e) => setFormCode(e.target.value)}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="product-name">Name</Label>
+              <Label htmlFor="product-name">{tc('name')}</Label>
               <Input
                 id="product-name"
-                placeholder="Enter product name"
+                placeholder={tc('enterField', { field: tc('name') })}
                 value={formName}
                 onChange={(e) => setFormName(e.target.value)}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="product-base-uom">Base UOM</Label>
-              <Input
-                id="product-base-uom"
-                placeholder="Enter base unit of measure"
-                value={formBaseUom}
-                onChange={(e) => setFormBaseUom(e.target.value)}
+              <Label>{t('baseUom')}</Label>
+              <EntityCombobox
+                endpoint="/unit-of-measures"
+                value={formBaseUomId}
+                onChange={setFormBaseUomId}
+                placeholder={tc('selectField', { field: t('unitOfMeasure') })}
+                searchPlaceholder={tc('searchField', { field: t('units') })}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="product-category-id">Category ID</Label>
-              <Input
-                id="product-category-id"
-                placeholder="Enter category ID (optional)"
+              <Label>{t('category')}</Label>
+              <EntityCombobox
+                endpoint="/product-categories"
                 value={formCategoryId}
-                onChange={(e) => setFormCategoryId(e.target.value)}
+                onChange={setFormCategoryId}
+                placeholder={tc('selectField', { field: t('category') })}
+                searchPlaceholder={tc('searchField', { field: t('categories') })}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="product-min-stock">Min Stock</Label>
+              <Label>{t('supplier')}</Label>
+              <EntityCombobox
+                endpoint="/suppliers"
+                value={formSupplierId}
+                onChange={setFormSupplierId}
+                placeholder={tc('selectField', { field: t('supplier') })}
+                searchPlaceholder={tc('searchField', { field: t('suppliers') })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="product-min-stock">{t('minStock')}</Label>
               <Input
                 id="product-min-stock"
                 type="number"
-                placeholder="Enter minimum stock (optional)"
+                placeholder={tc('enterFieldOptional', { field: t('minimumStock') })}
                 value={formMinStock}
                 onChange={(e) => setFormMinStock(e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="product-vendor">Vendor</Label>
-              <Input
-                id="product-vendor"
-                placeholder="Enter vendor (optional)"
-                value={formVendor}
-                onChange={(e) => setFormVendor(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") handleSubmit();
-                }}
               />
             </div>
           </div>
@@ -327,14 +331,14 @@ export default function ProductsPage() {
               onClick={() => setDialogOpen(false)}
               disabled={isSubmitting}
             >
-              Cancel
+              {tc('cancel')}
             </Button>
             <Button onClick={handleSubmit} disabled={isSubmitting}>
               {isSubmitting
-                ? "Saving..."
+                ? tc('saving')
                 : editingProduct
-                  ? "Update Product"
-                  : "Create Product"}
+                  ? tc('updateEntity', { entity: t('entity') })
+                  : tc('createEntity', { entity: t('entity') })}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -344,11 +348,11 @@ export default function ProductsPage() {
       <ConfirmDialog
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
-        title="Delete Product"
-        description={`Are you sure you want to delete "${deletingProduct?.name}"? This action cannot be undone.`}
+        title={tc('deleteEntity', { entity: t('entity') })}
+        description={tc('confirmDelete', { name: deletingProduct?.name ?? '' })}
         onConfirm={handleDelete}
         variant="destructive"
-        confirmLabel="Delete"
+        confirmLabel={tc('delete')}
       />
     </div>
   );

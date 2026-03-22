@@ -18,29 +18,42 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { fetchPaginated } from "@/lib/api";
-import { Product } from "@/types/api";
 
-interface ProductComboboxProps {
+interface EntityComboboxProps {
+  endpoint: string;
   value: string;
-  onChange: (productId: string, product: Product) => void;
+  onChange: (value: string) => void;
+  valueField?: string;
+  displayField?: string;
+  placeholder?: string;
+  searchPlaceholder?: string;
   disabled?: boolean;
 }
 
-export function ProductCombobox({ value, onChange, disabled }: ProductComboboxProps) {
+export function EntityCombobox({
+  endpoint,
+  value,
+  onChange,
+  valueField = "id",
+  displayField = "name",
+  placeholder = "Select...",
+  searchPlaceholder = "Search...",
+  disabled,
+}: EntityComboboxProps) {
   const [open, setOpen] = useState(false);
-  const [products, setProducts] = useState<Product[]>([]);
+  const [items, setItems] = useState<Record<string, string>[]>([]);
   const [search, setSearch] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     setIsLoading(true);
-    fetchPaginated<Product>("/products", { limit: 50, search })
-      .then((res) => setProducts(res.data))
+    fetchPaginated<Record<string, string>>(endpoint, { limit: 50, search })
+      .then((res) => setItems(res.data))
       .catch(() => {})
       .finally(() => setIsLoading(false));
-  }, [search]);
+  }, [endpoint, search]);
 
-  const selected = products.find((p) => p.id === value);
+  const selected = items.find((item) => item[valueField] === value);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -52,49 +65,40 @@ export function ProductCombobox({ value, onChange, disabled }: ProductComboboxPr
           className="w-full justify-between font-normal"
           disabled={disabled}
         >
-          {selected
-            ? `${selected.code} - ${selected.name}`
-            : "Select product..."}
+          {selected ? selected[displayField] : placeholder}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[400px] p-0" align="start">
         <Command shouldFilter={false}>
           <CommandInput
-            placeholder="Search products..."
+            placeholder={searchPlaceholder}
             value={search}
             onValueChange={setSearch}
           />
           <CommandList>
             {isLoading ? (
               <CommandEmpty>Loading...</CommandEmpty>
-            ) : products.length === 0 ? (
-              <CommandEmpty>No products found.</CommandEmpty>
+            ) : items.length === 0 ? (
+              <CommandEmpty>No results found.</CommandEmpty>
             ) : (
               <CommandGroup>
-                {products.map((product) => (
+                {items.map((item) => (
                   <CommandItem
-                    key={product.id}
-                    value={product.id}
+                    key={item.id}
+                    value={item.id}
                     onSelect={() => {
-                      onChange(product.id, product);
+                      onChange(item[valueField]);
                       setOpen(false);
                     }}
                   >
                     <Check
                       className={cn(
                         "mr-2 h-4 w-4",
-                        value === product.id ? "opacity-100" : "opacity-0"
+                        value === item[valueField] ? "opacity-100" : "opacity-0"
                       )}
                     />
-                    <div className="flex flex-col">
-                      <span>
-                        {product.code} - {product.name}
-                      </span>
-                      <span className="text-xs text-muted-foreground">
-                        {product.baseUom?.name}
-                      </span>
-                    </div>
+                    <span>{item[displayField]}</span>
                   </CommandItem>
                 ))}
               </CommandGroup>

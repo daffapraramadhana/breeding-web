@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useQueryState, parseAsInteger } from "nuqs";
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { DataTable, Column } from "@/components/shared/data-table";
 import { PageHeader } from "@/components/shared/page-header";
@@ -35,6 +36,9 @@ import {
 } from "@/components/ui/dialog";
 
 export default function EmployeesPage() {
+  const t = useTranslations('employees');
+  const tc = useTranslations('common');
+
   // URL state for pagination and search
   const [page, setPage] = useQueryState(
     "page",
@@ -66,32 +70,32 @@ export default function EmployeesPage() {
   // Table columns
   const columns: Column<Employee>[] = [
     {
-      header: "Name",
+      header: tc('name'),
       accessorKey: "name",
     },
     {
-      header: "Employee Number",
+      header: t('employeeNumber'),
       cell: (row) => row.employeeNumber || "-",
     },
     {
-      header: "Position",
+      header: t('position'),
       cell: (row) => row.position || "-",
     },
     {
-      header: "Status",
+      header: tc('status'),
       cell: (row) => <StatusBadge status={row.status} />,
     },
     {
-      header: "Branch",
+      header: t('branch'),
       cell: (row) => row.branch?.name || "-",
     },
     {
-      header: "Created",
+      header: tc('created'),
       cell: (row) => formatDate(row.createdAt),
       className: "w-[150px]",
     },
     {
-      header: "Actions",
+      header: tc('actions'),
       cell: (row) => (
         <div className="flex items-center gap-1">
           <Button
@@ -153,7 +157,7 @@ export default function EmployeesPage() {
   // Submit create/edit
   async function handleSubmit() {
     if (!formName.trim()) {
-      toast.error("Employee name is required");
+      toast.error(tc('required', { field: tc('name') }));
       return;
     }
 
@@ -173,20 +177,20 @@ export default function EmployeesPage() {
           method: "PATCH",
           body: JSON.stringify(body),
         });
-        toast.success("Employee updated successfully");
+        toast.success(tc('entityUpdated', { entity: t('entity') }));
       } else {
         await fetchApi("/employees", {
           method: "POST",
           body: JSON.stringify(body),
         });
-        toast.success("Employee created successfully");
+        toast.success(tc('entityCreated', { entity: t('entity') }));
       }
 
       setDialogOpen(false);
       refetch();
     } catch (error) {
       toast.error(
-        editingEmployee ? "Failed to update employee" : "Failed to create employee"
+        editingEmployee ? tc('entityUpdateFailed', { entity: t('entity') }) : tc('entityCreateFailed', { entity: t('entity') })
       );
     } finally {
       setIsSubmitting(false);
@@ -201,24 +205,24 @@ export default function EmployeesPage() {
       await fetchApi(`/employees/${deletingEmployee.id}`, {
         method: "DELETE",
       });
-      toast.success("Employee deleted successfully");
+      toast.success(tc('entityDeleted', { entity: t('entity') }));
       setDeleteDialogOpen(false);
       setDeletingEmployee(null);
       refetch();
     } catch (error) {
-      toast.error("Failed to delete employee");
+      toast.error(tc('entityDeleteFailed', { entity: t('entity') }));
     }
   }
 
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Employees"
-        description="Manage your employees and their assignments"
+        title={t('title')}
+        description={t('description')}
         actions={
           <Button onClick={handleCreate}>
             <Plus className="mr-2 h-4 w-4" />
-            New Employee
+            {tc('newEntity', { entity: t('entity') })}
           </Button>
         }
       />
@@ -232,17 +236,17 @@ export default function EmployeesPage() {
           setSearch(value);
           setPage(1);
         }}
-        searchPlaceholder="Search employees..."
+        searchPlaceholder={tc('searchField', { field: t('title') })}
         page={page}
         totalPages={meta?.totalPages || 1}
         onPageChange={setPage}
         total={meta?.total}
-        emptyTitle="No employees found"
-        emptyDescription="Get started by adding your first employee."
+        emptyTitle={tc('noResults', { entity: t('title') })}
+        emptyDescription={tc('getStartedAlt', { entity: t('entity') })}
         emptyAction={
           <Button onClick={handleCreate}>
             <Plus className="mr-2 h-4 w-4" />
-            New Employee
+            {tc('newEntity', { entity: t('entity') })}
           </Button>
         }
       />
@@ -252,71 +256,71 @@ export default function EmployeesPage() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {editingEmployee ? "Edit Employee" : "New Employee"}
+              {editingEmployee ? tc('editEntity', { entity: t('entity') }) : tc('newEntity', { entity: t('entity') })}
             </DialogTitle>
             <DialogDescription>
               {editingEmployee
-                ? "Update the employee details below."
-                : "Fill in the details to add a new employee."}
+                ? tc('updateDetails', { entity: t('entity') })
+                : tc('fillDetailsAlt', { entity: t('entity') })}
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="employee-name">Name</Label>
+              <Label htmlFor="employee-name">{tc('name')}</Label>
               <Input
                 id="employee-name"
-                placeholder="Enter employee name"
+                placeholder={tc('enterField', { field: tc('name') })}
                 value={formName}
                 onChange={(e) => setFormName(e.target.value)}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="employee-number">Employee Number</Label>
+              <Label htmlFor="employee-number">{t('employeeNumber')}</Label>
               <Input
                 id="employee-number"
-                placeholder="Enter employee number (optional)"
+                placeholder={tc('enterFieldOptional', { field: t('employeeNumber') })}
                 value={formEmployeeNumber}
                 onChange={(e) => setFormEmployeeNumber(e.target.value)}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="employee-phone">Phone</Label>
+              <Label htmlFor="employee-phone">{tc('phone')}</Label>
               <Input
                 id="employee-phone"
-                placeholder="Enter phone number (optional)"
+                placeholder={tc('enterFieldOptional', { field: tc('phone') })}
                 value={formPhone}
                 onChange={(e) => setFormPhone(e.target.value)}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="employee-position">Position</Label>
+              <Label htmlFor="employee-position">{t('position')}</Label>
               <Input
                 id="employee-position"
-                placeholder="Enter position (optional)"
+                placeholder={tc('enterFieldOptional', { field: t('position') })}
                 value={formPosition}
                 onChange={(e) => setFormPosition(e.target.value)}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="employee-status">Status</Label>
+              <Label htmlFor="employee-status">{tc('status')}</Label>
               <Select
                 value={formStatus}
                 onValueChange={(value) => setFormStatus(value as EmployeeStatus)}
               >
                 <SelectTrigger id="employee-status">
-                  <SelectValue placeholder="Select status" />
+                  <SelectValue placeholder={tc('selectField', { field: tc('status') })} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="ACTIVE">Active</SelectItem>
-                  <SelectItem value="INACTIVE">Inactive</SelectItem>
-                  <SelectItem value="ON_LEAVE">On Leave</SelectItem>
-                  <SelectItem value="TERMINATED">Terminated</SelectItem>
+                  <SelectItem value="ACTIVE">{tc('active')}</SelectItem>
+                  <SelectItem value="INACTIVE">{tc('inactive')}</SelectItem>
+                  <SelectItem value="ON_LEAVE">{t('onLeave')}</SelectItem>
+                  <SelectItem value="TERMINATED">{t('terminated')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-2">
-              <Label>Branch</Label>
+              <Label>{t('branch')}</Label>
               <BranchCombobox
                 value={formBranchId}
                 onChange={setFormBranchId}
@@ -330,14 +334,14 @@ export default function EmployeesPage() {
               onClick={() => setDialogOpen(false)}
               disabled={isSubmitting}
             >
-              Cancel
+              {tc('cancel')}
             </Button>
             <Button onClick={handleSubmit} disabled={isSubmitting}>
               {isSubmitting
-                ? "Saving..."
+                ? tc('saving')
                 : editingEmployee
-                  ? "Update Employee"
-                  : "Create Employee"}
+                  ? tc('updateEntity', { entity: t('entity') })
+                  : tc('createEntity', { entity: t('entity') })}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -347,11 +351,11 @@ export default function EmployeesPage() {
       <ConfirmDialog
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
-        title="Delete Employee"
-        description={`Are you sure you want to delete "${deletingEmployee?.name}"? This action cannot be undone.`}
+        title={tc('deleteEntity', { entity: t('entity') })}
+        description={tc('confirmDelete', { name: deletingEmployee?.name ?? '' })}
         onConfirm={handleDelete}
         variant="destructive"
-        confirmLabel="Delete"
+        confirmLabel={tc('delete')}
       />
     </div>
   );

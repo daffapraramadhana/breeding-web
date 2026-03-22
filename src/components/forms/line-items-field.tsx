@@ -82,8 +82,8 @@ export function LineItemsField({
             productId,
             productCode: product.code,
             productName: product.name,
-            uomId: product.baseUomId || uomMap[product.baseUom.toUpperCase()] || line.uomId,
-            uomName: product.baseUom,
+            uomId: product.baseUomId || line.uomId,
+            uomName: product.baseUom?.name || "",
           }
         : line
     );

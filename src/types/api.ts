@@ -50,7 +50,7 @@ export type InvoicePaymentStatus = "UNPAID" | "PARTIAL" | "PAID" | "OVERPAID";
 export type DriverBonusPaymentStatus = "PENDING" | "PAID";
 export type VerificationStatus = "PENDING" | "VERIFIED" | "REJECTED";
 export type BonusStatus = "ACTIVE" | "INACTIVE";
-export type StockStatus = "NORMAL" | "LOW" | "OUT_OF_STOCK" | "OVER_STOCK";
+export type StockStatus = "NORMAL" | "LOW" | "CRITICAL" | "OVERSTOCK";
 export type WarehouseOwnerType = "BRANCH" | "FARM" | "COOP";
 export type PurchaseDestinationType = "BRANCH" | "FARM" | "COOP";
 export type PurchaseSalesTarget = "INTERNAL" | "EXTERNAL";
@@ -123,12 +123,13 @@ export interface Product {
   id: string;
   code: string;
   name: string;
-  baseUom: string;
   baseUomId?: string;
+  baseUom?: UnitOfMeasure;
   categoryId?: string;
   category?: ProductCategory;
+  supplierId?: string;
+  supplier?: Supplier;
   minStock?: number;
-  vendor?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -896,4 +897,40 @@ export interface ProductionForecastRequest {
 export interface DashboardSummaryRequest {
   periodStart?: string;
   periodEnd?: string;
+}
+
+// Dashboard Analytics
+export interface DashboardStats {
+  activeProjects: number;
+  birdPopulation: number;
+  avgFcr: number | null;
+  mortalityRate: number | null;
+  openPurchaseOrders: number;
+  pendingSalesOrders: number;
+  criticalStockAlerts: number;
+  pendingInvoiceAmount: string;
+  overdueInvoiceCount: number;
+  projectsByPhase: {
+    rearing: number;
+    harvest: number;
+    cleaning: number;
+    preparation: number;
+  };
+}
+
+export interface DashboardTrends {
+  mortalityTrend: Array<{
+    date: string;
+    rate: number;
+  }>;
+  fcrTrend: Array<{
+    date: string;
+    value: number;
+    standard: number;
+  }>;
+  salesTrend: Array<{
+    week: string;
+    revenue: number;
+    orderCount: number;
+  }>;
 }

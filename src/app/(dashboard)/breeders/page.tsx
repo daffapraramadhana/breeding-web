@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useQueryState, parseAsInteger } from "nuqs";
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { DataTable, Column } from "@/components/shared/data-table";
 import { PageHeader } from "@/components/shared/page-header";
@@ -16,6 +17,7 @@ import { Breeder } from "@/types/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { EntityCombobox } from "@/components/forms/entity-combobox";
 import {
   Dialog,
   DialogContent,
@@ -26,6 +28,9 @@ import {
 } from "@/components/ui/dialog";
 
 export default function BreedersPage() {
+  const t = useTranslations('breeders');
+  const tc = useTranslations('common');
+
   // URL state for pagination and search
   const [page, setPage] = useQueryState(
     "page",
@@ -55,28 +60,28 @@ export default function BreedersPage() {
   // Table columns
   const columns: Column<Breeder>[] = [
     {
-      header: "Name",
+      header: tc('name'),
       accessorKey: "name",
     },
     {
-      header: "Card Type",
-      cell: (row) => row.cardType?.name || row.cardTypeId || "-",
+      header: t('cardType'),
+      cell: (row) => row.cardType?.name || "-",
     },
     {
-      header: "Phone",
+      header: tc('phone'),
       cell: (row) => row.phone || "-",
     },
     {
-      header: "Address",
+      header: tc('address'),
       cell: (row) => row.address || "-",
     },
     {
-      header: "Created",
+      header: tc('created'),
       cell: (row) => formatDate(row.createdAt),
       className: "w-[150px]",
     },
     {
-      header: "Actions",
+      header: tc('actions'),
       cell: (row) => (
         <div className="flex items-center gap-1">
           <Button
@@ -134,7 +139,7 @@ export default function BreedersPage() {
   // Submit create/edit
   async function handleSubmit() {
     if (!formName.trim()) {
-      toast.error("Breeder name is required");
+      toast.error(tc('required', { field: tc('name') }));
       return;
     }
 
@@ -152,20 +157,20 @@ export default function BreedersPage() {
           method: "PATCH",
           body: JSON.stringify(body),
         });
-        toast.success("Breeder updated successfully");
+        toast.success(tc('entityUpdated', { entity: t('entity') }));
       } else {
         await fetchApi("/breeders", {
           method: "POST",
           body: JSON.stringify(body),
         });
-        toast.success("Breeder created successfully");
+        toast.success(tc('entityCreated', { entity: t('entity') }));
       }
 
       setDialogOpen(false);
       refetch();
     } catch (error) {
       toast.error(
-        editingBreeder ? "Failed to update breeder" : "Failed to create breeder"
+        editingBreeder ? tc('entityUpdateFailed', { entity: t('entity') }) : tc('entityCreateFailed', { entity: t('entity') })
       );
     } finally {
       setIsSubmitting(false);
@@ -180,24 +185,24 @@ export default function BreedersPage() {
       await fetchApi(`/breeders/${deletingBreeder.id}`, {
         method: "DELETE",
       });
-      toast.success("Breeder deleted successfully");
+      toast.success(tc('entityDeleted', { entity: t('entity') }));
       setDeleteDialogOpen(false);
       setDeletingBreeder(null);
       refetch();
     } catch (error) {
-      toast.error("Failed to delete breeder");
+      toast.error(tc('entityDeleteFailed', { entity: t('entity') }));
     }
   }
 
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Breeders"
-        description="Manage your breeders and their information"
+        title={t('title')}
+        description={t('description')}
         actions={
           <Button onClick={handleCreate}>
             <Plus className="mr-2 h-4 w-4" />
-            New Breeder
+            {tc('newEntity', { entity: t('entity') })}
           </Button>
         }
       />
@@ -211,17 +216,17 @@ export default function BreedersPage() {
           setSearch(value);
           setPage(1);
         }}
-        searchPlaceholder="Search breeders..."
+        searchPlaceholder={tc('searchField', { field: t('title') })}
         page={page}
         totalPages={meta?.totalPages || 1}
         onPageChange={setPage}
         total={meta?.total}
-        emptyTitle="No breeders found"
-        emptyDescription="Get started by adding your first breeder."
+        emptyTitle={tc('noResults', { entity: t('title') })}
+        emptyDescription={tc('getStartedAlt', { entity: t('entity') })}
         emptyAction={
           <Button onClick={handleCreate}>
             <Plus className="mr-2 h-4 w-4" />
-            New Breeder
+            {tc('newEntity', { entity: t('entity') })}
           </Button>
         }
       />
@@ -231,48 +236,49 @@ export default function BreedersPage() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {editingBreeder ? "Edit Breeder" : "New Breeder"}
+              {editingBreeder ? tc('editEntity', { entity: t('entity') }) : tc('newEntity', { entity: t('entity') })}
             </DialogTitle>
             <DialogDescription>
               {editingBreeder
-                ? "Update the breeder details below."
-                : "Fill in the details to add a new breeder."}
+                ? tc('updateDetails', { entity: t('entity') })
+                : tc('fillDetailsAlt', { entity: t('entity') })}
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="breeder-name">Name</Label>
+              <Label htmlFor="breeder-name">{tc('name')}</Label>
               <Input
                 id="breeder-name"
-                placeholder="Enter breeder name"
+                placeholder={tc('enterField', { field: tc('name') })}
                 value={formName}
                 onChange={(e) => setFormName(e.target.value)}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="breeder-card-type">Card Type ID</Label>
-              <Input
-                id="breeder-card-type"
-                placeholder="Enter card type ID (optional)"
+              <Label>{t('cardType')}</Label>
+              <EntityCombobox
+                endpoint="/breeder-card-types"
                 value={formCardTypeId}
-                onChange={(e) => setFormCardTypeId(e.target.value)}
+                onChange={setFormCardTypeId}
+                placeholder={tc('selectField', { field: t('cardType') })}
+                searchPlaceholder={tc('searchField', { field: t('cardTypes') })}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="breeder-phone">Phone</Label>
+              <Label htmlFor="breeder-phone">{tc('phone')}</Label>
               <Input
                 id="breeder-phone"
-                placeholder="Enter phone number (optional)"
+                placeholder={tc('enterFieldOptional', { field: tc('phone') })}
                 value={formPhone}
                 onChange={(e) => setFormPhone(e.target.value)}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="breeder-address">Address</Label>
+              <Label htmlFor="breeder-address">{tc('address')}</Label>
               <Input
                 id="breeder-address"
-                placeholder="Enter address (optional)"
+                placeholder={tc('enterFieldOptional', { field: tc('address') })}
                 value={formAddress}
                 onChange={(e) => setFormAddress(e.target.value)}
                 onKeyDown={(e) => {
@@ -288,14 +294,14 @@ export default function BreedersPage() {
               onClick={() => setDialogOpen(false)}
               disabled={isSubmitting}
             >
-              Cancel
+              {tc('cancel')}
             </Button>
             <Button onClick={handleSubmit} disabled={isSubmitting}>
               {isSubmitting
-                ? "Saving..."
+                ? tc('saving')
                 : editingBreeder
-                  ? "Update Breeder"
-                  : "Create Breeder"}
+                  ? tc('updateEntity', { entity: t('entity') })
+                  : tc('createEntity', { entity: t('entity') })}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -305,11 +311,11 @@ export default function BreedersPage() {
       <ConfirmDialog
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
-        title="Delete Breeder"
-        description={`Are you sure you want to delete "${deletingBreeder?.name}"? This action cannot be undone.`}
+        title={tc('deleteEntity', { entity: t('entity') })}
+        description={tc('confirmDelete', { name: deletingBreeder?.name ?? '' })}
         onConfirm={handleDelete}
         variant="destructive"
-        confirmLabel="Delete"
+        confirmLabel={tc('delete')}
       />
     </div>
   );

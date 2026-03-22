@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useQueryState, parseAsInteger } from "nuqs";
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { DataTable, Column } from "@/components/shared/data-table";
 import { PageHeader } from "@/components/shared/page-header";
@@ -26,6 +27,9 @@ import {
 } from "@/components/ui/dialog";
 
 export default function VehiclesPage() {
+  const t = useTranslations('vehicles');
+  const tc = useTranslations('common');
+
   // URL state for pagination and search
   const [page, setPage] = useQueryState(
     "page",
@@ -55,24 +59,24 @@ export default function VehiclesPage() {
   // Table columns
   const columns: Column<Vehicle>[] = [
     {
-      header: "Plate Number",
+      header: t('plateNumber'),
       accessorKey: "plateNumber",
     },
     {
-      header: "Type",
+      header: tc('type'),
       cell: (row) => row.type || "-",
     },
     {
-      header: "Capacity",
+      header: t('capacity'),
       cell: (row) => row.capacity || "-",
     },
     {
-      header: "Created",
+      header: tc('created'),
       cell: (row) => formatDate(row.createdAt),
       className: "w-[150px]",
     },
     {
-      header: "Actions",
+      header: tc('actions'),
       cell: (row) => (
         <div className="flex items-center gap-1">
           <Button
@@ -130,7 +134,7 @@ export default function VehiclesPage() {
   // Submit create/edit
   async function handleSubmit() {
     if (!formPlateNumber.trim()) {
-      toast.error("Plate number is required");
+      toast.error(tc('required', { field: t('plateNumber') }));
       return;
     }
 
@@ -148,20 +152,20 @@ export default function VehiclesPage() {
           method: "PATCH",
           body: JSON.stringify(body),
         });
-        toast.success("Vehicle updated successfully");
+        toast.success(tc('entityUpdated', { entity: t('entity') }));
       } else {
         await fetchApi("/vehicles", {
           method: "POST",
           body: JSON.stringify(body),
         });
-        toast.success("Vehicle created successfully");
+        toast.success(tc('entityCreated', { entity: t('entity') }));
       }
 
       setDialogOpen(false);
       refetch();
     } catch (error) {
       toast.error(
-        editingVehicle ? "Failed to update vehicle" : "Failed to create vehicle"
+        editingVehicle ? tc('entityUpdateFailed', { entity: t('entity') }) : tc('entityCreateFailed', { entity: t('entity') })
       );
     } finally {
       setIsSubmitting(false);
@@ -176,24 +180,24 @@ export default function VehiclesPage() {
       await fetchApi(`/vehicles/${deletingVehicle.id}`, {
         method: "DELETE",
       });
-      toast.success("Vehicle deleted successfully");
+      toast.success(tc('entityDeleted', { entity: t('entity') }));
       setDeleteDialogOpen(false);
       setDeletingVehicle(null);
       refetch();
     } catch (error) {
-      toast.error("Failed to delete vehicle");
+      toast.error(tc('entityDeleteFailed', { entity: t('entity') }));
     }
   }
 
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Vehicles"
-        description="Manage your fleet vehicles and their details"
+        title={t('title')}
+        description={t('description')}
         actions={
           <Button onClick={handleCreate}>
             <Plus className="mr-2 h-4 w-4" />
-            New Vehicle
+            {tc('newEntity', { entity: t('entity') })}
           </Button>
         }
       />
@@ -207,17 +211,17 @@ export default function VehiclesPage() {
           setSearch(value);
           setPage(1);
         }}
-        searchPlaceholder="Search vehicles..."
+        searchPlaceholder={tc('searchField', { field: t('title') })}
         page={page}
         totalPages={meta?.totalPages || 1}
         onPageChange={setPage}
         total={meta?.total}
-        emptyTitle="No vehicles found"
-        emptyDescription="Get started by adding your first vehicle."
+        emptyTitle={tc('noResults', { entity: t('title') })}
+        emptyDescription={tc('getStartedAlt', { entity: t('entity') })}
         emptyAction={
           <Button onClick={handleCreate}>
             <Plus className="mr-2 h-4 w-4" />
-            New Vehicle
+            {tc('newEntity', { entity: t('entity') })}
           </Button>
         }
       />
@@ -227,48 +231,48 @@ export default function VehiclesPage() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {editingVehicle ? "Edit Vehicle" : "New Vehicle"}
+              {editingVehicle ? tc('editEntity', { entity: t('entity') }) : tc('newEntity', { entity: t('entity') })}
             </DialogTitle>
             <DialogDescription>
               {editingVehicle
-                ? "Update the vehicle details below."
-                : "Fill in the details to add a new vehicle."}
+                ? tc('updateDetails', { entity: t('entity') })
+                : tc('fillDetailsAlt', { entity: t('entity') })}
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="vehicle-plate">Plate Number</Label>
+              <Label htmlFor="vehicle-plate">{t('plateNumber')}</Label>
               <Input
                 id="vehicle-plate"
-                placeholder="Enter plate number"
+                placeholder={tc('enterField', { field: t('plateNumber') })}
                 value={formPlateNumber}
                 onChange={(e) => setFormPlateNumber(e.target.value)}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="vehicle-type">Type</Label>
+              <Label htmlFor="vehicle-type">{tc('type')}</Label>
               <Input
                 id="vehicle-type"
-                placeholder="Enter vehicle type (optional)"
+                placeholder={tc('enterFieldOptional', { field: t('vehicleType') })}
                 value={formType}
                 onChange={(e) => setFormType(e.target.value)}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="vehicle-capacity">Capacity</Label>
+              <Label htmlFor="vehicle-capacity">{t('capacity')}</Label>
               <Input
                 id="vehicle-capacity"
-                placeholder="Enter capacity (optional)"
+                placeholder={tc('enterFieldOptional', { field: t('capacity') })}
                 value={formCapacity}
                 onChange={(e) => setFormCapacity(e.target.value)}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="vehicle-description">Description</Label>
+              <Label htmlFor="vehicle-description">{tc('description')}</Label>
               <Input
                 id="vehicle-description"
-                placeholder="Enter description (optional)"
+                placeholder={tc('enterFieldOptional', { field: tc('description') })}
                 value={formDescription}
                 onChange={(e) => setFormDescription(e.target.value)}
                 onKeyDown={(e) => {
@@ -284,14 +288,14 @@ export default function VehiclesPage() {
               onClick={() => setDialogOpen(false)}
               disabled={isSubmitting}
             >
-              Cancel
+              {tc('cancel')}
             </Button>
             <Button onClick={handleSubmit} disabled={isSubmitting}>
               {isSubmitting
-                ? "Saving..."
+                ? tc('saving')
                 : editingVehicle
-                  ? "Update Vehicle"
-                  : "Create Vehicle"}
+                  ? tc('updateEntity', { entity: t('entity') })
+                  : tc('createEntity', { entity: t('entity') })}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -301,11 +305,11 @@ export default function VehiclesPage() {
       <ConfirmDialog
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
-        title="Delete Vehicle"
-        description={`Are you sure you want to delete "${deletingVehicle?.plateNumber}"? This action cannot be undone.`}
+        title={tc('deleteEntity', { entity: t('entity') })}
+        description={tc('confirmDelete', { name: deletingVehicle?.plateNumber ?? '' })}
         onConfirm={handleDelete}
         variant="destructive"
-        confirmLabel="Delete"
+        confirmLabel={tc('delete')}
       />
     </div>
   );

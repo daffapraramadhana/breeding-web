@@ -70,6 +70,8 @@ export function useAuthProvider(): AuthContextType {
   }, [logout]);
 
   const login = useCallback(async (email: string, password: string) => {
+    // Clear any stale token so fetchApi doesn't send it with the login request
+    removeToken();
     const res = await fetchApi<LoginResponse>("/auth/login", {
       method: "POST",
       body: JSON.stringify({ email, password }),
