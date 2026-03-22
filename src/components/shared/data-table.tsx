@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { ChevronLeft, ChevronRight, Search } from "lucide-react";
 import { EmptyState } from "./empty-state";
 import { TableSkeleton } from "./loading-skeleton";
+import { cn } from "@/lib/utils";
 
 export interface Column<T> {
   header: string;
@@ -60,7 +61,7 @@ export function DataTable<T extends Record<string, any>>({
     <div className="space-y-4">
       {onSearchChange && (
         <div className="relative max-w-sm">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--muted-foreground)]" />
           <Input
             placeholder={searchPlaceholder}
             value={search || ""}
@@ -79,12 +80,18 @@ export function DataTable<T extends Record<string, any>>({
           action={emptyAction}
         />
       ) : (
-        <div className="rounded-md border">
+        <div className="rounded-[18px] bg-[var(--glass-bg)] backdrop-blur-[var(--glass-blur)] border border-[var(--glass-border)] shadow-[var(--glass-shadow)] overflow-hidden">
           <Table>
             <TableHeader>
               <TableRow>
                 {columns.map((col) => (
-                  <TableHead key={col.header} className={col.className}>
+                  <TableHead
+                    key={col.header}
+                    className={cn(
+                      "text-[10px] uppercase tracking-[1.2px] text-[var(--muted-foreground)] font-medium py-3 px-5",
+                      col.className
+                    )}
+                  >
                     {col.header}
                   </TableHead>
                 ))}
@@ -94,11 +101,17 @@ export function DataTable<T extends Record<string, any>>({
               {data.map((row, idx) => (
                 <TableRow
                   key={idx}
-                  className={onRowClick ? "cursor-pointer" : ""}
+                  className={cn(
+                    "border-b border-[rgba(0,0,0,0.03)] dark:border-[rgba(255,255,255,0.03)]",
+                    onRowClick ? "cursor-pointer" : ""
+                  )}
                   onClick={() => onRowClick?.(row)}
                 >
                   {columns.map((col) => (
-                    <TableCell key={col.header} className={col.className}>
+                    <TableCell
+                      key={col.header}
+                      className={cn("py-3.5 px-5 text-[13px]", col.className)}
+                    >
                       {col.cell
                         ? col.cell(row)
                         : col.accessorKey
@@ -114,30 +127,44 @@ export function DataTable<T extends Record<string, any>>({
       )}
 
       {totalPages > 1 && onPageChange && (
-        <div className="flex items-center justify-between">
-          <p className="text-sm text-muted-foreground">
+        <div className="flex items-center justify-between px-1">
+          <p className="text-[11px] text-[var(--muted-foreground)]">
             {total !== undefined ? `${total} total records` : `Page ${page} of ${totalPages}`}
           </p>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
             <Button
-              variant="outline"
-              size="sm"
+              variant="ghost"
+              size="icon-sm"
               onClick={() => onPageChange(page - 1)}
               disabled={page <= 1}
+              className="rounded-[8px]"
             >
               <ChevronLeft className="h-4 w-4" />
-              Previous
             </Button>
-            <span className="text-sm text-muted-foreground">
-              {page} / {totalPages}
-            </span>
+            {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
+              const pageNum = i + 1;
+              return (
+                <button
+                  key={pageNum}
+                  onClick={() => onPageChange(pageNum)}
+                  className={cn(
+                    "h-8 w-8 rounded-[8px] text-[11px] font-medium transition-colors",
+                    pageNum === page
+                      ? "bg-[var(--foreground)] text-[var(--background)]"
+                      : "text-[var(--muted-foreground)] hover:bg-[var(--muted)]"
+                  )}
+                >
+                  {pageNum}
+                </button>
+              );
+            })}
             <Button
-              variant="outline"
-              size="sm"
+              variant="ghost"
+              size="icon-sm"
               onClick={() => onPageChange(page + 1)}
               disabled={page >= totalPages}
+              className="rounded-[8px]"
             >
-              Next
               <ChevronRight className="h-4 w-4" />
             </Button>
           </div>
