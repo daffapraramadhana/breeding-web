@@ -898,3 +898,39 @@ export interface DashboardSummaryRequest {
   periodStart?: string;
   periodEnd?: string;
 }
+
+// Dashboard Analytics
+export interface DashboardStats {
+  activeProjects: number;
+  birdPopulation: number;
+  avgFcr: number | null;
+  mortalityRate: number | null;
+  openPurchaseOrders: number;
+  pendingSalesOrders: number;
+  criticalStockAlerts: number;
+  pendingInvoiceAmount: string;
+  overdueInvoiceCount: number;
+  projectsByPhase: {
+    rearing: number;
+    harvest: number;
+    cleaning: number;
+    preparation: number;
+  };
+}
+
+export interface DashboardTrends {
+  mortalityTrend: Array<{
+    date: string;
+    rate: number;
+  }>;
+  fcrTrend: Array<{
+    date: string;
+    value: number;
+    standard: number;
+  }>;
+  salesTrend: Array<{
+    week: string;
+    revenue: number;
+    orderCount: number;
+  }>;
+}
