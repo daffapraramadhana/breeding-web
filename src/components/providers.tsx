@@ -14,14 +14,19 @@ export function Providers({ children }: { children: ReactNode }) {
     <AuthContext.Provider value={auth}>
       <ThemeProvider
         attribute="class"
-        defaultTheme="system"
-        themes={["light", "dark", "emerald"]}
-        enableSystem
+        defaultTheme="light"
+        themes={["light", "dark"]}
       >
         <NuqsAdapter>
           <TooltipProvider>
             {children}
-            <Toaster richColors position="top-right" />
+            <Toaster
+              richColors
+              position="top-right"
+              toastOptions={{
+                className: "!rounded-[14px] !border-[var(--glass-border)] !shadow-[var(--glass-shadow)]",
+              }}
+            />
           </TooltipProvider>
         </NuqsAdapter>
       </ThemeProvider>
