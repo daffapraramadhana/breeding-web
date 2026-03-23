@@ -29,13 +29,14 @@ import {
 } from "lucide-react";
 
 type NavLink = { title: string; url: string; icon: LucideIcon };
-type NavGroup = { title: string; items: NavLink[] };
+type NavGroup = { title: string; icon: LucideIcon; items: NavLink[] };
 export type NavItem = NavLink | NavGroup;
 
 export const NAV_ITEMS: NavItem[] = [
   { title: "Dashboard", url: "/", icon: Home },
   {
     title: "Organization",
+    icon: Building2,
     items: [
       { title: "Branches", url: "/branches", icon: Building2 },
       { title: "Farms", url: "/farms", icon: Building2 },
@@ -45,6 +46,7 @@ export const NAV_ITEMS: NavItem[] = [
   },
   {
     title: "Master Data",
+    icon: Package,
     items: [
       { title: "Products", url: "/products", icon: Package },
       { title: "Product Categories", url: "/product-categories", icon: FolderTree },
@@ -60,12 +62,14 @@ export const NAV_ITEMS: NavItem[] = [
   },
   {
     title: "Projects",
+    icon: ClipboardList,
     items: [
       { title: "Projects", url: "/projects", icon: ClipboardList },
     ],
   },
   {
     title: "Inventory",
+    icon: Warehouse,
     items: [
       { title: "Warehouses", url: "/warehouses", icon: Warehouse },
       { title: "Stock Summary", url: "/inventory", icon: BarChart3 },
@@ -73,6 +77,7 @@ export const NAV_ITEMS: NavItem[] = [
   },
   {
     title: "Purchasing",
+    icon: ShoppingCart,
     items: [
       { title: "Purchase Orders", url: "/purchase-orders", icon: ShoppingCart },
       { title: "Goods Receipts", url: "/goods-receipts", icon: Receipt },
@@ -80,6 +85,7 @@ export const NAV_ITEMS: NavItem[] = [
   },
   {
     title: "Logistics",
+    icon: Truck,
     items: [
       { title: "Goods Transfers", url: "/goods-transfers", icon: ArrowLeftRight },
       { title: "Goods Consumption", url: "/goods-consumptions", icon: Package },
@@ -91,6 +97,7 @@ export const NAV_ITEMS: NavItem[] = [
   },
   {
     title: "Sales & Marketing",
+    icon: FileText,
     items: [
       { title: "Sales Orders", url: "/sales-orders", icon: FileText },
       { title: "Deliveries", url: "/deliveries", icon: Truck },
@@ -102,6 +109,7 @@ export const NAV_ITEMS: NavItem[] = [
   },
   {
     title: "Standards",
+    icon: Settings,
     items: [
       { title: "Contract Categories", url: "/contract-categories", icon: FolderTree },
       { title: "FCR Standards", url: "/fcr-standards", icon: Calculator },
@@ -114,6 +122,7 @@ export const NAV_ITEMS: NavItem[] = [
   },
   {
     title: "Bonus",
+    icon: Award,
     items: [
       { title: "FCR Deff", url: "/bonus-fcr-deff", icon: Award },
       { title: "IP", url: "/bonus-ip", icon: Award },
@@ -123,6 +132,7 @@ export const NAV_ITEMS: NavItem[] = [
   },
   {
     title: "Finance",
+    icon: CreditCard,
     items: [
       { title: "Bank Accounts", url: "/bank-accounts", icon: CreditCard },
       { title: "Cash Accounts", url: "/cash-accounts", icon: DollarSign },
@@ -130,6 +140,7 @@ export const NAV_ITEMS: NavItem[] = [
   },
   {
     title: "Analytics",
+    icon: BrainCircuit,
     items: [
       { title: "AI Insights", url: "/ai-insights", icon: BrainCircuit },
     ],
