@@ -245,6 +245,7 @@ export function AppSidebar() {
                 <CollapsibleSidebarGroup
                   key={section.title}
                   title={t(section.title)}
+                  icon={section.icon}
                   isActive={isSectionActive}
                   forceOpen={isSearching ? true : undefined}
                 >

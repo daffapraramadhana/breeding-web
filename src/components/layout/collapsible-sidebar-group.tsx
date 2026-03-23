@@ -4,9 +4,7 @@ import * as React from "react"
 import * as CollapsiblePrimitive from "@radix-ui/react-collapsible"
 import { ChevronRight } from "lucide-react"
 
-import { cn } from "@/lib/utils"
 import {
-  SidebarMenuAction,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarMenuSub,
@@ -41,11 +39,11 @@ export function CollapsibleSidebarGroup({
         <CollapsiblePrimitive.CollapsibleTrigger asChild>
           <SidebarMenuButton tooltip={title} isActive={isActive} className="rounded-xl">
             {Icon && <Icon />}
-            <span className="text-[9px] uppercase tracking-[1.5px] text-[var(--muted-foreground)]">{title}</span>
-            <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+            <span className="text-[9px] uppercase tracking-[1.5px] text-[var(--muted-foreground)] group-data-[collapsible=icon]:hidden">{title}</span>
+            <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90 group-data-[collapsible=icon]:hidden" />
           </SidebarMenuButton>
         </CollapsiblePrimitive.CollapsibleTrigger>
-        <CollapsiblePrimitive.CollapsibleContent>
+        <CollapsiblePrimitive.CollapsibleContent className="group-data-[collapsible=icon]:hidden">
           <SidebarMenuSub>{children}</SidebarMenuSub>
         </CollapsiblePrimitive.CollapsibleContent>
       </SidebarMenuItem>
