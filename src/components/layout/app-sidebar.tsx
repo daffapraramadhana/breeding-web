@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Search, X } from "lucide-react";
+import { ChevronsLeft, Search, X } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -14,6 +14,7 @@ import {
   SidebarMenuItem,
   SidebarMenuSubButton,
   SidebarMenuSubItem,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import { NAV_ITEMS } from "@/lib/constants";
 import type { NavItem } from "@/lib/constants";
@@ -129,6 +130,7 @@ export function AppSidebar() {
   }
 
   const filteredNav = filterNavItems(NAV_ITEMS);
+  const { toggleSidebar } = useSidebar();
 
   return (
     <Sidebar
@@ -137,14 +139,22 @@ export function AppSidebar() {
       className="!bg-[var(--glass-bg)] !backdrop-blur-[20px] !border !border-[var(--glass-border)] !rounded-[20px] !m-[14px] !shadow-[var(--glass-shadow)] !h-[calc(100vh-28px)]"
     >
       <SidebarHeader className="border-0 px-4 py-4">
-        <Link href="/" className="flex items-center gap-2.5">
-          <div className="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-[10px] bg-gradient-to-br from-[#3d8c5c] to-[#2d6b44] text-white text-[13px] font-semibold shadow-[0_2px_8px_rgba(61,140,92,0.3)]">
-            B
-          </div>
-          <span className="truncate text-[15px] font-medium group-data-[collapsible=icon]:hidden">
-            Breeding
-          </span>
-        </Link>
+        <div className="flex items-center gap-2.5">
+          <Link href="/" className="flex items-center gap-2.5 flex-1 min-w-0">
+            <div className="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-[10px] bg-gradient-to-br from-[#3d8c5c] to-[#2d6b44] text-white text-[13px] font-semibold shadow-[0_2px_8px_rgba(61,140,92,0.3)]">
+              B
+            </div>
+            <span className="truncate text-[15px] font-medium group-data-[collapsible=icon]:hidden">
+              Breeding
+            </span>
+          </Link>
+          <button
+            onClick={toggleSidebar}
+            className="flex h-[22px] w-[22px] shrink-0 items-center justify-center rounded-[6px] bg-[var(--muted)] text-[var(--muted-foreground)] hover:bg-[var(--secondary)] hover:text-[var(--foreground)] transition-colors group-data-[collapsible=icon]:hidden"
+          >
+            <ChevronsLeft className="h-3.5 w-3.5" />
+          </button>
+        </div>
         {/* Functional search */}
         <div className="mt-3 relative group-data-[collapsible=icon]:hidden">
           <div className="flex items-center gap-2 rounded-xl bg-[var(--muted)] px-3 py-2 text-[12px] text-[var(--muted-foreground)]">
