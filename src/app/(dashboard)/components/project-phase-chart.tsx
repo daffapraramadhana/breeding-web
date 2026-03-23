@@ -10,7 +10,6 @@ import {
   ChartLegendContent,
   type ChartConfig,
 } from "@/components/ui/chart";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DashboardStats } from "@/types/api";
 
 interface ProjectPhaseChartProps {
@@ -18,10 +17,10 @@ interface ProjectPhaseChartProps {
 }
 
 const PHASE_COLORS = {
-  rearing: "var(--color-chart-1)",
-  harvest: "var(--color-chart-2)",
-  cleaning: "var(--color-chart-3)",
-  preparation: "var(--color-chart-4)",
+  rearing: "var(--accent-green)",
+  harvest: "var(--accent-purple)",
+  cleaning: "var(--accent-amber)",
+  preparation: "var(--accent-red)",
 };
 
 export function ProjectPhaseChart({ stats }: ProjectPhaseChartProps) {
@@ -47,40 +46,36 @@ export function ProjectPhaseChart({ stats }: ProjectPhaseChartProps) {
   const hasData = data.length > 0;
 
   return (
-    <Card>
-      <CardHeader className="pb-2">
-        <CardTitle className="text-base font-medium">
-          {t("projectsByPhase")}
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        {hasData ? (
-          <ChartContainer config={chartConfig} className="h-[280px] w-full">
-            <PieChart>
-              <ChartTooltip content={<ChartTooltipContent />} />
-              <Pie
-                data={data}
-                dataKey="value"
-                nameKey="name"
-                cx="50%"
-                cy="50%"
-                innerRadius={60}
-                outerRadius={100}
-                paddingAngle={2}
-              >
-                {data.map((entry) => (
-                  <Cell key={entry.name} fill={entry.fill} />
-                ))}
-              </Pie>
-              <ChartLegend content={<ChartLegendContent nameKey="name" />} />
-            </PieChart>
-          </ChartContainer>
-        ) : (
-          <div className="flex h-[280px] items-center justify-center text-sm text-muted-foreground">
-            {t("noData")}
-          </div>
-        )}
-      </CardContent>
-    </Card>
+    <div className="rounded-[18px] bg-[var(--glass-bg)] backdrop-blur-[var(--glass-blur)] border border-[var(--glass-border)] shadow-[var(--glass-shadow)] p-5">
+      <p className="text-[10px] uppercase tracking-[1.5px] text-[var(--muted-foreground)] mb-4">
+        {t("projectsByPhase")}
+      </p>
+      {hasData ? (
+        <ChartContainer config={chartConfig} className="h-[260px] w-full">
+          <PieChart>
+            <ChartTooltip content={<ChartTooltipContent />} />
+            <Pie
+              data={data}
+              dataKey="value"
+              nameKey="name"
+              cx="50%"
+              cy="50%"
+              innerRadius={60}
+              outerRadius={100}
+              paddingAngle={2}
+            >
+              {data.map((entry) => (
+                <Cell key={entry.name} fill={entry.fill} />
+              ))}
+            </Pie>
+            <ChartLegend content={<ChartLegendContent nameKey="name" />} />
+          </PieChart>
+        </ChartContainer>
+      ) : (
+        <div className="flex h-[260px] items-center justify-center text-sm text-[var(--muted-foreground)]">
+          {t("noData")}
+        </div>
+      )}
+    </div>
   );
 }

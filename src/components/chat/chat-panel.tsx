@@ -83,7 +83,7 @@ export function ChatPanel({
   }, [view, conversationsLoaded, conversationsLoading, onLoadConversations]);
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 flex flex-col bg-background border rounded-xl shadow-2xl overflow-hidden w-[100vw] h-[100dvh] sm:w-[380px] sm:h-[min(600px,calc(100dvh-2rem))] lg:w-[420px] sm:bottom-6 sm:right-6 bottom-0 right-0 sm:rounded-xl rounded-none animate-in slide-in-from-bottom-4 fade-in duration-200">
+    <div className="fixed bottom-6 right-6 z-50 flex flex-col bg-[var(--glass-bg)] backdrop-blur-[var(--glass-blur)] border border-[var(--glass-border)] shadow-[var(--glass-shadow)] rounded-[18px] overflow-hidden w-[100vw] h-[100dvh] sm:w-[380px] sm:h-[min(600px,calc(100dvh-2rem))] lg:w-[420px] sm:bottom-6 sm:right-6 bottom-0 right-0 sm:rounded-[18px] rounded-none animate-in slide-in-from-bottom-4 fade-in duration-200">
       {/* Header */}
       <div className="flex items-center justify-between border-b px-4 py-3 bg-background">
         <div className="flex items-center gap-2">

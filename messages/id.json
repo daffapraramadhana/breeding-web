@@ -217,7 +217,18 @@
     "preparation": "Persiapan",
     "revenue": "Pendapatan",
     "orders": "Pesanan",
-    "viewAll": "Lihat Semua",
+    "greeting": {
+      "morning": "Selamat pagi",
+      "afternoon": "Selamat siang",
+      "evening": "Selamat malam"
+    },
+    "timeRange": {
+      "1d": "1H",
+      "7d": "7H",
+      "1m": "1B",
+      "all": "Semua"
+    },
+    "viewAll": "Lihat semua",
     "noData": "Tidak ada data",
     "last30Days": "30 Hari Terakhir",
     "vsStandard": "vs Standar",

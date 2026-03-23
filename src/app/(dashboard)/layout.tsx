@@ -34,11 +34,13 @@ export default function DashboardLayout({
 
   return (
     <SidebarProvider>
-      <AppSidebar />
-      <SidebarInset>
-        <Header />
-        <main className="flex-1 overflow-auto p-6">{children}</main>
-      </SidebarInset>
+      <div className="flex min-h-screen w-full" style={{ background: 'var(--background-gradient)' }}>
+        <AppSidebar />
+        <SidebarInset className="flex-1 border-0 bg-transparent shadow-none">
+          <Header />
+          <main className="flex-1 overflow-auto p-2 md:p-4 lg:p-6">{children}</main>
+        </SidebarInset>
+      </div>
       <ChatWidget />
     </SidebarProvider>
   );
