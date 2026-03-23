@@ -18,17 +18,23 @@ export function CollapsibleSidebarGroup({
   children,
   defaultOpen = false,
   isActive = false,
+  forceOpen,
 }: {
   title: string
   icon?: React.ElementType
   children: React.ReactNode
   defaultOpen?: boolean
   isActive?: boolean
+  forceOpen?: boolean
 }) {
+  const openProps = forceOpen !== undefined
+    ? { open: forceOpen }
+    : { defaultOpen: defaultOpen || isActive }
+
   return (
     <CollapsiblePrimitive.Root
       asChild
-      defaultOpen={defaultOpen || isActive}
+      {...openProps}
       className="group/collapsible"
     >
       <SidebarMenuItem>
