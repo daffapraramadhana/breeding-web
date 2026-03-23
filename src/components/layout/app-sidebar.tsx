@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { ChevronsLeft, Search, X } from "lucide-react";
+import { ChevronsLeft, ChevronsRight, Search, X } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -138,16 +138,18 @@ export function AppSidebar() {
       collapsible="icon"
       className="!bg-[var(--glass-bg)] !backdrop-blur-[20px] !border !border-[var(--glass-border)] !rounded-[20px] !m-[14px] !shadow-[var(--glass-shadow)] !h-[calc(100vh-28px)]"
     >
-      <SidebarHeader className="border-0 px-4 py-4">
-        <div className="flex items-center gap-2.5">
-          <Link href="/" className="flex items-center gap-2.5 flex-1 min-w-0">
-            <div className="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-[10px] bg-gradient-to-br from-[#3d8c5c] to-[#2d6b44] text-white text-[13px] font-semibold shadow-[0_2px_8px_rgba(61,140,92,0.3)]">
+      <SidebarHeader className="border-0 px-3 py-3 group-data-[collapsible=icon]:px-2 group-data-[collapsible=icon]:py-3">
+        {/* Expanded: logo + title + collapse button */}
+        <div className="flex items-center gap-2.5 group-data-[collapsible=icon]:justify-center">
+          <Link href="/" className="flex items-center gap-2.5 flex-1 min-w-0 group-data-[collapsible=icon]:flex-initial">
+            <div className="flex h-[32px] w-[32px] shrink-0 items-center justify-center rounded-[9px] bg-gradient-to-br from-[#3d8c5c] to-[#2d6b44] text-white text-[12px] font-semibold shadow-[0_2px_8px_rgba(61,140,92,0.3)]">
               B
             </div>
             <span className="truncate text-[15px] font-medium group-data-[collapsible=icon]:hidden">
               Breeding
             </span>
           </Link>
+          {/* Collapse button (expanded state) */}
           <button
             onClick={toggleSidebar}
             className="flex h-[22px] w-[22px] shrink-0 items-center justify-center rounded-[6px] bg-[var(--muted)] text-[var(--muted-foreground)] hover:bg-[var(--secondary)] hover:text-[var(--foreground)] transition-colors group-data-[collapsible=icon]:hidden"
@@ -155,6 +157,13 @@ export function AppSidebar() {
             <ChevronsLeft className="h-3.5 w-3.5" />
           </button>
         </div>
+        {/* Expand button (collapsed state) */}
+        <button
+          onClick={toggleSidebar}
+          className="hidden group-data-[collapsible=icon]:flex h-[28px] w-[28px] mx-auto mt-2 items-center justify-center rounded-[8px] bg-[var(--muted)] text-[var(--muted-foreground)] hover:bg-[var(--secondary)] hover:text-[var(--foreground)] transition-colors"
+        >
+          <ChevronsRight className="h-3.5 w-3.5" />
+        </button>
         {/* Functional search */}
         <div className="mt-3 relative group-data-[collapsible=icon]:hidden">
           <div className="flex items-center gap-2 rounded-xl bg-[var(--muted)] px-3 py-2 text-[12px] text-[var(--muted-foreground)]">
@@ -275,9 +284,9 @@ export function AppSidebar() {
           </SidebarMenu>
         </SidebarGroup>
         {/* User card at bottom */}
-        <div className="mt-auto p-3 group-data-[collapsible=icon]:p-2">
-          <div className="flex items-center gap-2.5 rounded-xl bg-[var(--muted)] p-2.5 group-data-[collapsible=icon]:justify-center">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[9px] bg-[var(--foreground)] text-[10px] font-medium text-[var(--background)]">
+        <div className="mt-auto p-3 group-data-[collapsible=icon]:p-1.5">
+          <div className="flex items-center gap-2.5 rounded-xl bg-[var(--muted)] p-2.5 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-1.5 group-data-[collapsible=icon]:rounded-lg">
+            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-[8px] bg-[var(--foreground)] text-[9px] font-medium text-[var(--background)]">
               {initials}
             </div>
             <div className="group-data-[collapsible=icon]:hidden">
