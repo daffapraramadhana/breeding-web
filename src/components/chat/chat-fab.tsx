@@ -21,7 +21,7 @@ export function ChatFab({ onClick, hasUnread }: ChatFabProps) {
           <button
             onClick={onClick}
             aria-label="Buka AI Assistant"
-            className="group fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-all duration-300 hover:scale-110 hover:shadow-[0_0_25px_rgba(99,102,241,0.5)] sm:h-12 sm:w-12"
+            className="group fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-[14px] bg-[var(--glass-bg)] backdrop-blur-[var(--glass-blur)] border border-[var(--glass-border)] shadow-[var(--glass-shadow)] text-[var(--foreground)] transition-all duration-300 hover:scale-110 sm:h-12 sm:w-12"
           >
             {/* Glow ring on hover */}
             <span className="absolute inset-0 rounded-full bg-primary/20 opacity-0 blur-md transition-opacity duration-300 group-hover:opacity-100" />
