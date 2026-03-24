@@ -291,6 +291,13 @@ export default function ProductsPage() {
                 onChange={setFormBaseUomId}
                 placeholder={tc('selectField', { field: t('unitOfMeasure') })}
                 searchPlaceholder={tc('searchField', { field: t('units') })}
+                quickCreate={{
+                  title: "Unit of Measure",
+                  fields: [
+                    { key: "name", label: "Name", required: true },
+                    { key: "description", label: "Description" },
+                  ],
+                }}
               />
             </div>
             <div className="space-y-2">
@@ -301,6 +308,12 @@ export default function ProductsPage() {
                 onChange={setFormCategoryId}
                 placeholder={tc('selectField', { field: t('category') })}
                 searchPlaceholder={tc('searchField', { field: t('categories') })}
+                quickCreate={{
+                  title: "Category",
+                  fields: [
+                    { key: "name", label: "Name", required: true },
+                  ],
+                }}
               />
             </div>
             <div className="space-y-2">
@@ -311,6 +324,14 @@ export default function ProductsPage() {
                 onChange={setFormSupplierId}
                 placeholder={tc('selectField', { field: t('supplier') })}
                 searchPlaceholder={tc('searchField', { field: t('suppliers') })}
+                quickCreate={{
+                  title: "Supplier",
+                  fields: [
+                    { key: "code", label: "Code", required: true },
+                    { key: "name", label: "Name", required: true },
+                    { key: "address", label: "Address" },
+                  ],
+                }}
               />
             </div>
             <div className="space-y-2">

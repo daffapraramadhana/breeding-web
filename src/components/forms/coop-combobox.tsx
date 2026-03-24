@@ -23,10 +23,11 @@ import { Coop } from "@/types/api";
 interface CoopComboboxProps {
   value: string;
   onChange: (id: string) => void;
+  onCoopSelect?: (coop: Coop | null) => void;
   disabled?: boolean;
 }
 
-export function CoopCombobox({ value, onChange, disabled }: CoopComboboxProps) {
+export function CoopCombobox({ value, onChange, onCoopSelect, disabled }: CoopComboboxProps) {
   const [open, setOpen] = useState(false);
   const [coops, setCoops] = useState<Coop[]>([]);
   const [search, setSearch] = useState("");
@@ -78,6 +79,7 @@ export function CoopCombobox({ value, onChange, disabled }: CoopComboboxProps) {
                     value={coop.id}
                     onSelect={() => {
                       onChange(coop.id);
+                      onCoopSelect?.(coop);
                       setOpen(false);
                     }}
                   >

@@ -45,8 +45,12 @@ export default function CoopFloorsPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingFloor, setEditingFloor] = useState<CoopFloor | null>(null);
   const [formCoopId, setFormCoopId] = useState("");
-  const [formFloorNumber, setFormFloorNumber] = useState("");
+  const [formFarmId, setFormFarmId] = useState("");
+  const [formBranchId, setFormBranchId] = useState("");
+  const [formCode, setFormCode] = useState("");
+  const [formName, setFormName] = useState("");
   const [formDescription, setFormDescription] = useState("");
+  const [formMaxPopulation, setFormMaxPopulation] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Delete state
@@ -61,13 +65,18 @@ export default function CoopFloorsPage() {
         row.coop ? `${row.coop.code} - ${row.coop.name}` : "-",
     },
     {
-      header: "Floor Number",
-      cell: (row) => row.floorNumber,
+      header: "Code",
+      accessorKey: "code",
       className: "w-[120px]",
     },
     {
-      header: "Description",
-      cell: (row) => row.description || "-",
+      header: "Name",
+      accessorKey: "name",
+    },
+    {
+      header: "Max Population",
+      cell: (row) => row.maxPopulation?.toLocaleString() || "-",
+      className: "w-[140px]",
     },
     {
       header: "Created",
@@ -108,8 +117,12 @@ export default function CoopFloorsPage() {
   function handleCreate() {
     setEditingFloor(null);
     setFormCoopId("");
-    setFormFloorNumber("");
+    setFormFarmId("");
+    setFormBranchId("");
+    setFormCode("");
+    setFormName("");
     setFormDescription("");
+    setFormMaxPopulation("");
     setDialogOpen(true);
   }
 
@@ -117,8 +130,12 @@ export default function CoopFloorsPage() {
   function handleEdit(floor: CoopFloor) {
     setEditingFloor(floor);
     setFormCoopId(floor.coopId || "");
-    setFormFloorNumber(String(floor.floorNumber));
+    setFormFarmId(floor.farmId || "");
+    setFormBranchId(floor.branchId || "");
+    setFormCode(floor.code || "");
+    setFormName(floor.name || "");
     setFormDescription(floor.description || "");
+    setFormMaxPopulation(String(floor.maxPopulation || ""));
     setDialogOpen(true);
   }
 
@@ -135,8 +152,23 @@ export default function CoopFloorsPage() {
       return;
     }
 
-    if (!formFloorNumber.trim()) {
-      toast.error("Floor number is required");
+    if (!formCode.trim()) {
+      toast.error("Code is required");
+      return;
+    }
+
+    if (!formName.trim()) {
+      toast.error("Name is required");
+      return;
+    }
+
+    if (!formMaxPopulation || Number(formMaxPopulation) <= 0) {
+      toast.error("Max population is required");
+      return;
+    }
+
+    if (!formFarmId || !formBranchId) {
+      toast.error("Please select a coop to auto-fill farm and branch");
       return;
     }
 
@@ -144,7 +176,11 @@ export default function CoopFloorsPage() {
     try {
       const body = {
         coopId: formCoopId,
-        floorNumber: Number(formFloorNumber),
+        farmId: formFarmId,
+        branchId: formBranchId,
+        code: formCode.trim(),
+        name: formName.trim(),
+        maxPopulation: Number(formMaxPopulation),
         ...(formDescription.trim() && { description: formDescription.trim() }),
       };
 
@@ -249,16 +285,46 @@ export default function CoopFloorsPage() {
               <CoopCombobox
                 value={formCoopId}
                 onChange={setFormCoopId}
+                onCoopSelect={(coop) => {
+                  if (coop) {
+                    setFormFarmId(coop.farmId);
+                    setFormBranchId(coop.branchId);
+                  }
+                }}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="floor-number">Floor Number</Label>
+              <Label htmlFor="floor-code">Code</Label>
               <Input
-                id="floor-number"
+                id="floor-code"
+                placeholder="Enter floor code"
+                value={formCode}
+                onChange={(e) => setFormCode(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") handleSubmit();
+                }}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="floor-name">Name</Label>
+              <Input
+                id="floor-name"
+                placeholder="Enter floor name"
+                value={formName}
+                onChange={(e) => setFormName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") handleSubmit();
+                }}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="floor-max-population">Max Population</Label>
+              <Input
+                id="floor-max-population"
                 type="number"
-                placeholder="Enter floor number"
-                value={formFloorNumber}
-                onChange={(e) => setFormFloorNumber(e.target.value)}
+                placeholder="Enter max population"
+                value={formMaxPopulation}
+                onChange={(e) => setFormMaxPopulation(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === "Enter") handleSubmit();
                 }}
@@ -299,7 +365,7 @@ export default function CoopFloorsPage() {
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
         title="Delete Coop Floor"
-        description={`Are you sure you want to delete floor ${deletingFloor?.floorNumber}? This action cannot be undone.`}
+        description={`Are you sure you want to delete "${deletingFloor?.name}"? This action cannot be undone.`}
         onConfirm={handleDelete}
         variant="destructive"
         confirmLabel="Delete"
