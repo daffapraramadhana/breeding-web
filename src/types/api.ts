@@ -34,7 +34,7 @@ export interface User {
 }
 
 // --- Status Enums ---
-export type FarmStatus = "ACTIVE" | "INACTIVE" | "MAINTENANCE";
+export type FarmStatus = "OWN" | "COOP";
 export type CoopStatus = "ACTIVE" | "INACTIVE" | "MAINTENANCE";
 export type EmployeeStatus = "ACTIVE" | "INACTIVE" | "ON_LEAVE" | "TERMINATED";
 export type PurchaseStatus = "ORDERED" | "RECEIVED" | "PROCESSING" | "VERIFIED" | "REJECTED";
@@ -102,8 +102,16 @@ export interface CoopFloor {
   id: string;
   coopId: string;
   coop?: Coop;
-  floorNumber: number;
+  farmId: string;
+  farm?: Farm;
+  branchId: string;
+  code: string;
+  name: string;
   description?: string;
+  population?: number;
+  maxPopulation: number;
+  area?: number;
+  status?: CoopStatus;
   createdAt: string;
   updatedAt: string;
 }

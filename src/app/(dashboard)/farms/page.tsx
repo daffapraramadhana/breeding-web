@@ -57,7 +57,6 @@ export default function FarmsPage() {
   const [formName, setFormName] = useState("");
   const [formAddress, setFormAddress] = useState("");
   const [formBranchId, setFormBranchId] = useState("");
-  const [formFarmType, setFormFarmType] = useState("");
   const [formStatus, setFormStatus] = useState<FarmStatus | "">("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -81,10 +80,6 @@ export default function FarmsPage() {
     },
     {
       header: "Farm Type",
-      cell: (row) => row.farmType || "-",
-    },
-    {
-      header: "Status",
       cell: (row) =>
         row.status ? <StatusBadge status={row.status} /> : "-",
       className: "w-[120px]",
@@ -130,7 +125,6 @@ export default function FarmsPage() {
     setFormName("");
     setFormAddress("");
     setFormBranchId("");
-    setFormFarmType("");
     setFormStatus("");
     setDialogOpen(true);
   }
@@ -141,7 +135,6 @@ export default function FarmsPage() {
     setFormName(farm.name);
     setFormAddress(farm.address || "");
     setFormBranchId(farm.branchId || "");
-    setFormFarmType(farm.farmType || "");
     setFormStatus(farm.status || "");
     setDialogOpen(true);
   }
@@ -170,7 +163,6 @@ export default function FarmsPage() {
         name: formName.trim(),
         branchId: formBranchId,
         ...(formAddress.trim() && { address: formAddress.trim() }),
-        ...(formFarmType.trim() && { farmType: formFarmType.trim() }),
         ...(formStatus && { status: formStatus }),
       };
 
@@ -301,30 +293,17 @@ export default function FarmsPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="farm-type">Farm Type</Label>
-              <Input
-                id="farm-type"
-                placeholder="Enter farm type (optional)"
-                value={formFarmType}
-                onChange={(e) => setFormFarmType(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") handleSubmit();
-                }}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="farm-status">Status</Label>
+              <Label htmlFor="farm-status">Farm Type</Label>
               <Select
                 value={formStatus}
                 onValueChange={(val) => setFormStatus(val as FarmStatus)}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select status (optional)" />
+                  <SelectValue placeholder="Select farm type (optional)" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="ACTIVE">Active</SelectItem>
-                  <SelectItem value="INACTIVE">Inactive</SelectItem>
-                  <SelectItem value="MAINTENANCE">Maintenance</SelectItem>
+                  <SelectItem value="OWN">Own</SelectItem>
+                  <SelectItem value="COOP">Coop</SelectItem>
                 </SelectContent>
               </Select>
             </div>
