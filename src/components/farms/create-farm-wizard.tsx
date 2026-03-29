@@ -83,7 +83,7 @@ function emptyCoop(): CoopForm {
 
 // ─── Step indicator ────────────────────────────────────────────────────────────
 
-const STEPS = ["Farm Details", "Coops & Floors", "Review"];
+const STEPS = ["Farm Details", "Coops & Blocks", "Review"];
 
 function StepIndicator({ current }: { current: number }) {
   return (
@@ -211,7 +211,7 @@ function FloorRow({
         <Label className="text-xs">Name *</Label>
         <Input
           className="h-8 text-sm"
-          placeholder="Lantai 1"
+          placeholder="Blok 1"
           value={floor.name}
           onChange={(e) => onChange({ ...floor, name: e.target.value })}
         />
@@ -370,7 +370,7 @@ function CoopCard({
             onClick={addFloor}
           >
             <Plus className="w-3 h-3 mr-1" />
-            Add Floor
+            Add Blok
           </Button>
         </div>
         <div className="space-y-2">
@@ -410,7 +410,7 @@ function StepCoops({
   return (
     <div className="space-y-4">
       <p className="text-sm text-muted-foreground">
-        Add one or more kandang. Each kandang can have multiple floors.
+        Add one or more kandang. Each kandang can have multiple blok.
       </p>
       {coops.map((coop, i) => (
         <CoopCard
@@ -532,12 +532,12 @@ export function CreateFarmWizard({ open, onOpenChange, onSuccess }: Props) {
 
       for (let fi = 0; fi < c.floors.length; fi++) {
         const f = c.floors[fi];
-        if (!f.code.trim()) return `Kandang ${ci + 1}, Lantai ${fi + 1}: code is required`;
-        if (!f.name.trim()) return `Kandang ${ci + 1}, Lantai ${fi + 1}: name is required`;
+        if (!f.code.trim()) return `Kandang ${ci + 1}, Blok ${fi + 1}: code is required`;
+        if (!f.name.trim()) return `Kandang ${ci + 1}, Blok ${fi + 1}: name is required`;
         if (!f.population || isNaN(Number(f.population)) || Number(f.population) < 1)
-          return `Kandang ${ci + 1}, Lantai ${fi + 1}: populasi per m² harus diisi`;
+          return `Kandang ${ci + 1}, Blok ${fi + 1}: populasi per m² harus diisi`;
         if (!f.area || isNaN(Number(f.area)) || Number(f.area) < 1)
-          return `Kandang ${ci + 1}, Lantai ${fi + 1}: luas harus diisi`;
+          return `Kandang ${ci + 1}, Blok ${fi + 1}: luas harus diisi`;
       }
     }
     return null;
@@ -588,7 +588,7 @@ export function CreateFarmWizard({ open, onOpenChange, onSuccess }: Props) {
         body: JSON.stringify(payload),
       });
 
-      toast.success("Farm, coops, and floors created successfully! 🎉");
+      toast.success("Farm, coops, dan blok berhasil dibuat! 🎉");
       handleClose();
       onSuccess();
     } catch (err: any) {
@@ -604,7 +604,7 @@ export function CreateFarmWizard({ open, onOpenChange, onSuccess }: Props) {
         <DialogHeader>
           <DialogTitle>Create New Farm</DialogTitle>
           <DialogDescription>
-            Set up your farm, kandang, and floors in one step.
+            Set up your farm, kandang, dan blok in one step.
           </DialogDescription>
         </DialogHeader>
 

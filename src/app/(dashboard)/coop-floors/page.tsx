@@ -35,7 +35,7 @@ export default function CoopFloorsPage() {
   );
   const [search, setSearch] = useQueryState("search", { defaultValue: "" });
 
-  // Fetch coop floors
+  // Fetch coop bloks
   const { data: coopFloors, meta, isLoading, refetch } = usePaginated<CoopFloor>(
     "/coop-floors",
     { page, limit: 10, search }
@@ -213,13 +213,13 @@ export default function CoopFloorsPage() {
           method: "PATCH",
           body: JSON.stringify(body),
         });
-        toast.success("Coop floor updated successfully");
+        toast.success("Coop blok berhasil diupdate");
       } else {
         await fetchApi("/coop-floors", {
           method: "POST",
           body: JSON.stringify(body),
         });
-        toast.success("Coop floor created successfully");
+        toast.success("Coop blok berhasil dibuat");
       }
 
       setDialogOpen(false);
@@ -227,8 +227,8 @@ export default function CoopFloorsPage() {
     } catch (error) {
       toast.error(
         editingFloor
-          ? "Failed to update coop floor"
-          : "Failed to create coop floor"
+          ? "Failed to update coop blok"
+          : "Failed to create coop blok"
       );
     } finally {
       setIsSubmitting(false);
@@ -243,24 +243,24 @@ export default function CoopFloorsPage() {
       await fetchApi(`/coop-floors/${deletingFloor.id}`, {
         method: "DELETE",
       });
-      toast.success("Coop floor deleted successfully");
+      toast.success("Coop blok berhasil dihapus");
       setDeleteDialogOpen(false);
       setDeletingFloor(null);
       refetch();
     } catch (error) {
-      toast.error("Failed to delete coop floor");
+      toast.error("Failed to delete coop blok");
     }
   }
 
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Coop Floors"
-        description="Manage coop floor levels"
+        title="Coop Bloks"
+        description="Kelola blok kandang"
         actions={
           <Button onClick={handleCreate}>
             <Plus className="mr-2 h-4 w-4" />
-            New Coop Floor
+            New Coop Blok
           </Button>
         }
       />
@@ -274,17 +274,17 @@ export default function CoopFloorsPage() {
           setSearch(value);
           setPage(1);
         }}
-        searchPlaceholder="Search coop floors..."
+        searchPlaceholder="Search coop bloks..."
         page={page}
         totalPages={meta?.totalPages || 1}
         onPageChange={setPage}
         total={meta?.total}
-        emptyTitle="No coop floors found"
-        emptyDescription="Get started by creating your first coop floor."
+        emptyTitle="No coop bloks found"
+        emptyDescription="Get started by creating your first coop blok."
         emptyAction={
           <Button onClick={handleCreate}>
             <Plus className="mr-2 h-4 w-4" />
-            New Coop Floor
+            New Coop Blok
           </Button>
         }
       />
@@ -294,12 +294,12 @@ export default function CoopFloorsPage() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {editingFloor ? "Edit Coop Floor" : "New Coop Floor"}
+              {editingFloor ? "Edit Coop Blok" : "New Coop Blok"}
             </DialogTitle>
             <DialogDescription>
               {editingFloor
-                ? "Update the coop floor details below."
-                : "Fill in the details to create a new coop floor."}
+                ? "Update detail blok kandang."
+                : "Isi detail untuk membuat blok kandang baru."}
             </DialogDescription>
           </DialogHeader>
 
@@ -404,8 +404,8 @@ export default function CoopFloorsPage() {
               {isSubmitting
                 ? "Saving..."
                 : editingFloor
-                  ? "Update Coop Floor"
-                  : "Create Coop Floor"}
+                  ? "Update Coop Blok"
+                  : "Create Coop Blok"}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -415,7 +415,7 @@ export default function CoopFloorsPage() {
       <ConfirmDialog
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
-        title="Delete Coop Floor"
+        title="Delete Coop Blok"
         description={`Are you sure you want to delete "${deletingFloor?.name}"? This action cannot be undone.`}
         onConfirm={handleDelete}
         variant="destructive"
