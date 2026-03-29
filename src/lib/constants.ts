@@ -41,7 +41,7 @@ export const NAV_ITEMS: NavItem[] = [
       { title: "Branches", url: "/branches", icon: Building2 },
       { title: "Farms", url: "/farms", icon: Building2 },
       { title: "Coops", url: "/coops", icon: Layers },
-      { title: "Coop Floors", url: "/coop-floors", icon: Layers },
+      { title: "Coop Bloks", url: "/coop-floors", icon: Layers },
     ],
   },
   {
