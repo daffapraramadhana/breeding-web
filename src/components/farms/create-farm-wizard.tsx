@@ -358,10 +358,10 @@ function CoopCard({
         </div>
       </div>
 
-      {/* Floors */}
+      {/* Blok */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <Label className="text-sm font-medium">Lantai (Floors)</Label>
+          <Label className="text-sm font-medium">Blok</Label>
           <Button
             type="button"
             variant="ghost"

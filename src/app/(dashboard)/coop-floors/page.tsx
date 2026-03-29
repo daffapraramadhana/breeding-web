@@ -321,7 +321,7 @@ export default function CoopFloorsPage() {
               <Label htmlFor="floor-code">Code</Label>
               <Input
                 id="floor-code"
-                placeholder="Enter floor code"
+                placeholder="Enter kode blok"
                 value={formCode}
                 onChange={(e) => setFormCode(e.target.value)}
                 onKeyDown={(e) => {
@@ -333,7 +333,7 @@ export default function CoopFloorsPage() {
               <Label htmlFor="floor-name">Name</Label>
               <Input
                 id="floor-name"
-                placeholder="Enter floor name"
+                placeholder="Enter nama blok"
                 value={formName}
                 onChange={(e) => setFormName(e.target.value)}
                 onKeyDown={(e) => {
