@@ -34,7 +34,7 @@ interface FloorForm {
   code: string;
   name: string;
   description: string;
-  maxPopulation: string;
+  population: string;
   area: string;
   status: CoopStatus | "";
 }
@@ -65,7 +65,7 @@ function uid() {
 }
 
 function emptyFloor(): FloorForm {
-  return { id: uid(), code: "", name: "", description: "", maxPopulation: "", area: "", status: "" };
+  return { id: uid(), code: "", name: "", description: "", population: "", area: "", status: "" };
 }
 
 function emptyCoop(): CoopForm {
@@ -217,23 +217,34 @@ function FloorRow({
         />
       </div>
       <div className="space-y-1">
-        <Label className="text-xs">Max Population *</Label>
+        <Label className="text-xs">Populasi / m² *</Label>
         <Input
           className="h-8 text-sm"
           type="number"
-          placeholder="5000"
-          value={floor.maxPopulation}
-          onChange={(e) => onChange({ ...floor, maxPopulation: e.target.value })}
+          placeholder="50"
+          value={floor.population}
+          onChange={(e) => onChange({ ...floor, population: e.target.value })}
         />
       </div>
       <div className="space-y-1">
-        <Label className="text-xs">Area (m²)</Label>
+        <Label className="text-xs">Luas (m²) *</Label>
         <Input
           className="h-8 text-sm"
           type="number"
           placeholder="100"
           value={floor.area}
           onChange={(e) => onChange({ ...floor, area: e.target.value })}
+        />
+      </div>
+      <div className="col-span-2 space-y-1">
+        <Label className="text-xs text-muted-foreground">Max Populasi (otomatis)</Label>
+        <Input
+          className="h-8 text-sm bg-muted"
+          type="number"
+          readOnly
+          disabled
+          value={floor.population && floor.area ? Number(floor.population) * Number(floor.area) : ""}
+          placeholder="Populasi × Luas"
         />
       </div>
       <div className="col-span-2 flex justify-end">
@@ -455,8 +466,11 @@ function StepReview({ farm, coops }: { farm: FarmForm; coops: CoopForm[] }) {
                 {coop.floors.map((floor, fi) => (
                   <div key={floor.id} className="flex items-center gap-3 text-xs text-muted-foreground">
                     <span className="font-medium text-foreground">{floor.code} — {floor.name}</span>
-                    <span>Max: {floor.maxPopulation}</span>
-                    {floor.area && <span>Area: {floor.area}m²</span>}
+                    {floor.area && <span>Luas: {floor.area}m²</span>}
+                    {floor.population && <span>Pop/m²: {floor.population}</span>}
+                    {floor.population && floor.area && (
+                      <span className="font-medium text-foreground">Max: {Number(floor.population) * Number(floor.area)}</span>
+                    )}
                   </div>
                 ))}
               </div>
@@ -520,8 +534,10 @@ export function CreateFarmWizard({ open, onOpenChange, onSuccess }: Props) {
         const f = c.floors[fi];
         if (!f.code.trim()) return `Kandang ${ci + 1}, Lantai ${fi + 1}: code is required`;
         if (!f.name.trim()) return `Kandang ${ci + 1}, Lantai ${fi + 1}: name is required`;
-        if (!f.maxPopulation || isNaN(Number(f.maxPopulation)) || Number(f.maxPopulation) < 1)
-          return `Kandang ${ci + 1}, Lantai ${fi + 1}: valid max population is required`;
+        if (!f.population || isNaN(Number(f.population)) || Number(f.population) < 1)
+          return `Kandang ${ci + 1}, Lantai ${fi + 1}: populasi per m² harus diisi`;
+        if (!f.area || isNaN(Number(f.area)) || Number(f.area) < 1)
+          return `Kandang ${ci + 1}, Lantai ${fi + 1}: luas harus diisi`;
       }
     }
     return null;
@@ -559,8 +575,9 @@ export function CreateFarmWizard({ open, onOpenChange, onSuccess }: Props) {
             code: f.code.trim(),
             name: f.name.trim(),
             ...(f.description.trim() && { description: f.description.trim() }),
-            maxPopulation: Number(f.maxPopulation),
-            ...(f.area && { area: Number(f.area) }),
+            population: Number(f.population),
+            area: Number(f.area),
+            maxPopulation: Number(f.population) * Number(f.area),
             ...(f.status && { status: f.status }),
           })),
         })),

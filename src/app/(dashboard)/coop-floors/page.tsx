@@ -50,7 +50,8 @@ export default function CoopFloorsPage() {
   const [formCode, setFormCode] = useState("");
   const [formName, setFormName] = useState("");
   const [formDescription, setFormDescription] = useState("");
-  const [formMaxPopulation, setFormMaxPopulation] = useState("");
+  const [formPopulation, setFormPopulation] = useState("");
+  const [formArea, setFormArea] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Delete state
@@ -74,9 +75,19 @@ export default function CoopFloorsPage() {
       accessorKey: "name",
     },
     {
-      header: "Max Population",
+      header: "Luas (m²)",
+      cell: (row) => row.area?.toLocaleString() || "-",
+      className: "w-[100px]",
+    },
+    {
+      header: "Populasi/m²",
+      cell: (row) => row.population?.toLocaleString() || "-",
+      className: "w-[110px]",
+    },
+    {
+      header: "Max Populasi",
       cell: (row) => row.maxPopulation?.toLocaleString() || "-",
-      className: "w-[140px]",
+      className: "w-[120px]",
     },
     {
       header: "Created",
@@ -122,7 +133,8 @@ export default function CoopFloorsPage() {
     setFormCode("");
     setFormName("");
     setFormDescription("");
-    setFormMaxPopulation("");
+    setFormPopulation("");
+    setFormArea("");
     setDialogOpen(true);
   }
 
@@ -135,7 +147,8 @@ export default function CoopFloorsPage() {
     setFormCode(floor.code || "");
     setFormName(floor.name || "");
     setFormDescription(floor.description || "");
-    setFormMaxPopulation(String(floor.maxPopulation || ""));
+    setFormPopulation(String(floor.population || ""));
+    setFormArea(String(floor.area || ""));
     setDialogOpen(true);
   }
 
@@ -162,8 +175,17 @@ export default function CoopFloorsPage() {
       return;
     }
 
-    if (!formMaxPopulation || Number(formMaxPopulation) <= 0) {
-      toast.error("Max population is required");
+    if (!formPopulation || Number(formPopulation) <= 0) {
+      toast.error("Populasi per m² is required");
+      return;
+    }
+    if (!formArea || Number(formArea) <= 0) {
+      toast.error("Luas is required");
+      return;
+    }
+    const maxPopulation = Number(formPopulation) * Number(formArea);
+    if (maxPopulation <= 0) {
+      toast.error("Max populasi harus lebih dari 0");
       return;
     }
 
@@ -180,7 +202,9 @@ export default function CoopFloorsPage() {
         branchId: formBranchId,
         code: formCode.trim(),
         name: formName.trim(),
-        maxPopulation: Number(formMaxPopulation),
+        population: Number(formPopulation),
+        area: Number(formArea),
+        maxPopulation: Number(formPopulation) * Number(formArea),
         ...(formDescription.trim() && { description: formDescription.trim() }),
       };
 
@@ -318,17 +342,44 @@ export default function CoopFloorsPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="floor-max-population">Max Population</Label>
+              <Label htmlFor="floor-population">Populasi / m²</Label>
               <Input
-                id="floor-max-population"
+                id="floor-population"
                 type="number"
-                placeholder="Enter max population"
-                value={formMaxPopulation}
-                onChange={(e) => setFormMaxPopulation(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") handleSubmit();
-                }}
+                placeholder="Populasi per m²"
+                value={formPopulation}
+                onChange={(e) => setFormPopulation(e.target.value)}
               />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="floor-area">Luas (m²)</Label>
+              <Input
+                id="floor-area"
+                type="number"
+                placeholder="Luas kandang dalam m²"
+                value={formArea}
+                onChange={(e) => setFormArea(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Max Populasi (otomatis)</Label>
+              <Input
+                type="number"
+                readOnly
+                disabled
+                value={
+                  formPopulation && formArea
+                    ? Number(formPopulation) * Number(formArea)
+                    : ""
+                }
+                placeholder="Populasi × Luas"
+                className="bg-muted text-muted-foreground"
+              />
+              {formPopulation && formArea && (
+                <p className="text-xs text-muted-foreground">
+                  {formPopulation} × {formArea} = {Number(formPopulation) * Number(formArea)} ekor
+                </p>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="floor-description">Description</Label>
