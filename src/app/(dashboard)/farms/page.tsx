@@ -15,6 +15,7 @@ import { fetchApi } from "@/lib/api";
 import { formatDate } from "@/lib/utils";
 import { Farm, FarmStatus } from "@/types/api";
 import { BranchCombobox } from "@/components/forms/branch-combobox";
+import { CreateFarmWizard } from "@/components/farms/create-farm-wizard";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -51,12 +52,16 @@ export default function FarmsPage() {
     { page, limit: 10, search }
   );
 
-  // Dialog state
+  // Wizard state (create)
+  const [wizardOpen, setWizardOpen] = useState(false);
+
+  // Dialog state (edit only)
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingFarm, setEditingFarm] = useState<Farm | null>(null);
   const [formName, setFormName] = useState("");
   const [formAddress, setFormAddress] = useState("");
   const [formBranchId, setFormBranchId] = useState("");
+  const [formFarmType, setFormFarmType] = useState("");
   const [formStatus, setFormStatus] = useState<FarmStatus | "">("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -80,6 +85,10 @@ export default function FarmsPage() {
     },
     {
       header: "Farm Type",
+      cell: (row) => row.farmType || "-",
+    },
+    {
+      header: "Status",
       cell: (row) =>
         row.status ? <StatusBadge status={row.status} /> : "-",
       className: "w-[120px]",
@@ -119,14 +128,9 @@ export default function FarmsPage() {
     },
   ];
 
-  // Open create dialog
+  // Open create wizard
   function handleCreate() {
-    setEditingFarm(null);
-    setFormName("");
-    setFormAddress("");
-    setFormBranchId("");
-    setFormStatus("");
-    setDialogOpen(true);
+    setWizardOpen(true);
   }
 
   // Open edit dialog
@@ -135,6 +139,7 @@ export default function FarmsPage() {
     setFormName(farm.name);
     setFormAddress(farm.address || "");
     setFormBranchId(farm.branchId || "");
+    setFormFarmType(farm.farmType || "");
     setFormStatus(farm.status || "");
     setDialogOpen(true);
   }
@@ -163,6 +168,7 @@ export default function FarmsPage() {
         name: formName.trim(),
         branchId: formBranchId,
         ...(formAddress.trim() && { address: formAddress.trim() }),
+        ...(formFarmType.trim() && { farmType: formFarmType.trim() }),
         ...(formStatus && { status: formStatus }),
       };
 
@@ -172,12 +178,6 @@ export default function FarmsPage() {
           body: JSON.stringify(body),
         });
         toast.success("Farm updated successfully");
-      } else {
-        await fetchApi("/farms", {
-          method: "POST",
-          body: JSON.stringify(body),
-        });
-        toast.success("Farm created successfully");
       }
 
       setDialogOpen(false);
@@ -246,18 +246,19 @@ export default function FarmsPage() {
         }
       />
 
-      {/* Create/Edit Dialog */}
+      {/* Create Wizard */}
+      <CreateFarmWizard
+        open={wizardOpen}
+        onOpenChange={setWizardOpen}
+        onSuccess={refetch}
+      />
+
+      {/* Edit Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>
-              {editingFarm ? "Edit Farm" : "New Farm"}
-            </DialogTitle>
-            <DialogDescription>
-              {editingFarm
-                ? "Update the farm details below."
-                : "Fill in the details to create a new farm."}
-            </DialogDescription>
+            <DialogTitle>Edit Farm</DialogTitle>
+            <DialogDescription>Update the farm details below.</DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">
@@ -293,17 +294,29 @@ export default function FarmsPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="farm-status">Farm Type</Label>
+              <Label htmlFor="farm-type">Farm Type</Label>
+              <Input
+                id="farm-type"
+                placeholder="Enter farm type (optional)"
+                value={formFarmType}
+                onChange={(e) => setFormFarmType(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") handleSubmit();
+                }}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="farm-status">Status</Label>
               <Select
                 value={formStatus}
                 onValueChange={(val) => setFormStatus(val as FarmStatus)}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select farm type (optional)" />
+                  <SelectValue placeholder="Select status (optional)" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="OWN">Own</SelectItem>
-                  <SelectItem value="COOP">Coop</SelectItem>
+                  <SelectItem value="OWN">Milik Sendiri (OWN)</SelectItem>
+                  <SelectItem value="COOP">Kerjasama (COOP)</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -318,11 +331,7 @@ export default function FarmsPage() {
               Cancel
             </Button>
             <Button onClick={handleSubmit} disabled={isSubmitting}>
-              {isSubmitting
-                ? "Saving..."
-                : editingFarm
-                  ? "Update Farm"
-                  : "Create Farm"}
+              {isSubmitting ? "Saving..." : "Update Farm"}
             </Button>
           </DialogFooter>
         </DialogContent>
