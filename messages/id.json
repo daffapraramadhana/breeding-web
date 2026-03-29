@@ -188,12 +188,21 @@
     "description": "Kelola gudang dan lokasi penyimpanan",
     "entity": "gudang",
     "branch": "Cabang",
+    "farm": "Farm",
     "ownerType": "Tipe Pemilik",
     "owner": "Pemilik",
     "codePlaceholder": "cth. WH-001",
     "warehouseName": "Nama gudang",
+    "addressPlaceholder": "Alamat gudang",
+    "selectOwnerType": "Pilih tipe pemilik",
+    "selectBranch": "Pilih cabang",
+    "selectFarm": "Pilih farm",
     "codeAndNameRequired": "Kode dan nama wajib diisi",
-    "failedToSave": "Gagal menyimpan gudang"
+    "ownerTypeRequired": "Silakan pilih tipe pemilik",
+    "ownerRequired": "Silakan pilih pemilik",
+    "failedToSave": "Gagal menyimpan gudang",
+    "createWarehouse": "Buat Gudang",
+    "editWarehouse": "Edit Gudang"
   },
   "dashboard": {
     "title": "Dasbor",

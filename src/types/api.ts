@@ -230,6 +230,7 @@ export interface Warehouse {
   branch?: Branch;
   code: string;
   name: string;
+  address?: string;
   ownerType: WarehouseOwnerType;
   ownerId: string;
   createdAt: string;

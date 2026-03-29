@@ -188,12 +188,21 @@
     "description": "Manage warehouses and storage locations",
     "entity": "warehouse",
     "branch": "Branch",
+    "farm": "Farm",
     "ownerType": "Owner Type",
     "owner": "Owner",
     "codePlaceholder": "e.g. WH-001",
     "warehouseName": "Warehouse name",
+    "addressPlaceholder": "Warehouse address",
+    "selectOwnerType": "Select owner type",
+    "selectBranch": "Select branch",
+    "selectFarm": "Select farm",
     "codeAndNameRequired": "Code and name are required",
-    "failedToSave": "Failed to save warehouse"
+    "ownerTypeRequired": "Please select an owner type",
+    "ownerRequired": "Please select an owner",
+    "failedToSave": "Failed to save warehouse",
+    "createWarehouse": "Create Warehouse",
+    "editWarehouse": "Edit Warehouse"
   },
   "dashboard": {
     "title": "Dashboard",
