@@ -35,7 +35,7 @@ export default function CoopFloorsPage() {
   );
   const [search, setSearch] = useQueryState("search", { defaultValue: "" });
 
-  // Fetch coop floors
+  // Fetch coop bloks
   const { data: coopFloors, meta, isLoading, refetch } = usePaginated<CoopFloor>(
     "/coop-floors",
     { page, limit: 10, search }
@@ -50,7 +50,8 @@ export default function CoopFloorsPage() {
   const [formCode, setFormCode] = useState("");
   const [formName, setFormName] = useState("");
   const [formDescription, setFormDescription] = useState("");
-  const [formMaxPopulation, setFormMaxPopulation] = useState("");
+  const [formPopulation, setFormPopulation] = useState("");
+  const [formArea, setFormArea] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Delete state
@@ -74,9 +75,19 @@ export default function CoopFloorsPage() {
       accessorKey: "name",
     },
     {
-      header: "Max Population",
+      header: "Luas (m²)",
+      cell: (row) => row.area?.toLocaleString() || "-",
+      className: "w-[100px]",
+    },
+    {
+      header: "Populasi/m²",
+      cell: (row) => row.population?.toLocaleString() || "-",
+      className: "w-[110px]",
+    },
+    {
+      header: "Max Populasi",
       cell: (row) => row.maxPopulation?.toLocaleString() || "-",
-      className: "w-[140px]",
+      className: "w-[120px]",
     },
     {
       header: "Created",
@@ -122,7 +133,8 @@ export default function CoopFloorsPage() {
     setFormCode("");
     setFormName("");
     setFormDescription("");
-    setFormMaxPopulation("");
+    setFormPopulation("");
+    setFormArea("");
     setDialogOpen(true);
   }
 
@@ -135,7 +147,8 @@ export default function CoopFloorsPage() {
     setFormCode(floor.code || "");
     setFormName(floor.name || "");
     setFormDescription(floor.description || "");
-    setFormMaxPopulation(String(floor.maxPopulation || ""));
+    setFormPopulation(String(floor.population || ""));
+    setFormArea(String(floor.area || ""));
     setDialogOpen(true);
   }
 
@@ -162,8 +175,17 @@ export default function CoopFloorsPage() {
       return;
     }
 
-    if (!formMaxPopulation || Number(formMaxPopulation) <= 0) {
-      toast.error("Max population is required");
+    if (!formPopulation || Number(formPopulation) <= 0) {
+      toast.error("Populasi per m² is required");
+      return;
+    }
+    if (!formArea || Number(formArea) <= 0) {
+      toast.error("Luas is required");
+      return;
+    }
+    const maxPopulation = Number(formPopulation) * Number(formArea);
+    if (maxPopulation <= 0) {
+      toast.error("Max populasi harus lebih dari 0");
       return;
     }
 
@@ -180,7 +202,9 @@ export default function CoopFloorsPage() {
         branchId: formBranchId,
         code: formCode.trim(),
         name: formName.trim(),
-        maxPopulation: Number(formMaxPopulation),
+        population: Number(formPopulation),
+        area: Number(formArea),
+        maxPopulation: Number(formPopulation) * Number(formArea),
         ...(formDescription.trim() && { description: formDescription.trim() }),
       };
 
@@ -189,13 +213,13 @@ export default function CoopFloorsPage() {
           method: "PATCH",
           body: JSON.stringify(body),
         });
-        toast.success("Coop floor updated successfully");
+        toast.success("Coop blok berhasil diupdate");
       } else {
         await fetchApi("/coop-floors", {
           method: "POST",
           body: JSON.stringify(body),
         });
-        toast.success("Coop floor created successfully");
+        toast.success("Coop blok berhasil dibuat");
       }
 
       setDialogOpen(false);
@@ -203,8 +227,8 @@ export default function CoopFloorsPage() {
     } catch (error) {
       toast.error(
         editingFloor
-          ? "Failed to update coop floor"
-          : "Failed to create coop floor"
+          ? "Failed to update coop blok"
+          : "Failed to create coop blok"
       );
     } finally {
       setIsSubmitting(false);
@@ -219,24 +243,24 @@ export default function CoopFloorsPage() {
       await fetchApi(`/coop-floors/${deletingFloor.id}`, {
         method: "DELETE",
       });
-      toast.success("Coop floor deleted successfully");
+      toast.success("Coop blok berhasil dihapus");
       setDeleteDialogOpen(false);
       setDeletingFloor(null);
       refetch();
     } catch (error) {
-      toast.error("Failed to delete coop floor");
+      toast.error("Failed to delete coop blok");
     }
   }
 
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Coop Floors"
-        description="Manage coop floor levels"
+        title="Coop Bloks"
+        description="Kelola blok kandang"
         actions={
           <Button onClick={handleCreate}>
             <Plus className="mr-2 h-4 w-4" />
-            New Coop Floor
+            New Coop Blok
           </Button>
         }
       />
@@ -250,17 +274,17 @@ export default function CoopFloorsPage() {
           setSearch(value);
           setPage(1);
         }}
-        searchPlaceholder="Search coop floors..."
+        searchPlaceholder="Search coop bloks..."
         page={page}
         totalPages={meta?.totalPages || 1}
         onPageChange={setPage}
         total={meta?.total}
-        emptyTitle="No coop floors found"
-        emptyDescription="Get started by creating your first coop floor."
+        emptyTitle="No coop bloks found"
+        emptyDescription="Get started by creating your first coop blok."
         emptyAction={
           <Button onClick={handleCreate}>
             <Plus className="mr-2 h-4 w-4" />
-            New Coop Floor
+            New Coop Blok
           </Button>
         }
       />
@@ -270,12 +294,12 @@ export default function CoopFloorsPage() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {editingFloor ? "Edit Coop Floor" : "New Coop Floor"}
+              {editingFloor ? "Edit Coop Blok" : "New Coop Blok"}
             </DialogTitle>
             <DialogDescription>
               {editingFloor
-                ? "Update the coop floor details below."
-                : "Fill in the details to create a new coop floor."}
+                ? "Update detail blok kandang."
+                : "Isi detail untuk membuat blok kandang baru."}
             </DialogDescription>
           </DialogHeader>
 
@@ -297,7 +321,7 @@ export default function CoopFloorsPage() {
               <Label htmlFor="floor-code">Code</Label>
               <Input
                 id="floor-code"
-                placeholder="Enter floor code"
+                placeholder="Enter kode blok"
                 value={formCode}
                 onChange={(e) => setFormCode(e.target.value)}
                 onKeyDown={(e) => {
@@ -309,7 +333,7 @@ export default function CoopFloorsPage() {
               <Label htmlFor="floor-name">Name</Label>
               <Input
                 id="floor-name"
-                placeholder="Enter floor name"
+                placeholder="Enter nama blok"
                 value={formName}
                 onChange={(e) => setFormName(e.target.value)}
                 onKeyDown={(e) => {
@@ -318,17 +342,44 @@ export default function CoopFloorsPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="floor-max-population">Max Population</Label>
+              <Label htmlFor="floor-population">Populasi / m²</Label>
               <Input
-                id="floor-max-population"
+                id="floor-population"
                 type="number"
-                placeholder="Enter max population"
-                value={formMaxPopulation}
-                onChange={(e) => setFormMaxPopulation(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") handleSubmit();
-                }}
+                placeholder="Populasi per m²"
+                value={formPopulation}
+                onChange={(e) => setFormPopulation(e.target.value)}
               />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="floor-area">Luas (m²)</Label>
+              <Input
+                id="floor-area"
+                type="number"
+                placeholder="Luas kandang dalam m²"
+                value={formArea}
+                onChange={(e) => setFormArea(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Max Populasi (otomatis)</Label>
+              <Input
+                type="number"
+                readOnly
+                disabled
+                value={
+                  formPopulation && formArea
+                    ? Number(formPopulation) * Number(formArea)
+                    : ""
+                }
+                placeholder="Populasi × Luas"
+                className="bg-muted text-muted-foreground"
+              />
+              {formPopulation && formArea && (
+                <p className="text-xs text-muted-foreground">
+                  {formPopulation} × {formArea} = {Number(formPopulation) * Number(formArea)} ekor
+                </p>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="floor-description">Description</Label>
@@ -353,8 +404,8 @@ export default function CoopFloorsPage() {
               {isSubmitting
                 ? "Saving..."
                 : editingFloor
-                  ? "Update Coop Floor"
-                  : "Create Coop Floor"}
+                  ? "Update Coop Blok"
+                  : "Create Coop Blok"}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -364,7 +415,7 @@ export default function CoopFloorsPage() {
       <ConfirmDialog
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
-        title="Delete Coop Floor"
+        title="Delete Coop Blok"
         description={`Are you sure you want to delete "${deletingFloor?.name}"? This action cannot be undone.`}
         onConfirm={handleDelete}
         variant="destructive"
