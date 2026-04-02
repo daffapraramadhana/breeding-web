@@ -138,37 +138,39 @@ export function CoopAccordion({
           <Accordion type="single" collapsible className="space-y-2">
             {coops.map((coop) => (
               <AccordionItem key={coop.id} value={coop.id}>
-                <AccordionTrigger className="hover:no-underline">
-                  <div className="flex flex-1 items-center gap-3 mr-4">
-                    <span className="font-bold">{coop.code}</span>
-                    <span className="text-muted-foreground">{coop.name}</span>
-                    <StatusBadge status={coop.status} />
-                    <span className="text-sm text-muted-foreground">
-                      Cap: {coop.capacity.toLocaleString()}
-                    </span>
-                    <span className="text-sm text-muted-foreground">
-                      · {coop.floors?.length || 0} floor(s)
-                    </span>
-                    <div className="ml-auto flex gap-1" onClick={(e) => e.stopPropagation()}>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-7 w-7"
-                        onClick={() => handleEditCoop(coop)}
-                      >
-                        <Pencil className="h-3.5 w-3.5" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-7 w-7 text-destructive"
-                        onClick={() => handleDeleteCoop(coop)}
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </Button>
+                <div className="flex items-center">
+                  <AccordionTrigger className="hover:no-underline flex-1">
+                    <div className="flex flex-1 items-center gap-3 mr-4">
+                      <span className="font-bold">{coop.code}</span>
+                      <span className="text-muted-foreground">{coop.name}</span>
+                      <StatusBadge status={coop.status} />
+                      <span className="text-sm text-muted-foreground">
+                        Cap: {coop.capacity.toLocaleString()}
+                      </span>
+                      <span className="text-sm text-muted-foreground">
+                        · {coop.floors?.length || 0} floor(s)
+                      </span>
                     </div>
+                  </AccordionTrigger>
+                  <div className="flex gap-1 pr-4">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7"
+                      onClick={() => handleEditCoop(coop)}
+                    >
+                      <Pencil className="h-3.5 w-3.5" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7 text-destructive"
+                      onClick={() => handleDeleteCoop(coop)}
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
                   </div>
-                </AccordionTrigger>
+                </div>
                 <AccordionContent>
                   {/* Floor Table */}
                   <div className="border rounded-md overflow-hidden">
