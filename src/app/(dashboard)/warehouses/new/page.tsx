@@ -54,6 +54,11 @@ export default function NewWarehousePage() {
       return;
     }
 
+    if (form.ownerType === "FARM" && !form.branchId) {
+      toast.error(t("selectBranch"));
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       const body: Record<string, string> = {
@@ -199,6 +204,21 @@ export default function NewWarehousePage() {
                   searchPlaceholder={tc("searchField", {
                     field: form.ownerType === "BRANCH" ? t("branch") : t("farm"),
                   })}
+                />
+              </div>
+            )}
+
+            {form.ownerType === "FARM" && (
+              <div className="space-y-2">
+                <Label>
+                  {t("branch")} <span className="text-destructive">*</span>
+                </Label>
+                <EntityCombobox
+                  endpoint="/branches"
+                  value={form.branchId}
+                  onChange={(id) => setForm((prev) => ({ ...prev, branchId: id }))}
+                  placeholder={t("selectBranch")}
+                  searchPlaceholder={tc("searchField", { field: t("branch") })}
                 />
               </div>
             )}
