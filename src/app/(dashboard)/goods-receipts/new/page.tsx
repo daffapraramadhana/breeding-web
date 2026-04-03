@@ -22,8 +22,6 @@ import {
 } from "@/components/ui/select";
 import { PageHeader } from "@/components/shared/page-header";
 import { LineItemsField, LineItem } from "@/components/forms/line-items-field";
-import { BranchCombobox } from "@/components/forms/branch-combobox";
-import { SupplierCombobox } from "@/components/forms/supplier-combobox";
 import { WarehouseCombobox } from "@/components/forms/warehouse-combobox";
 import { fetchApi, fetchPaginated } from "@/lib/api";
 import { PurchaseOrder } from "@/types/api";
@@ -36,9 +34,8 @@ export default function NewGoodsReceiptPage() {
   const [purchaseOrders, setPurchaseOrders] = useState<PurchaseOrder[]>([]);
   const [form, setForm] = useState({
     purchaseOrderId: "",
-    branchId: "",
-    supplierId: "",
     warehouseId: "",
+    receiptDate: "",
     notes: "",
   });
   const [lines, setLines] = useState<LineItem[]>([]);
@@ -67,12 +64,9 @@ export default function NewGoodsReceiptPage() {
             }))
           );
         }
-        // Auto-fill supplier and branch from PO
-        if (po.supplierId) {
-          setForm((prev) => ({ ...prev, supplierId: po.supplierId }));
-        }
-        if (po.branchId) {
-          setForm((prev) => ({ ...prev, branchId: po.branchId }));
+        // Auto-fill warehouse from PO destination
+        if (po.destinationWarehouseId) {
+          setForm((prev) => ({ ...prev, warehouseId: po.destinationWarehouseId || "" }));
         }
       })
       .catch(() => {});
@@ -91,9 +85,8 @@ export default function NewGoodsReceiptPage() {
     try {
       const body = {
         purchaseOrderId: form.purchaseOrderId,
-        branchId: form.branchId,
-        supplierId: form.supplierId || undefined,
         warehouseId: form.warehouseId,
+        receiptDate: form.receiptDate,
         notes: form.notes || undefined,
         lines: validLines.map((l) => ({
           productId: l.productId,
@@ -166,17 +159,15 @@ export default function NewGoodsReceiptPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label>Branch *</Label>
-              <BranchCombobox
-                value={form.branchId}
-                onChange={(id) => setForm({ ...form, branchId: id })}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Supplier</Label>
-              <SupplierCombobox
-                value={form.supplierId}
-                onChange={(id) => setForm({ ...form, supplierId: id })}
+              <Label htmlFor="receiptDate">Receipt Date *</Label>
+              <Input
+                id="receiptDate"
+                type="date"
+                value={form.receiptDate}
+                onChange={(e) =>
+                  setForm({ ...form, receiptDate: e.target.value })
+                }
+                required
               />
             </div>
             <div className="md:col-span-2 space-y-2">
