@@ -21,19 +21,20 @@ export function ChatFab({ onClick, hasUnread }: ChatFabProps) {
           <button
             onClick={onClick}
             aria-label="Buka AI Assistant"
-            className="group fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-[14px] bg-[var(--glass-bg)] backdrop-blur-[var(--glass-blur)] border border-[var(--glass-border)] shadow-[var(--glass-shadow)] text-[var(--foreground)] transition-all duration-300 hover:scale-110 sm:h-12 sm:w-12"
+            className="group fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex h-11 items-center justify-center gap-2 rounded-full px-5 bg-primary/90 backdrop-blur-sm border border-primary/20 shadow-lg shadow-primary/10 text-primary-foreground transition-all duration-300 hover:scale-105"
           >
             {/* Glow ring on hover */}
             <span className="absolute inset-0 rounded-full bg-primary/20 opacity-0 blur-md transition-opacity duration-300 group-hover:opacity-100" />
 
-            <Sparkles className="relative h-6 w-6 transition-transform duration-300 group-hover:rotate-12 sm:h-5 sm:w-5" />
+            <Sparkles className="relative h-4 w-4 transition-transform duration-300 group-hover:rotate-12" />
+            <span className="text-sm font-medium">AI Assistant</span>
 
             {hasUnread && (
               <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-destructive animate-pulse" />
             )}
           </button>
         </TooltipTrigger>
-        <TooltipContent side="left" sideOffset={12}>
+        <TooltipContent side="top" sideOffset={12}>
           <p>AI Assistant</p>
         </TooltipContent>
       </Tooltip>
