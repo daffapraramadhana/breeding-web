@@ -146,7 +146,6 @@ export default function NewPurchaseOrderPage() {
                 <SelectContent>
                   <SelectItem value="BRANCH">Branch</SelectItem>
                   <SelectItem value="FARM">Farm</SelectItem>
-                  <SelectItem value="COOP">Coop</SelectItem>
                 </SelectContent>
               </Select>
             </div>
