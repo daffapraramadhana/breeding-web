@@ -24,9 +24,10 @@ interface ProductComboboxProps {
   value: string;
   onChange: (productId: string, product: Product) => void;
   disabled?: boolean;
+  supplierId?: string;
 }
 
-export function ProductCombobox({ value, onChange, disabled }: ProductComboboxProps) {
+export function ProductCombobox({ value, onChange, disabled, supplierId }: ProductComboboxProps) {
   const [open, setOpen] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
   const [search, setSearch] = useState("");
@@ -34,11 +35,13 @@ export function ProductCombobox({ value, onChange, disabled }: ProductComboboxPr
 
   useEffect(() => {
     setIsLoading(true);
-    fetchPaginated<Product>("/products", { limit: 50, search })
+    const extra: Record<string, string> = {};
+    if (supplierId) extra.supplierId = supplierId;
+    fetchPaginated<Product>("/products", { limit: 50, search, extra })
       .then((res) => setProducts(res.data))
       .catch(() => {})
       .finally(() => setIsLoading(false));
-  }, [search]);
+  }, [search, supplierId]);
 
   const selected = products.find((p) => p.id === value);
 
