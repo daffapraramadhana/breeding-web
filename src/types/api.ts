@@ -233,6 +233,7 @@ export interface Warehouse {
   address?: string;
   ownerType: WarehouseOwnerType;
   ownerId: string;
+  ownerName?: string;
   createdAt: string;
   updatedAt: string;
 }

@@ -69,15 +69,15 @@ export default function WarehousesPage() {
       cell: (row) => row.address || "—",
     },
     {
-      header: t("branch"),
-      cell: (row) => row.branch?.name || "—",
-    },
-    {
       header: t("ownerType"),
       cell: (row) =>
         row.ownerType
           ? ownerTypeLabels[row.ownerType] || row.ownerType
           : "—",
+    },
+    {
+      header: t("owner"),
+      cell: (row) => row.ownerName || "—",
     },
     {
       header: tc("created"),

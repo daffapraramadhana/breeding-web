@@ -15,7 +15,6 @@ import {
 import { PageHeader } from "@/components/shared/page-header";
 import { LineItemsField, LineItem } from "@/components/forms/line-items-field";
 import { SupplierCombobox } from "@/components/forms/supplier-combobox";
-import { BranchCombobox } from "@/components/forms/branch-combobox";
 import { WarehouseCombobox } from "@/components/forms/warehouse-combobox";
 import {
   Select,
@@ -34,7 +33,6 @@ export default function NewPurchaseOrderPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [form, setForm] = useState({
     supplierId: "",
-    branchId: "",
     destinationType: "" as string,
     destinationWarehouseId: "",
     orderDate: "",
@@ -50,10 +48,6 @@ export default function NewPurchaseOrderPage() {
 
     if (!form.supplierId) {
       toast.error("Please select a supplier");
-      return;
-    }
-    if (!form.branchId) {
-      toast.error("Please select a branch");
       return;
     }
     if (!form.destinationType) {
@@ -75,7 +69,6 @@ export default function NewPurchaseOrderPage() {
     try {
       const body = {
         supplierId: form.supplierId,
-        branchId: form.branchId,
         destinationType: form.destinationType || undefined,
         destinationWarehouseId: form.destinationWarehouseId || undefined,
         orderDate: form.orderDate,
@@ -127,14 +120,12 @@ export default function NewPurchaseOrderPage() {
               <Label>Supplier *</Label>
               <SupplierCombobox
                 value={form.supplierId}
-                onChange={(id) => setForm({ ...form, supplierId: id })}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Branch *</Label>
-              <BranchCombobox
-                value={form.branchId}
-                onChange={(id) => setForm({ ...form, branchId: id })}
+                onChange={(id) =>
+                  setForm((prev) => ({
+                    ...prev,
+                    supplierId: id,
+                  }))
+                }
               />
             </div>
             <div className="space-y-2">
@@ -142,7 +133,11 @@ export default function NewPurchaseOrderPage() {
               <Select
                 value={form.destinationType}
                 onValueChange={(val) =>
-                  setForm({ ...form, destinationType: val })
+                  setForm((prev) => ({
+                    ...prev,
+                    destinationType: val,
+                    destinationWarehouseId: "",
+                  }))
                 }
               >
                 <SelectTrigger>
@@ -160,8 +155,10 @@ export default function NewPurchaseOrderPage() {
               <WarehouseCombobox
                 value={form.destinationWarehouseId}
                 onChange={(id) =>
-                  setForm({ ...form, destinationWarehouseId: id })
+                  setForm((prev) => ({ ...prev, destinationWarehouseId: id }))
                 }
+                ownerType={form.destinationType || undefined}
+                disabled={!form.destinationType}
               />
             </div>
             <div className="space-y-2">
@@ -210,6 +207,7 @@ export default function NewPurchaseOrderPage() {
               onChange={setLines}
               showPrice
               priceLabel="Unit Price"
+              supplierId={form.supplierId || undefined}
             />
           </CardContent>
         </Card>

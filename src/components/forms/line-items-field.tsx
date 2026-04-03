@@ -33,6 +33,7 @@ interface LineItemsFieldProps {
   showPrice?: boolean;
   priceLabel?: string;
   disabled?: boolean;
+  supplierId?: string;
 }
 
 export function LineItemsField({
@@ -41,6 +42,7 @@ export function LineItemsField({
   showPrice = true,
   priceLabel = "Unit Price",
   disabled = false,
+  supplierId,
 }: LineItemsFieldProps) {
   const [uomMap, setUomMap] = useState<Record<string, string>>({});
 
@@ -139,6 +141,7 @@ export function LineItemsField({
                           handleProductSelect(idx, productId, product)
                         }
                         disabled={disabled}
+                        supplierId={supplierId}
                       />
                     </TableCell>
                     <TableCell>

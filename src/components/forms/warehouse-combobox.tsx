@@ -24,9 +24,10 @@ interface WarehouseComboboxProps {
   value: string;
   onChange: (id: string) => void;
   disabled?: boolean;
+  ownerType?: string;
 }
 
-export function WarehouseCombobox({ value, onChange, disabled }: WarehouseComboboxProps) {
+export function WarehouseCombobox({ value, onChange, disabled, ownerType }: WarehouseComboboxProps) {
   const [open, setOpen] = useState(false);
   const [warehouses, setWarehouses] = useState<Warehouse[]>([]);
   const [search, setSearch] = useState("");
@@ -34,11 +35,13 @@ export function WarehouseCombobox({ value, onChange, disabled }: WarehouseCombob
 
   useEffect(() => {
     setIsLoading(true);
-    fetchPaginated<Warehouse>("/warehouses", { limit: 50, search })
+    const extra: Record<string, string> = {};
+    if (ownerType) extra.ownerType = ownerType;
+    fetchPaginated<Warehouse>("/warehouses", { limit: 50, search, extra })
       .then((res) => setWarehouses(res.data))
       .catch(() => {})
       .finally(() => setIsLoading(false));
-  }, [search]);
+  }, [search, ownerType]);
 
   const selected = warehouses.find((w) => w.id === value);
 
