@@ -18,7 +18,9 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { fetchPaginated } from "@/lib/api";
-import { Warehouse, WarehouseOwnerType } from "@/types/api";
+import { Warehouse } from "@/types/api";
+
+type GroupKey = "BRANCH" | "FARM_OWN" | "FARM_COOP";
 
 interface WarehouseGroupedComboboxProps {
   value: string;
@@ -26,14 +28,20 @@ interface WarehouseGroupedComboboxProps {
   disabled?: boolean;
   placeholder?: string;
   searchPlaceholder?: string;
-  groupLabels?: Record<WarehouseOwnerType, string>;
+  groupLabels?: Record<GroupKey, string>;
 }
 
-const DEFAULT_GROUP_LABELS: Record<WarehouseOwnerType, string> = {
+const DEFAULT_GROUP_LABELS: Record<GroupKey, string> = {
   BRANCH: "Cabang",
-  FARM: "Farm",
-  COOP: "Kandang Ownfarm",
+  FARM_OWN: "Farm",
+  FARM_COOP: "Kandang Ownfarm",
 };
+
+function getGroupKey(wh: Warehouse): GroupKey {
+  if (wh.ownerType === "BRANCH") return "BRANCH";
+  if (wh.farmStatus === "COOP") return "FARM_COOP";
+  return "FARM_OWN";
+}
 
 export function WarehouseGroupedCombobox({
   value,
@@ -57,15 +65,18 @@ export function WarehouseGroupedCombobox({
   }, [search]);
 
   const grouped = useMemo(() => {
-    const groups: Partial<Record<WarehouseOwnerType, Warehouse[]>> = {};
+    const groups: Partial<Record<GroupKey, Warehouse[]>> = {};
     for (const wh of warehouses) {
-      if (!groups[wh.ownerType]) groups[wh.ownerType] = [];
-      groups[wh.ownerType]!.push(wh);
+      const key = getGroupKey(wh);
+      if (!groups[key]) groups[key] = [];
+      groups[key]!.push(wh);
     }
     return groups;
   }, [warehouses]);
 
   const selected = warehouses.find((w) => w.id === value);
+
+  const groupOrder: GroupKey[] = ["BRANCH", "FARM_OWN", "FARM_COOP"];
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -94,11 +105,11 @@ export function WarehouseGroupedCombobox({
             ) : warehouses.length === 0 ? (
               <CommandEmpty>No warehouses found.</CommandEmpty>
             ) : (
-              (Object.keys(groupLabels) as WarehouseOwnerType[]).map((type) => {
-                const items = grouped[type];
+              groupOrder.map((key) => {
+                const items = grouped[key];
                 if (!items || items.length === 0) return null;
                 return (
-                  <CommandGroup key={type} heading={groupLabels[type]}>
+                  <CommandGroup key={key} heading={groupLabels[key]}>
                     {items.map((warehouse) => (
                       <CommandItem
                         key={warehouse.id}

@@ -234,6 +234,7 @@ export interface Warehouse {
   ownerType: WarehouseOwnerType;
   ownerId: string;
   ownerName?: string;
+  farmStatus?: "OWN" | "COOP";
   createdAt: string;
   updatedAt: string;
 }

@@ -18,16 +18,15 @@ import { PageHeader } from "@/components/shared/page-header";
 import { LineItemsField, LineItem } from "@/components/forms/line-items-field";
 import { WarehouseGroupedCombobox } from "@/components/forms/warehouse-grouped-combobox";
 import { fetchApi } from "@/lib/api";
-import { WarehouseOwnerType } from "@/types/api";
 import { toast } from "sonner";
 import { ArrowLeft } from "lucide-react";
 
-function useGroupLabels(): Record<WarehouseOwnerType, string> {
+function useGroupLabels() {
   const t = useTranslations("goodsTransferNew");
   return {
     BRANCH: t("ownerBranch"),
-    FARM: t("ownerFarm"),
-    COOP: t("ownerCoop"),
+    FARM_OWN: t("ownerFarm"),
+    FARM_COOP: t("ownerCoop"),
   };
 }
 
