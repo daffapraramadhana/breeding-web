@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { useQueryState, parseAsInteger } from "nuqs";
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2 } from "lucide-react";
@@ -27,6 +28,8 @@ import {
 } from "@/components/ui/dialog";
 
 export default function ChickInPlansPage() {
+  const t = useTranslations("chickInPlans");
+  const tc = useTranslations("common");
   const [page, setPage] = useQueryState(
     "page",
     parseAsInteger.withDefault(1)
@@ -57,26 +60,26 @@ export default function ChickInPlansPage() {
   const [deleting, setDeleting] = useState<ChickInPlan | null>(null);
 
   const columns: Column<ChickInPlan>[] = [
-    { header: "Name", accessorKey: "name" },
+    { header: tc("name"), accessorKey: "name" },
     {
-      header: "Planned Date",
+      header: t("plannedDate"),
       cell: (row) => formatDate(row.plannedDate),
     },
     {
-      header: "Population",
+      header: t("population"),
       cell: (row) => row.population ?? "-",
     },
     {
-      header: "Notes",
+      header: t("notes"),
       cell: (row) => row.notes || "-",
     },
     {
-      header: "Created",
+      header: tc("created"),
       cell: (row) => formatDate(row.createdAt),
       className: "w-[150px]",
     },
     {
-      header: "Actions",
+      header: tc("actions"),
       cell: (row) => (
         <div className="flex items-center gap-1">
           <Button
@@ -132,7 +135,7 @@ export default function ChickInPlansPage() {
 
   async function handleSubmit() {
     if (!formName.trim()) {
-      toast.error("Name is required");
+      toast.error(tc("required", { field: tc("name") }));
       return;
     }
 
@@ -151,13 +154,13 @@ export default function ChickInPlansPage() {
           method: "PATCH",
           body: JSON.stringify(body),
         });
-        toast.success("Chick-in plan updated successfully");
+        toast.success(tc("entityUpdated", { entity: t("entity") }));
       } else {
         await fetchApi("/chick-in-plans", {
           method: "POST",
           body: JSON.stringify(body),
         });
-        toast.success("Chick-in plan created successfully");
+        toast.success(tc("entityCreated", { entity: t("entity") }));
       }
 
       setDialogOpen(false);
@@ -165,8 +168,8 @@ export default function ChickInPlansPage() {
     } catch {
       toast.error(
         editing
-          ? "Failed to update chick-in plan"
-          : "Failed to create chick-in plan"
+          ? tc("entityUpdateFailed", { entity: t("entity") })
+          : tc("entityCreateFailed", { entity: t("entity") })
       );
     } finally {
       setIsSubmitting(false);
@@ -180,24 +183,24 @@ export default function ChickInPlansPage() {
       await fetchApi(`/chick-in-plans/${deleting.id}`, {
         method: "DELETE",
       });
-      toast.success("Chick-in plan deleted successfully");
+      toast.success(tc("entityDeleted", { entity: t("entity") }));
       setDeleteDialogOpen(false);
       setDeleting(null);
       refetch();
     } catch {
-      toast.error("Failed to delete chick-in plan");
+      toast.error(tc("entityDeleteFailed", { entity: t("entity") }));
     }
   }
 
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Chick-in Plans"
-        description="Manage chick-in plans"
+        title={t("title")}
+        description={t("description")}
         actions={
           <Button onClick={handleCreate}>
             <Plus className="mr-2 h-4 w-4" />
-            New Chick-in Plan
+            {tc("newEntity", { entity: t("entity") })}
           </Button>
         }
       />
@@ -211,17 +214,17 @@ export default function ChickInPlansPage() {
           setSearch(value);
           setPage(1);
         }}
-        searchPlaceholder="Search chick-in plans..."
+        searchPlaceholder={t("searchPlaceholder")}
         page={page}
         totalPages={meta?.totalPages || 1}
         onPageChange={setPage}
         total={meta?.total}
-        emptyTitle="No chick-in plans found"
-        emptyDescription="Get started by creating your first chick-in plan."
+        emptyTitle={tc("noResults", { entity: t("entity") })}
+        emptyDescription={tc("getStarted", { entity: t("entity") })}
         emptyAction={
           <Button onClick={handleCreate}>
             <Plus className="mr-2 h-4 w-4" />
-            New Chick-in Plan
+            {tc("newEntity", { entity: t("entity") })}
           </Button>
         }
       />
@@ -230,27 +233,27 @@ export default function ChickInPlansPage() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {editing ? "Edit Chick-in Plan" : "New Chick-in Plan"}
+              {editing ? tc("editEntity", { entity: t("entity") }) : tc("newEntity", { entity: t("entity") })}
             </DialogTitle>
             <DialogDescription>
               {editing
-                ? "Update the chick-in plan details below."
-                : "Fill in the details to create a new chick-in plan."}
+                ? tc("updateDetails", { entity: t("entity") })
+                : tc("fillDetails", { entity: t("entity") })}
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Name</Label>
+              <Label htmlFor="name">{tc("name")}</Label>
               <Input
                 id="name"
-                placeholder="Enter name"
+                placeholder={tc("enterField", { field: tc("name") })}
                 value={formName}
                 onChange={(e) => setFormName(e.target.value)}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="plannedDate">Planned Date</Label>
+              <Label htmlFor="plannedDate">{t("plannedDate")}</Label>
               <Input
                 id="plannedDate"
                 type="date"
@@ -259,24 +262,24 @@ export default function ChickInPlansPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label>Coop</Label>
+              <Label>{t("coop")}</Label>
               <CoopCombobox value={formCoopId} onChange={setFormCoopId} />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="population">Population</Label>
+              <Label htmlFor="population">{t("population")}</Label>
               <Input
                 id="population"
                 type="number"
-                placeholder="Enter population"
+                placeholder={tc("enterField", { field: t("population") })}
                 value={formPopulation}
                 onChange={(e) => setFormPopulation(e.target.value)}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="notes">Notes</Label>
+              <Label htmlFor="notes">{t("notes")}</Label>
               <Input
                 id="notes"
-                placeholder="Enter notes"
+                placeholder={tc("enterField", { field: t("notes") })}
                 value={formNotes}
                 onChange={(e) => setFormNotes(e.target.value)}
               />
@@ -289,14 +292,14 @@ export default function ChickInPlansPage() {
               onClick={() => setDialogOpen(false)}
               disabled={isSubmitting}
             >
-              Cancel
+              {tc("cancel")}
             </Button>
             <Button onClick={handleSubmit} disabled={isSubmitting}>
               {isSubmitting
-                ? "Saving..."
+                ? tc("saving")
                 : editing
-                  ? "Update"
-                  : "Create"}
+                  ? tc("update")
+                  : tc("create")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -305,11 +308,11 @@ export default function ChickInPlansPage() {
       <ConfirmDialog
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
-        title="Delete Chick-in Plan"
-        description={`Are you sure you want to delete "${deleting?.name}"? This action cannot be undone.`}
+        title={tc("deleteEntity", { entity: t("entity") })}
+        description={tc("confirmDelete", { name: deleting?.name ?? "" })}
         onConfirm={handleDelete}
         variant="destructive"
-        confirmLabel="Delete"
+        confirmLabel={tc("delete")}
       />
     </div>
   );

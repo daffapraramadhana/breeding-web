@@ -19,10 +19,13 @@ import { BranchCombobox } from "@/components/forms/branch-combobox";
 import { WarehouseCombobox } from "@/components/forms/warehouse-combobox";
 import { SupplierCombobox } from "@/components/forms/supplier-combobox";
 import { fetchApi } from "@/lib/api";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { ArrowLeft } from "lucide-react";
 
 export default function NewGoodsReturnPage() {
+  const t = useTranslations('goodsReturns');
+  const tc = useTranslations('common');
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [form, setForm] = useState({
@@ -41,7 +44,7 @@ export default function NewGoodsReturnPage() {
 
     const validLines = lines.filter((l) => l.productId && l.quantity);
     if (validLines.length === 0) {
-      toast.error("Please add at least one line item");
+      toast.error(t('addLineItem'));
       return;
     }
 
@@ -66,11 +69,11 @@ export default function NewGoodsReturnPage() {
         body: JSON.stringify(body),
       });
 
-      toast.success("Goods Return created successfully");
+      toast.success(tc('entityCreated', { entity: t('entity') }));
       router.push(`/goods-returns/${result.id}`);
     } catch (err) {
       toast.error(
-        err instanceof Error ? err.message : "Failed to create goods return"
+        err instanceof Error ? err.message : tc('entityCreateFailed', { entity: t('entity') })
       );
     } finally {
       setIsSubmitting(false);
@@ -80,12 +83,12 @@ export default function NewGoodsReturnPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Create Goods Return"
+        title={tc('createEntity', { entity: t('entity') })}
         actions={
           <Button variant="outline" asChild>
             <Link href="/goods-returns">
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Back
+              {tc('back')}
             </Link>
           </Button>
         }
@@ -94,48 +97,48 @@ export default function NewGoodsReturnPage() {
       <form onSubmit={handleSubmit} className="space-y-6">
         <Card>
           <CardHeader>
-            <CardTitle>Return Details</CardTitle>
+            <CardTitle>{t('returnDetails')}</CardTitle>
           </CardHeader>
           <CardContent className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
-              <Label>Branch *</Label>
+              <Label>{t('branch')} *</Label>
               <BranchCombobox
                 value={form.branchId}
                 onChange={(v) => setForm({ ...form, branchId: v })}
               />
             </div>
             <div className="space-y-2">
-              <Label>Supplier</Label>
+              <Label>{t('supplier')}</Label>
               <SupplierCombobox
                 value={form.supplierId}
                 onChange={(v) => setForm({ ...form, supplierId: v })}
               />
             </div>
             <div className="space-y-2">
-              <Label>Warehouse *</Label>
+              <Label>{t('warehouse')} *</Label>
               <WarehouseCombobox
                 value={form.warehouseId}
                 onChange={(v) => setForm({ ...form, warehouseId: v })}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="purchaseOrderId">Purchase Order ID</Label>
+              <Label htmlFor="purchaseOrderId">{t('purchaseOrderId')}</Label>
               <Input
                 id="purchaseOrderId"
                 value={form.purchaseOrderId}
                 onChange={(e) =>
                   setForm({ ...form, purchaseOrderId: e.target.value })
                 }
-                placeholder="Reference PO ID..."
+                placeholder={t('referencePo')}
               />
             </div>
             <div className="space-y-2 md:col-span-2">
-              <Label htmlFor="notes">Notes</Label>
+              <Label htmlFor="notes">{t('notes')}</Label>
               <Textarea
                 id="notes"
                 value={form.notes}
                 onChange={(e) => setForm({ ...form, notes: e.target.value })}
-                placeholder="Additional notes..."
+                placeholder={t('additionalNotes')}
               />
             </div>
           </CardContent>
@@ -143,7 +146,7 @@ export default function NewGoodsReturnPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Line Items</CardTitle>
+            <CardTitle>{t('lineItems')}</CardTitle>
           </CardHeader>
           <CardContent>
             <LineItemsField
@@ -156,10 +159,10 @@ export default function NewGoodsReturnPage() {
 
         <div className="flex justify-end gap-3">
           <Button type="button" variant="outline" asChild>
-            <Link href="/goods-returns">Cancel</Link>
+            <Link href="/goods-returns">{tc('cancel')}</Link>
           </Button>
           <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "Creating..." : "Create Goods Return"}
+            {isSubmitting ? tc('saving') : tc('createEntity', { entity: t('entity') })}
           </Button>
         </div>
       </form>

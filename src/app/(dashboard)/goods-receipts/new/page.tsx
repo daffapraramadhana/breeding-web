@@ -25,10 +25,13 @@ import { LineItemsField, LineItem } from "@/components/forms/line-items-field";
 import { WarehouseCombobox } from "@/components/forms/warehouse-combobox";
 import { fetchApi, fetchPaginated } from "@/lib/api";
 import { PurchaseOrder } from "@/types/api";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { ArrowLeft } from "lucide-react";
 
 export default function NewGoodsReceiptPage() {
+  const t = useTranslations('goodsReceipts');
+  const tc = useTranslations('common');
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [purchaseOrders, setPurchaseOrders] = useState<PurchaseOrder[]>([]);
@@ -77,7 +80,7 @@ export default function NewGoodsReceiptPage() {
 
     const validLines = lines.filter((l) => l.productId && l.quantity);
     if (validLines.length === 0) {
-      toast.error("Please add at least one line item");
+      toast.error(t('addLineItem'));
       return;
     }
 
@@ -102,10 +105,10 @@ export default function NewGoodsReceiptPage() {
         body: JSON.stringify(body),
       });
 
-      toast.success("Goods Receipt created successfully");
+      toast.success(tc('entityCreated', { entity: t('entity') }));
       router.push(`/goods-receipts/${result.id}`);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to create GR");
+      toast.error(err instanceof Error ? err.message : tc('entityCreateFailed', { entity: t('entity') }));
     } finally {
       setIsSubmitting(false);
     }
@@ -114,12 +117,12 @@ export default function NewGoodsReceiptPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Create Goods Receipt"
+        title={tc('createEntity', { entity: t('entity') })}
         actions={
           <Button variant="outline" asChild>
             <Link href="/goods-receipts">
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Back
+              {tc('back')}
             </Link>
           </Button>
         }
@@ -128,11 +131,11 @@ export default function NewGoodsReceiptPage() {
       <form onSubmit={handleSubmit} className="space-y-6">
         <Card>
           <CardHeader>
-            <CardTitle>Receipt Details</CardTitle>
+            <CardTitle>{t('receiptDetails')}</CardTitle>
           </CardHeader>
           <CardContent className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
-              <Label>Purchase Order *</Label>
+              <Label>{t('purchaseOrder')} *</Label>
               <Select
                 value={form.purchaseOrderId}
                 onValueChange={(v) =>
@@ -140,7 +143,7 @@ export default function NewGoodsReceiptPage() {
                 }
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select PO..." />
+                  <SelectValue placeholder={t('selectPo')} />
                 </SelectTrigger>
                 <SelectContent>
                   {purchaseOrders.map((po) => (
@@ -152,14 +155,14 @@ export default function NewGoodsReceiptPage() {
               </Select>
             </div>
             <div className="space-y-2">
-              <Label>Warehouse *</Label>
+              <Label>{t('warehouse')} *</Label>
               <WarehouseCombobox
                 value={form.warehouseId}
                 onChange={(id) => setForm({ ...form, warehouseId: id })}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="receiptDate">Receipt Date *</Label>
+              <Label htmlFor="receiptDate">{t('receiptDate')} *</Label>
               <Input
                 id="receiptDate"
                 type="date"
@@ -171,12 +174,12 @@ export default function NewGoodsReceiptPage() {
               />
             </div>
             <div className="md:col-span-2 space-y-2">
-              <Label htmlFor="notes">Notes</Label>
+              <Label htmlFor="notes">{t('notes')}</Label>
               <Textarea
                 id="notes"
                 value={form.notes}
                 onChange={(e) => setForm({ ...form, notes: e.target.value })}
-                placeholder="Additional notes..."
+                placeholder={t('additionalNotes')}
               />
             </div>
           </CardContent>
@@ -184,24 +187,24 @@ export default function NewGoodsReceiptPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Line Items</CardTitle>
+            <CardTitle>{t('lineItems')}</CardTitle>
           </CardHeader>
           <CardContent>
             <LineItemsField
               lines={lines}
               onChange={setLines}
               showPrice
-              priceLabel="Unit Cost"
+              priceLabel={t('unitCost')}
             />
           </CardContent>
         </Card>
 
         <div className="flex justify-end gap-3">
           <Button type="button" variant="outline" asChild>
-            <Link href="/goods-receipts">Cancel</Link>
+            <Link href="/goods-receipts">{tc('cancel')}</Link>
           </Button>
           <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "Creating..." : "Create Goods Receipt"}
+            {isSubmitting ? tc('saving') : tc('createEntity', { entity: t('entity') })}
           </Button>
         </div>
       </form>

@@ -13,16 +13,19 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import { formatDate } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 
 export default function DeliveryDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const t = useTranslations('deliveries');
+  const tc = useTranslations('common');
   const { id } = use(params);
   const router = useRouter();
   const { data: delivery, isLoading, refetch } = useApi<Delivery>(`/deliveries/${id}`);
 
-  if (isLoading) return <div className="p-6">Loading...</div>;
-  if (!delivery) return <div className="p-6">Delivery not found</div>;
+  if (isLoading) return <div className="p-6">{t('loading')}</div>;
+  if (!delivery) return <div className="p-6">{t('notFound')}</div>;
 
   return (
     <div className="space-y-6">
@@ -32,7 +35,7 @@ export default function DeliveryDetailPage({ params }: { params: Promise<{ id: s
           <div className="flex items-center gap-2">
             <Button variant="outline" onClick={() => router.push("/deliveries")}>
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Back
+              {tc('back')}
             </Button>
             <StatusAction
               currentStatus={delivery.status}
@@ -46,43 +49,43 @@ export default function DeliveryDetailPage({ params }: { params: Promise<{ id: s
 
       <div className="grid grid-cols-2 gap-4">
         <Card>
-          <CardHeader><CardTitle className="text-sm">Delivery Info</CardTitle></CardHeader>
+          <CardHeader><CardTitle className="text-sm">{t('deliveryInfo')}</CardTitle></CardHeader>
           <CardContent className="space-y-2 text-sm">
-            <div className="flex justify-between"><span className="text-muted-foreground">Status</span><StatusBadge status={delivery.status} /></div>
-            <div className="flex justify-between"><span className="text-muted-foreground">Delivery Date</span><span>{delivery.deliveryDate ? formatDate(delivery.deliveryDate) : "—"}</span></div>
-            <div className="flex justify-between"><span className="text-muted-foreground">Destination</span><span>{delivery.destinationCity || "—"}</span></div>
-            <div className="flex justify-between"><span className="text-muted-foreground">Route</span><span>{delivery.deliveryRoute || "—"}</span></div>
-            <div className="flex justify-between"><span className="text-muted-foreground">Total Birds</span><span>{delivery.totalBirdCount ?? "—"}</span></div>
-            <div className="flex justify-between"><span className="text-muted-foreground">Total Weight</span><span>{delivery.totalWeightKg ? `${delivery.totalWeightKg} kg` : "—"}</span></div>
+            <div className="flex justify-between"><span className="text-muted-foreground">{tc('status')}</span><StatusBadge status={delivery.status} /></div>
+            <div className="flex justify-between"><span className="text-muted-foreground">{t('deliveryDate')}</span><span>{delivery.deliveryDate ? formatDate(delivery.deliveryDate) : "—"}</span></div>
+            <div className="flex justify-between"><span className="text-muted-foreground">{t('destination')}</span><span>{delivery.destinationCity || "—"}</span></div>
+            <div className="flex justify-between"><span className="text-muted-foreground">{t('route')}</span><span>{delivery.deliveryRoute || "—"}</span></div>
+            <div className="flex justify-between"><span className="text-muted-foreground">{t('totalBirds')}</span><span>{delivery.totalBirdCount ?? "—"}</span></div>
+            <div className="flex justify-between"><span className="text-muted-foreground">{t('totalWeight')}</span><span>{delivery.totalWeightKg ? `${delivery.totalWeightKg} kg` : "—"}</span></div>
           </CardContent>
         </Card>
         <Card>
-          <CardHeader><CardTitle className="text-sm">People & Vehicle</CardTitle></CardHeader>
+          <CardHeader><CardTitle className="text-sm">{t('peopleVehicle')}</CardTitle></CardHeader>
           <CardContent className="space-y-2 text-sm">
-            <div className="flex justify-between"><span className="text-muted-foreground">Customer</span><span>{delivery.customer?.name || "—"}</span></div>
-            <div className="flex justify-between"><span className="text-muted-foreground">Vehicle</span><span>{delivery.vehicle?.plateNumber || "—"}</span></div>
-            <div className="flex justify-between"><span className="text-muted-foreground">Driver</span><span>{delivery.driver?.name || "—"}</span></div>
-            <div className="flex justify-between"><span className="text-muted-foreground">Notes</span><span>{delivery.notes || "—"}</span></div>
+            <div className="flex justify-between"><span className="text-muted-foreground">{t('customer')}</span><span>{delivery.customer?.name || "—"}</span></div>
+            <div className="flex justify-between"><span className="text-muted-foreground">{t('vehicle')}</span><span>{delivery.vehicle?.plateNumber || "—"}</span></div>
+            <div className="flex justify-between"><span className="text-muted-foreground">{t('driver')}</span><span>{delivery.driver?.name || "—"}</span></div>
+            <div className="flex justify-between"><span className="text-muted-foreground">{t('notes')}</span><span>{delivery.notes || "—"}</span></div>
           </CardContent>
         </Card>
       </div>
 
       <Card>
-        <CardHeader><CardTitle className="text-sm">Line Items</CardTitle></CardHeader>
+        <CardHeader><CardTitle className="text-sm">{t('lineItems')}</CardTitle></CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>#</TableHead>
-                <TableHead>Customer DO Number</TableHead>
-                <TableHead>Bird Count</TableHead>
-                <TableHead>Weight (kg)</TableHead>
-                <TableHead>Notes</TableHead>
+                <TableHead>{t('customerDoNumber')}</TableHead>
+                <TableHead>{t('birdCount')}</TableHead>
+                <TableHead>{t('weightKg')}</TableHead>
+                <TableHead>{t('notes')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {delivery.lines?.length === 0 ? (
-                <TableRow><TableCell colSpan={5} className="text-center text-muted-foreground">No lines</TableCell></TableRow>
+                <TableRow><TableCell colSpan={5} className="text-center text-muted-foreground">{t('noLines')}</TableCell></TableRow>
               ) : (
                 delivery.lines?.map((line, idx) => (
                   <TableRow key={line.id}>

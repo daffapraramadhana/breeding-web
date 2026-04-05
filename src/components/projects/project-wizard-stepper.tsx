@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -9,12 +10,15 @@ interface Step {
   sublabel: string;
 }
 
-const STEPS: Step[] = [
-  { number: 1, label: "Own Farm", sublabel: "Persiapan Own Farm" },
-  { number: 2, label: "Kandang", sublabel: "Persiapan Kandang" },
-  { number: 3, label: "Chickin", sublabel: "Persiapan Chickin" },
-  { number: 4, label: "Anak Kandang", sublabel: "Persiapan Anak Kandang" },
-];
+function useWizardSteps(): Step[] {
+  const t = useTranslations("projectWizard");
+  return [
+    { number: 1, label: t("stepOwnFarm"), sublabel: t("stepOwnFarmSub") },
+    { number: 2, label: t("stepCoop"), sublabel: t("stepCoopSub") },
+    { number: 3, label: t("stepChickIn"), sublabel: t("stepChickInSub") },
+    { number: 4, label: t("stepCaretaker"), sublabel: t("stepCaretakerSub") },
+  ];
+}
 
 interface ProjectWizardStepperProps {
   currentStep: number;
@@ -27,6 +31,7 @@ export function ProjectWizardStepper({
   highestCompletedStep,
   onStepClick,
 }: ProjectWizardStepperProps) {
+  const STEPS = useWizardSteps();
   const STEP_COLORS = [
     "bg-green-600",
     "bg-amber-600",

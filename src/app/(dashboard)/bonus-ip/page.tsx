@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { useQueryState, parseAsInteger } from "nuqs";
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2, X } from "lucide-react";
@@ -40,6 +41,8 @@ interface DetailRow {
 }
 
 export default function BonusIpPage() {
+  const t = useTranslations("bonusIp");
+  const tc = useTranslations("common");
   const [page, setPage] = useQueryState(
     "page",
     parseAsInteger.withDefault(1)
@@ -69,22 +72,22 @@ export default function BonusIpPage() {
   const [deleting, setDeleting] = useState<BonusIp | null>(null);
 
   const columns: Column<BonusIp>[] = [
-    { header: "Name", accessorKey: "name" },
+    { header: tc("name"), accessorKey: "name" },
     {
-      header: "Unit Option",
+      header: t("bonusUnitOption"),
       cell: (row) => row.bonusUnitOption || "-",
     },
     {
-      header: "Status",
+      header: tc("status"),
       cell: (row) => <StatusBadge status={row.status} />,
     },
     {
-      header: "Created",
+      header: tc("created"),
       cell: (row) => formatDate(row.createdAt),
       className: "w-[150px]",
     },
     {
-      header: "Actions",
+      header: tc("actions"),
       cell: (row) => (
         <div className="flex items-center gap-1">
           <Button
@@ -158,7 +161,7 @@ export default function BonusIpPage() {
 
   async function handleSubmit() {
     if (!formName.trim()) {
-      toast.error("Name is required");
+      toast.error(tc("required", { field: tc("name") }));
       return;
     }
 
@@ -176,13 +179,13 @@ export default function BonusIpPage() {
           method: "PATCH",
           body: JSON.stringify(body),
         });
-        toast.success("Bonus IP updated successfully");
+        toast.success(tc("entityUpdated", { entity: t("entity") }));
       } else {
         await fetchApi("/bonus-ip", {
           method: "POST",
           body: JSON.stringify(body),
         });
-        toast.success("Bonus IP created successfully");
+        toast.success(tc("entityCreated", { entity: t("entity") }));
       }
 
       setDialogOpen(false);
@@ -190,8 +193,8 @@ export default function BonusIpPage() {
     } catch {
       toast.error(
         editing
-          ? "Failed to update bonus IP"
-          : "Failed to create bonus IP"
+          ? tc("entityUpdateFailed", { entity: t("entity") })
+          : tc("entityCreateFailed", { entity: t("entity") })
       );
     } finally {
       setIsSubmitting(false);
@@ -205,24 +208,24 @@ export default function BonusIpPage() {
       await fetchApi(`/bonus-ip/${deleting.id}`, {
         method: "DELETE",
       });
-      toast.success("Bonus IP deleted successfully");
+      toast.success(tc("entityDeleted", { entity: t("entity") }));
       setDeleteDialogOpen(false);
       setDeleting(null);
       refetch();
     } catch {
-      toast.error("Failed to delete bonus IP");
+      toast.error(tc("entityDeleteFailed", { entity: t("entity") }));
     }
   }
 
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Bonus IP"
-        description="Manage bonus IP configurations"
+        title={t("title")}
+        description={t("description")}
         actions={
           <Button onClick={handleCreate}>
             <Plus className="mr-2 h-4 w-4" />
-            New Bonus IP
+            {tc("newEntity", { entity: t("entity") })}
           </Button>
         }
       />
@@ -236,17 +239,17 @@ export default function BonusIpPage() {
           setSearch(value);
           setPage(1);
         }}
-        searchPlaceholder="Search bonus IP..."
+        searchPlaceholder={t("searchPlaceholder")}
         page={page}
         totalPages={meta?.totalPages || 1}
         onPageChange={setPage}
         total={meta?.total}
-        emptyTitle="No bonus IP found"
-        emptyDescription="Get started by creating your first bonus IP."
+        emptyTitle={tc("noResults", { entity: t("entity") })}
+        emptyDescription={tc("getStarted", { entity: t("entity") })}
         emptyAction={
           <Button onClick={handleCreate}>
             <Plus className="mr-2 h-4 w-4" />
-            New Bonus IP
+            {tc("newEntity", { entity: t("entity") })}
           </Button>
         }
       />
@@ -255,33 +258,33 @@ export default function BonusIpPage() {
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>
-              {editing ? "Edit Bonus IP" : "New Bonus IP"}
+              {editing ? tc("editEntity", { entity: t("entity") }) : tc("newEntity", { entity: t("entity") })}
             </DialogTitle>
             <DialogDescription>
               {editing
-                ? "Update the bonus IP details below."
-                : "Fill in the details to create a new bonus IP."}
+                ? tc("updateDetails", { entity: t("entity") })
+                : tc("fillDetails", { entity: t("entity") })}
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Name</Label>
+              <Label htmlFor="name">{tc("name")}</Label>
               <Input
                 id="name"
-                placeholder="Enter name"
+                placeholder={tc("enterField", { field: tc("name") })}
                 value={formName}
                 onChange={(e) => setFormName(e.target.value)}
               />
             </div>
             <div className="space-y-2">
-              <Label>Bonus Unit Option</Label>
+              <Label>{t("bonusUnitOption")}</Label>
               <Select
                 value={formBonusUnitOption}
                 onValueChange={setFormBonusUnitOption}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select unit option" />
+                  <SelectValue placeholder={t("selectUnitOption")} />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="PER_KG">PER_KG</SelectItem>
@@ -291,10 +294,10 @@ export default function BonusIpPage() {
               </Select>
             </div>
             <div className="space-y-2">
-              <Label>Status</Label>
+              <Label>{tc("status")}</Label>
               <Select value={formStatus} onValueChange={setFormStatus}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select status" />
+                  <SelectValue placeholder={tc("selectField", { field: tc("status") })} />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="ACTIVE">ACTIVE</SelectItem>
@@ -305,30 +308,30 @@ export default function BonusIpPage() {
 
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label>Details</Label>
+                <Label>{t("details")}</Label>
                 <Button type="button" variant="outline" size="sm" onClick={addDetail}>
                   <Plus className="mr-1 h-3 w-3" />
-                  Add Detail
+                  {t("addDetail")}
                 </Button>
               </div>
               {formDetails.map((detail, index) => (
                 <div key={index} className="flex items-center gap-2">
                   <Input
-                    placeholder="Min IP"
+                    placeholder={t("minIp")}
                     value={detail.minIp}
                     onChange={(e) =>
                       updateDetail(index, "minIp", e.target.value)
                     }
                   />
                   <Input
-                    placeholder="Max IP"
+                    placeholder={t("maxIp")}
                     value={detail.maxIp}
                     onChange={(e) =>
                       updateDetail(index, "maxIp", e.target.value)
                     }
                   />
                   <Input
-                    placeholder="Bonus"
+                    placeholder={t("bonus")}
                     value={detail.bonus}
                     onChange={(e) =>
                       updateDetail(index, "bonus", e.target.value)
@@ -353,14 +356,14 @@ export default function BonusIpPage() {
               onClick={() => setDialogOpen(false)}
               disabled={isSubmitting}
             >
-              Cancel
+              {tc("cancel")}
             </Button>
             <Button onClick={handleSubmit} disabled={isSubmitting}>
               {isSubmitting
-                ? "Saving..."
+                ? tc("saving")
                 : editing
-                  ? "Update"
-                  : "Create"}
+                  ? tc("update")
+                  : tc("create")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -369,11 +372,11 @@ export default function BonusIpPage() {
       <ConfirmDialog
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
-        title="Delete Bonus IP"
-        description={`Are you sure you want to delete "${deleting?.name}"? This action cannot be undone.`}
+        title={tc("deleteEntity", { entity: t("entity") })}
+        description={tc("confirmDelete", { name: deleting?.name ?? "" })}
         onConfirm={handleDelete}
         variant="destructive"
-        confirmLabel="Delete"
+        confirmLabel={tc("delete")}
       />
     </div>
   );

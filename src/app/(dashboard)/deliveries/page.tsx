@@ -10,47 +10,50 @@ import { DataTable, Column } from "@/components/shared/data-table";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { usePaginated } from "@/hooks/use-api";
 import { Delivery } from "@/types/api";
+import { useTranslations } from "next-intl";
 import { formatDate } from "@/lib/utils";
 
-const columns: Column<Delivery>[] = [
-  {
-    header: "Sales Order",
-    cell: (row) => (
-      <span className="font-medium">
-        {row.salesOrder?.doNumber || row.salesOrderId?.slice(0, 8) || "—"}
-      </span>
-    ),
-  },
-  {
-    header: "Customer / Breeder",
-    cell: (row) => row.customer?.name || "—",
-  },
-  {
-    header: "Vehicle",
-    cell: (row) => row.vehicle?.plateNumber || "—",
-  },
-  {
-    header: "Driver",
-    cell: (row) => row.driver?.name || "—",
-  },
-  {
-    header: "Delivery Date",
-    cell: (row) => row.deliveryDate ? formatDate(row.deliveryDate) : "—",
-  },
-  {
-    header: "Status",
-    cell: (row) => <StatusBadge status={row.status} />,
-  },
-  {
-    header: "Created",
-    cell: (row) => formatDate(row.createdAt),
-  },
-];
-
 export default function DeliveriesPage() {
+  const t = useTranslations('deliveries');
+  const tc = useTranslations('common');
   const router = useRouter();
   const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(1));
   const [search, setSearch] = useQueryState("search", { defaultValue: "" });
+
+  const columns: Column<Delivery>[] = [
+    {
+      header: t('salesOrder'),
+      cell: (row) => (
+        <span className="font-medium">
+          {row.salesOrder?.doNumber || row.salesOrderId?.slice(0, 8) || "—"}
+        </span>
+      ),
+    },
+    {
+      header: t('customerBreeder'),
+      cell: (row) => row.customer?.name || "—",
+    },
+    {
+      header: t('vehicle'),
+      cell: (row) => row.vehicle?.plateNumber || "—",
+    },
+    {
+      header: t('driver'),
+      cell: (row) => row.driver?.name || "—",
+    },
+    {
+      header: t('deliveryDate'),
+      cell: (row) => row.deliveryDate ? formatDate(row.deliveryDate) : "—",
+    },
+    {
+      header: tc('status'),
+      cell: (row) => <StatusBadge status={row.status} />,
+    },
+    {
+      header: tc('created'),
+      cell: (row) => formatDate(row.createdAt),
+    },
+  ];
 
   const { data, meta, isLoading } = usePaginated<Delivery>(
     "/deliveries",
@@ -60,13 +63,13 @@ export default function DeliveriesPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Deliveries"
-        description="Manage delivery orders"
+        title={t('title')}
+        description={t('description')}
         actions={
           <Button asChild>
             <Link href="/deliveries/new">
               <Plus className="mr-2 h-4 w-4" />
-              New Delivery
+              {t('newDelivery')}
             </Link>
           </Button>
         }
@@ -77,7 +80,7 @@ export default function DeliveriesPage() {
         isLoading={isLoading}
         search={search}
         onSearchChange={setSearch}
-        searchPlaceholder="Search deliveries..."
+        searchPlaceholder={t('searchPlaceholder')}
         page={page}
         totalPages={meta?.totalPages || 1}
         total={meta?.total}

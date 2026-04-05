@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useQueryState, parseAsInteger } from "nuqs";
+import { useTranslations } from "next-intl";
 import { Plus } from "lucide-react";
 
 import { DataTable, Column } from "@/components/shared/data-table";
@@ -16,6 +17,8 @@ import { BranchCombobox } from "@/components/forms/branch-combobox";
 import { Label } from "@/components/ui/label";
 
 export default function ProjectsPage() {
+  const t = useTranslations("projects");
+  const tc = useTranslations("common");
   const router = useRouter();
 
   // URL state for pagination and search
@@ -42,33 +45,33 @@ export default function ProjectsPage() {
   // Table columns
   const columns: Column<Project>[] = [
     {
-      header: "ID",
+      header: "ID",  // keep as-is, universal
       cell: (row) => (
         <span className="font-mono text-xs">{row.id.slice(0, 8)}</span>
       ),
       className: "w-[100px]",
     },
     {
-      header: "Branch",
+      header: t("branch"),
       cell: (row) => row.branch?.name || "-",
     },
     {
-      header: "Farm",
+      header: t("farm"),
       cell: (row) => row.farm?.name || "-",
     },
     {
-      header: "Start Date",
+      header: t("startDate"),
       cell: (row) => (row.startDate ? formatDate(row.startDate) : "-"),
       className: "w-[140px]",
     },
     {
-      header: "Status",
+      header: tc("status"),
       cell: (row) =>
         row.status ? <StatusBadge status={row.status} /> : "-",
       className: "w-[120px]",
     },
     {
-      header: "Created",
+      header: tc("created"),
       cell: (row) => formatDate(row.createdAt),
       className: "w-[140px]",
     },
@@ -77,12 +80,12 @@ export default function ProjectsPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Projects"
-        description="Manage poultry production projects"
+        title={t("title")}
+        description={t("description")}
         actions={
           <Button onClick={() => router.push("/projects/new")}>
             <Plus className="mr-2 h-4 w-4" />
-            New Project
+            {t("newProject")}
           </Button>
         }
       />
@@ -90,7 +93,7 @@ export default function ProjectsPage() {
       {/* Filter Bar */}
       <div className="flex items-end gap-4">
         <div className="w-[280px] space-y-2">
-          <Label>Branch</Label>
+          <Label>{t("branch")}</Label>
           <BranchCombobox
             value={branchId}
             onChange={(val) => {
@@ -108,7 +111,7 @@ export default function ProjectsPage() {
               setPage(1);
             }}
           >
-            Clear filter
+            {t("clearFilter")}
           </Button>
         )}
       </div>
@@ -122,18 +125,18 @@ export default function ProjectsPage() {
           setSearch(value);
           setPage(1);
         }}
-        searchPlaceholder="Search projects..."
+        searchPlaceholder={t("searchPlaceholder")}
         page={page}
         totalPages={meta?.totalPages || 1}
         onPageChange={setPage}
         total={meta?.total}
         onRowClick={(project) => router.push(`/projects/${project.id}`)}
-        emptyTitle="No projects found"
-        emptyDescription="Get started by creating your first project."
+        emptyTitle={t("emptyTitle")}
+        emptyDescription={t("emptyDescription")}
         emptyAction={
           <Button onClick={() => router.push("/projects/new")}>
             <Plus className="mr-2 h-4 w-4" />
-            New Project
+            {t("newProject")}
           </Button>
         }
       />

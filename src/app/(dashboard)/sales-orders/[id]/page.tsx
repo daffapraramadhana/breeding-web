@@ -3,6 +3,7 @@
 import { use, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -37,6 +38,8 @@ export default function SalesOrderDetailPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  const t = useTranslations("salesOrderDetail");
+  const tc = useTranslations("common");
   const { id } = use(params);
   const router = useRouter();
   const { data: so, isLoading, refetch } = useApi<SalesOrder>(
@@ -45,15 +48,15 @@ export default function SalesOrderDetailPage({
   const [showDelete, setShowDelete] = useState(false);
 
   if (isLoading) return <PageSkeleton />;
-  if (!so) return <div>Sales Order not found</div>;
+  if (!so) return <div>{t("notFound")}</div>;
 
   async function handleDelete() {
     try {
       await fetchApi(`/sales-orders/${id}`, { method: "DELETE" });
-      toast.success("Sales Order deleted");
+      toast.success(t("deleted"));
       router.push("/sales-orders");
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to delete");
+      toast.error(err instanceof Error ? err.message : t("deleteFailed"));
     }
   }
 
@@ -71,7 +74,7 @@ export default function SalesOrderDetailPage({
             <Button variant="outline" asChild>
               <Link href="/sales-orders">
                 <ArrowLeft className="mr-2 h-4 w-4" />
-                Back
+                {t("back")}
               </Link>
             </Button>
             {so.status === "PENDING_APPROVAL" && (
@@ -80,7 +83,7 @@ export default function SalesOrderDetailPage({
                 onClick={() => setShowDelete(true)}
               >
                 <Trash2 className="mr-2 h-4 w-4" />
-                Delete
+                {tc("delete")}
               </Button>
             )}
             <StatusAction
@@ -96,32 +99,32 @@ export default function SalesOrderDetailPage({
       <div className="grid gap-6 md:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>Order Information</CardTitle>
+            <CardTitle>{t("orderInformation")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Status</span>
+              <span className="text-muted-foreground">{tc("status")}</span>
               <StatusBadge status={so.status} />
             </div>
             <Separator />
             <div className="flex justify-between">
-              <span className="text-muted-foreground">DO Number</span>
+              <span className="text-muted-foreground">{t("doNumber")}</span>
               <span className="font-medium">{so.doNumber || "—"}</span>
             </div>
             <Separator />
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Branch</span>
+              <span className="text-muted-foreground">{t("branch")}</span>
               <span className="font-medium">{so.branch?.name || "—"}</span>
             </div>
             <Separator />
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Recipient Type</span>
+              <span className="text-muted-foreground">{t("recipientType")}</span>
               <span>{so.recipientType || "—"}</span>
             </div>
             <Separator />
             <div className="flex justify-between">
               <span className="text-muted-foreground">
-                {so.recipientType === "BREEDER" ? "Breeder" : "Customer"}
+                {so.recipientType === "BREEDER" ? t("breeder") : t("customer")}
               </span>
               <span className="font-medium">{recipientName || "—"}</span>
             </div>
@@ -130,33 +133,33 @@ export default function SalesOrderDetailPage({
 
         <Card>
           <CardHeader>
-            <CardTitle>Additional Info</CardTitle>
+            <CardTitle>{t("additionalInfo")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Contract Price</span>
+              <span className="text-muted-foreground">{t("contractPrice")}</span>
               <span>{so.contractPrice ? formatCurrency(so.contractPrice) : "—"}</span>
             </div>
             <Separator />
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Market Price</span>
+              <span className="text-muted-foreground">{t("marketPrice")}</span>
               <span>{so.marketPrice ? formatCurrency(so.marketPrice) : "—"}</span>
             </div>
             <Separator />
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Payment Method</span>
+              <span className="text-muted-foreground">{t("paymentMethod")}</span>
               <span>{so.paymentMethod || "—"}</span>
             </div>
             <Separator />
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Created</span>
+              <span className="text-muted-foreground">{tc("created")}</span>
               <span>{formatDate(so.createdAt)}</span>
             </div>
             {so.notes && (
               <>
                 <Separator />
                 <div>
-                  <span className="text-muted-foreground">Notes</span>
+                  <span className="text-muted-foreground">{t("notes")}</span>
                   <p className="mt-1">{so.notes}</p>
                 </div>
               </>
@@ -167,7 +170,7 @@ export default function SalesOrderDetailPage({
 
       <Card>
         <CardHeader>
-          <CardTitle>Line Items</CardTitle>
+          <CardTitle>{t("lineItems")}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="rounded-md border">
@@ -175,11 +178,11 @@ export default function SalesOrderDetailPage({
               <TableHeader>
                 <TableRow>
                   <TableHead>#</TableHead>
-                  <TableHead>Product Description</TableHead>
-                  <TableHead className="text-right">Bird Count</TableHead>
-                  <TableHead className="text-right">Weight (kg)</TableHead>
-                  <TableHead className="text-right">Unit Price</TableHead>
-                  <TableHead className="text-right">Total Price</TableHead>
+                  <TableHead>{t("productDescription")}</TableHead>
+                  <TableHead className="text-right">{t("birdCount")}</TableHead>
+                  <TableHead className="text-right">{t("weightKg")}</TableHead>
+                  <TableHead className="text-right">{t("unitPrice")}</TableHead>
+                  <TableHead className="text-right">{t("totalPrice")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -212,11 +215,11 @@ export default function SalesOrderDetailPage({
       <ConfirmDialog
         open={showDelete}
         onOpenChange={setShowDelete}
-        title="Delete Sales Order"
-        description="Are you sure you want to delete this sales order?"
+        title={t("deleteTitle")}
+        description={t("deleteDescription")}
         onConfirm={handleDelete}
         variant="destructive"
-        confirmLabel="Delete"
+        confirmLabel={tc("delete")}
       />
     </div>
   );

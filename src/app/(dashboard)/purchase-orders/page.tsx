@@ -4,6 +4,8 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useQueryState, parseAsInteger } from "nuqs";
 import { Plus } from "lucide-react";
+import { useTranslations } from "next-intl";
+
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/shared/page-header";
 import { DataTable, Column } from "@/components/shared/data-table";
@@ -12,38 +14,40 @@ import { usePaginated } from "@/hooks/use-api";
 import { PurchaseOrder } from "@/types/api";
 import { formatDate, formatCurrency } from "@/lib/utils";
 
-const columns: Column<PurchaseOrder>[] = [
-  {
-    header: "PO Number",
-    cell: (row) => <span className="font-medium">{row.poNumber}</span>,
-  },
-  {
-    header: "Supplier",
-    cell: (row) => row.supplier?.name || "—",
-  },
-  {
-    header: "Branch",
-    cell: (row) => row.branch?.name || "—",
-  },
-  {
-    header: "Order Date",
-    cell: (row) => formatDate(row.orderDate),
-  },
-  {
-    header: "Status",
-    cell: (row) => <StatusBadge status={row.status} />,
-  },
-  {
-    header: "Total",
-    cell: (row) => formatCurrency(row.totalAmount),
-    className: "text-right",
-  },
-];
-
 export default function PurchaseOrdersPage() {
+  const t = useTranslations('purchaseOrders');
+  const tc = useTranslations('common');
   const router = useRouter();
   const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(1));
   const [search, setSearch] = useQueryState("search", { defaultValue: "" });
+
+  const columns: Column<PurchaseOrder>[] = [
+    {
+      header: t('poNumber'),
+      cell: (row) => <span className="font-medium">{row.poNumber}</span>,
+    },
+    {
+      header: t('supplier'),
+      cell: (row) => row.supplier?.name || "—",
+    },
+    {
+      header: t('branch'),
+      cell: (row) => row.branch?.name || "—",
+    },
+    {
+      header: t('orderDate'),
+      cell: (row) => formatDate(row.orderDate),
+    },
+    {
+      header: tc('status'),
+      cell: (row) => <StatusBadge status={row.status} />,
+    },
+    {
+      header: t('total'),
+      cell: (row) => formatCurrency(row.totalAmount),
+      className: "text-right",
+    },
+  ];
 
   const { data, meta, isLoading } = usePaginated<PurchaseOrder>(
     "/purchase-orders",
@@ -53,13 +57,13 @@ export default function PurchaseOrdersPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Purchase Orders"
-        description="Manage purchase orders from suppliers"
+        title={t('title')}
+        description={t('description')}
         actions={
           <Button asChild>
             <Link href="/purchase-orders/new">
               <Plus className="mr-2 h-4 w-4" />
-              New PO
+              {tc('newEntity', { entity: t('entity') })}
             </Link>
           </Button>
         }
@@ -70,7 +74,7 @@ export default function PurchaseOrdersPage() {
         isLoading={isLoading}
         search={search}
         onSearchChange={setSearch}
-        searchPlaceholder="Search by PO number or supplier..."
+        searchPlaceholder={tc('search')}
         page={page}
         totalPages={meta?.totalPages || 1}
         total={meta?.total}

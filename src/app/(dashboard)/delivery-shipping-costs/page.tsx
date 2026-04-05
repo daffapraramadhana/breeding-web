@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { useQueryState, parseAsInteger } from "nuqs";
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2 } from "lucide-react";
@@ -26,6 +27,8 @@ import {
 } from "@/components/ui/dialog";
 
 export default function DeliveryShippingCostsPage() {
+  const t = useTranslations("deliveryShippingCosts");
+  const tc = useTranslations("common");
   const [page, setPage] = useQueryState(
     "page",
     parseAsInteger.withDefault(1)
@@ -55,27 +58,27 @@ export default function DeliveryShippingCostsPage() {
   const [deleting, setDeleting] = useState<DeliveryShippingCost | null>(null);
 
   const columns: Column<DeliveryShippingCost>[] = [
-    { header: "Delivery ID", accessorKey: "deliveryId" },
+    { header: t("deliveryId"), accessorKey: "deliveryId" },
     {
-      header: "Fuel Cost",
+      header: t("fuelCost"),
       cell: (row) => row.fuelCost || "-",
     },
     {
-      header: "Toll Cost",
+      header: t("tollCost"),
       cell: (row) => row.tollCost || "-",
     },
     {
-      header: "Other",
+      header: t("other"),
       cell: (row) => row.otherCost || "-",
     },
-    { header: "Total Cost", accessorKey: "totalCost" },
+    { header: t("totalCost"), accessorKey: "totalCost" },
     {
-      header: "Created",
+      header: tc("created"),
       cell: (row) => formatDate(row.createdAt),
       className: "w-[150px]",
     },
     {
-      header: "Actions",
+      header: tc("actions"),
       cell: (row) => (
         <div className="flex items-center gap-1">
           <Button
@@ -129,7 +132,7 @@ export default function DeliveryShippingCostsPage() {
 
   async function handleSubmit() {
     if (!formDeliveryId.trim()) {
-      toast.error("Delivery ID is required");
+      toast.error(tc("required", { field: t("deliveryId") }));
       return;
     }
 
@@ -147,13 +150,13 @@ export default function DeliveryShippingCostsPage() {
           method: "PATCH",
           body: JSON.stringify(body),
         });
-        toast.success("Shipping cost updated successfully");
+        toast.success(tc("entityUpdated", { entity: t("entity") }));
       } else {
         await fetchApi("/delivery-shipping-costs", {
           method: "POST",
           body: JSON.stringify(body),
         });
-        toast.success("Shipping cost created successfully");
+        toast.success(tc("entityCreated", { entity: t("entity") }));
       }
 
       setDialogOpen(false);
@@ -161,8 +164,8 @@ export default function DeliveryShippingCostsPage() {
     } catch {
       toast.error(
         editing
-          ? "Failed to update shipping cost"
-          : "Failed to create shipping cost"
+          ? tc("entityUpdateFailed", { entity: t("entity") })
+          : tc("entityCreateFailed", { entity: t("entity") })
       );
     } finally {
       setIsSubmitting(false);
@@ -176,24 +179,24 @@ export default function DeliveryShippingCostsPage() {
       await fetchApi(`/delivery-shipping-costs/${deleting.id}`, {
         method: "DELETE",
       });
-      toast.success("Shipping cost deleted successfully");
+      toast.success(tc("entityDeleted", { entity: t("entity") }));
       setDeleteDialogOpen(false);
       setDeleting(null);
       refetch();
     } catch {
-      toast.error("Failed to delete shipping cost");
+      toast.error(tc("entityDeleteFailed", { entity: t("entity") }));
     }
   }
 
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Delivery Shipping Costs"
-        description="Manage delivery shipping costs"
+        title={t("title")}
+        description={t("description")}
         actions={
           <Button onClick={handleCreate}>
             <Plus className="mr-2 h-4 w-4" />
-            New Shipping Cost
+            {tc("newEntity", { entity: t("entity") })}
           </Button>
         }
       />
@@ -207,17 +210,17 @@ export default function DeliveryShippingCostsPage() {
           setSearch(value);
           setPage(1);
         }}
-        searchPlaceholder="Search shipping costs..."
+        searchPlaceholder={t("searchPlaceholder")}
         page={page}
         totalPages={meta?.totalPages || 1}
         onPageChange={setPage}
         total={meta?.total}
-        emptyTitle="No shipping costs found"
-        emptyDescription="Get started by creating your first shipping cost."
+        emptyTitle={tc("noResults", { entity: t("entity") })}
+        emptyDescription={tc("getStarted", { entity: t("entity") })}
         emptyAction={
           <Button onClick={handleCreate}>
             <Plus className="mr-2 h-4 w-4" />
-            New Shipping Cost
+            {tc("newEntity", { entity: t("entity") })}
           </Button>
         }
       />
@@ -226,48 +229,48 @@ export default function DeliveryShippingCostsPage() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {editing ? "Edit Shipping Cost" : "New Shipping Cost"}
+              {editing ? tc("editEntity", { entity: t("entity") }) : tc("newEntity", { entity: t("entity") })}
             </DialogTitle>
             <DialogDescription>
               {editing
-                ? "Update the shipping cost details below."
-                : "Fill in the details to create a new shipping cost."}
+                ? tc("updateDetails", { entity: t("entity") })
+                : tc("fillDetails", { entity: t("entity") })}
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="deliveryId">Delivery ID</Label>
+              <Label htmlFor="deliveryId">{t("deliveryId")}</Label>
               <Input
                 id="deliveryId"
-                placeholder="Enter delivery ID"
+                placeholder={tc("enterField", { field: t("deliveryId") })}
                 value={formDeliveryId}
                 onChange={(e) => setFormDeliveryId(e.target.value)}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="fuelCost">Fuel Cost</Label>
+              <Label htmlFor="fuelCost">{t("fuelCost")}</Label>
               <Input
                 id="fuelCost"
-                placeholder="Enter fuel cost"
+                placeholder={tc("enterField", { field: t("fuelCost") })}
                 value={formFuelCost}
                 onChange={(e) => setFormFuelCost(e.target.value)}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="tollCost">Toll Cost</Label>
+              <Label htmlFor="tollCost">{t("tollCost")}</Label>
               <Input
                 id="tollCost"
-                placeholder="Enter toll cost"
+                placeholder={tc("enterField", { field: t("tollCost") })}
                 value={formTollCost}
                 onChange={(e) => setFormTollCost(e.target.value)}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="otherCost">Other Cost</Label>
+              <Label htmlFor="otherCost">{t("otherCost")}</Label>
               <Input
                 id="otherCost"
-                placeholder="Enter other cost"
+                placeholder={tc("enterField", { field: t("otherCost") })}
                 value={formOtherCost}
                 onChange={(e) => setFormOtherCost(e.target.value)}
               />
@@ -280,14 +283,14 @@ export default function DeliveryShippingCostsPage() {
               onClick={() => setDialogOpen(false)}
               disabled={isSubmitting}
             >
-              Cancel
+              {tc("cancel")}
             </Button>
             <Button onClick={handleSubmit} disabled={isSubmitting}>
               {isSubmitting
-                ? "Saving..."
+                ? tc("saving")
                 : editing
-                  ? "Update"
-                  : "Create"}
+                  ? tc("update")
+                  : tc("create")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -296,11 +299,11 @@ export default function DeliveryShippingCostsPage() {
       <ConfirmDialog
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
-        title="Delete Shipping Cost"
-        description="Are you sure you want to delete this shipping cost? This action cannot be undone."
+        title={tc("deleteEntity", { entity: t("entity") })}
+        description={tc("confirmDelete", { name: t("entity") })}
         onConfirm={handleDelete}
         variant="destructive"
-        confirmLabel="Delete"
+        confirmLabel={tc("delete")}
       />
     </div>
   );

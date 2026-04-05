@@ -15,6 +15,7 @@ import { ChevronLeft, ChevronRight, Search } from "lucide-react";
 import { EmptyState } from "./empty-state";
 import { TableSkeleton } from "./loading-skeleton";
 import { cn } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 
 export interface Column<T> {
   header: string;
@@ -47,7 +48,7 @@ export function DataTable<T extends Record<string, any>>({
   isLoading,
   search,
   onSearchChange,
-  searchPlaceholder = "Search...",
+  searchPlaceholder,
   page = 1,
   totalPages = 1,
   onPageChange,
@@ -57,13 +58,15 @@ export function DataTable<T extends Record<string, any>>({
   emptyDescription,
   emptyAction,
 }: DataTableProps<T>) {
+  const tc = useTranslations('common');
+  const resolvedSearchPlaceholder = searchPlaceholder ?? tc('search');
   return (
     <div className="space-y-4">
       {onSearchChange && (
         <div className="relative max-w-sm">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--muted-foreground)]" />
           <Input
-            placeholder={searchPlaceholder}
+            placeholder={resolvedSearchPlaceholder}
             value={search || ""}
             onChange={(e) => onSearchChange(e.target.value)}
             className="pl-9"
@@ -129,7 +132,7 @@ export function DataTable<T extends Record<string, any>>({
       {totalPages > 1 && onPageChange && (
         <div className="flex items-center justify-between px-1">
           <p className="text-[11px] text-[var(--muted-foreground)]">
-            {total !== undefined ? `${total} total records` : `Page ${page} of ${totalPages}`}
+            {total !== undefined ? tc('totalRecords', { total }) : tc('pageOf', { page, totalPages })}
           </p>
           <div className="flex items-center gap-1">
             <Button

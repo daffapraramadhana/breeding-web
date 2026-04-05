@@ -29,6 +29,7 @@ import { GoodsReturn } from "@/types/api";
 import { fetchApi } from "@/lib/api";
 import { formatDate, formatCurrency, formatQuantity, parseDecimal } from "@/lib/utils";
 import { RETURN_STATUS_TRANSITIONS } from "@/lib/constants";
+import { useTranslations } from "next-intl";
 import { ArrowLeft, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -37,6 +38,8 @@ export default function GoodsReturnDetailPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  const t = useTranslations('goodsReturns');
+  const tc = useTranslations('common');
   const { id } = use(params);
   const router = useRouter();
   const { data: gr, isLoading, refetch } = useApi<GoodsReturn>(
@@ -45,15 +48,15 @@ export default function GoodsReturnDetailPage({
   const [showDelete, setShowDelete] = useState(false);
 
   if (isLoading) return <PageSkeleton />;
-  if (!gr) return <div>Goods Return not found</div>;
+  if (!gr) return <div>{t('notFound')}</div>;
 
   async function handleDelete() {
     try {
       await fetchApi(`/goods-returns/${id}`, { method: "DELETE" });
-      toast.success("Goods Return deleted");
+      toast.success(tc('entityDeleted', { entity: t('entity') }));
       router.push("/goods-returns");
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to delete");
+      toast.error(err instanceof Error ? err.message : tc('entityDeleteFailed', { entity: t('entity') }));
     }
   }
 
@@ -71,7 +74,7 @@ export default function GoodsReturnDetailPage({
             <Button variant="outline" asChild>
               <Link href="/goods-returns">
                 <ArrowLeft className="mr-2 h-4 w-4" />
-                Back
+                {tc('back')}
               </Link>
             </Button>
             {gr.status === "PROCESSING" && (
@@ -80,7 +83,7 @@ export default function GoodsReturnDetailPage({
                 onClick={() => setShowDelete(true)}
               >
                 <Trash2 className="mr-2 h-4 w-4" />
-                Delete
+                {tc('delete')}
               </Button>
             )}
             <StatusAction
@@ -96,26 +99,26 @@ export default function GoodsReturnDetailPage({
       <div className="grid gap-6 md:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>Return Information</CardTitle>
+            <CardTitle>{t('returnInformation')}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Status</span>
+              <span className="text-muted-foreground">{tc('status')}</span>
               <StatusBadge status={gr.status} />
             </div>
             <Separator />
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Supplier</span>
+              <span className="text-muted-foreground">{t('supplier')}</span>
               <span className="font-medium">{gr.supplier?.name || "—"}</span>
             </div>
             <Separator />
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Warehouse</span>
+              <span className="text-muted-foreground">{t('warehouse')}</span>
               <span className="font-medium">{gr.warehouse?.name || "—"}</span>
             </div>
             <Separator />
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Total Return Value</span>
+              <span className="text-muted-foreground">{t('totalReturnValue')}</span>
               <span className="text-lg font-bold">
                 {formatCurrency(grandTotal)}
               </span>
@@ -125,18 +128,18 @@ export default function GoodsReturnDetailPage({
 
         <Card>
           <CardHeader>
-            <CardTitle>Additional Info</CardTitle>
+            <CardTitle>{t('additionalInfo')}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Created</span>
+              <span className="text-muted-foreground">{tc('created')}</span>
               <span>{formatDate(gr.createdAt)}</span>
             </div>
             {gr.purchaseOrderId && (
               <>
                 <Separator />
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Purchase Order</span>
+                  <span className="text-muted-foreground">{t('purchaseOrderId')}</span>
                   <span>{gr.purchaseOrderId}</span>
                 </div>
               </>
@@ -145,7 +148,7 @@ export default function GoodsReturnDetailPage({
               <>
                 <Separator />
                 <div>
-                  <span className="text-muted-foreground">Notes</span>
+                  <span className="text-muted-foreground">{t('notes')}</span>
                   <p className="mt-1">{gr.notes}</p>
                 </div>
               </>
@@ -156,7 +159,7 @@ export default function GoodsReturnDetailPage({
 
       <Card>
         <CardHeader>
-          <CardTitle>Line Items</CardTitle>
+          <CardTitle>{t('lineItems')}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="rounded-md border">
@@ -164,12 +167,12 @@ export default function GoodsReturnDetailPage({
               <TableHeader>
                 <TableRow>
                   <TableHead>#</TableHead>
-                  <TableHead>Product</TableHead>
-                  <TableHead className="text-right">Qty</TableHead>
-                  <TableHead>UOM</TableHead>
-                  <TableHead>Reason</TableHead>
-                  <TableHead className="text-right">Unit Cost</TableHead>
-                  <TableHead className="text-right">Total</TableHead>
+                  <TableHead>{t('product')}</TableHead>
+                  <TableHead className="text-right">{t('qty')}</TableHead>
+                  <TableHead>{t('uom')}</TableHead>
+                  <TableHead>{t('reason')}</TableHead>
+                  <TableHead className="text-right">{t('unitCost')}</TableHead>
+                  <TableHead className="text-right">{t('total')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -202,7 +205,7 @@ export default function GoodsReturnDetailPage({
                     colSpan={6}
                     className="text-right font-medium"
                   >
-                    Grand Total
+                    {t('grandTotal')}
                   </TableCell>
                   <TableCell className="text-right text-lg font-bold">
                     {formatCurrency(grandTotal)}
@@ -217,11 +220,11 @@ export default function GoodsReturnDetailPage({
       <ConfirmDialog
         open={showDelete}
         onOpenChange={setShowDelete}
-        title="Delete Goods Return"
-        description="Are you sure you want to delete this goods return?"
+        title={t('deleteTitle')}
+        description={t('deleteDescription')}
         onConfirm={handleDelete}
         variant="destructive"
-        confirmLabel="Delete"
+        confirmLabel={tc('delete')}
       />
     </div>
   );

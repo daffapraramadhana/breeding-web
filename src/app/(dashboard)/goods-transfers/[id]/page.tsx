@@ -28,6 +28,7 @@ import { GoodsTransfer } from "@/types/api";
 import { TRANSFER_STATUS_TRANSITIONS } from "@/lib/constants";
 import { fetchApi } from "@/lib/api";
 import { formatDate, formatQuantity } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 import { ArrowLeft, ArrowRight, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -36,6 +37,8 @@ export default function GoodsTransferDetailPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  const t = useTranslations('goodsTransfers');
+  const tc = useTranslations('common');
   const { id } = use(params);
   const router = useRouter();
   const { data: gt, isLoading, refetch } = useApi<GoodsTransfer>(
@@ -43,16 +46,16 @@ export default function GoodsTransferDetailPage({
   );
   const [showDelete, setShowDelete] = useState(false);
 
-  if (isLoading) return <div className="p-6">Loading...</div>;
-  if (!gt) return <div className="p-6">Goods Transfer not found</div>;
+  if (isLoading) return <div className="p-6">{t('loading')}</div>;
+  if (!gt) return <div className="p-6">{t('notFound')}</div>;
 
   async function handleDelete() {
     try {
       await fetchApi(`/goods-transfers/${id}`, { method: "DELETE" });
-      toast.success("Goods Transfer deleted");
+      toast.success(tc('entityDeleted', { entity: t('entity') }));
       router.push("/goods-transfers");
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to delete");
+      toast.error(err instanceof Error ? err.message : tc('entityDeleteFailed', { entity: t('entity') }));
     }
   }
 
@@ -65,7 +68,7 @@ export default function GoodsTransferDetailPage({
             <Button variant="outline" asChild>
               <Link href="/goods-transfers">
                 <ArrowLeft className="mr-2 h-4 w-4" />
-                Back
+                {tc('back')}
               </Link>
             </Button>
             {gt.status === "IN_TRANSIT" && (
@@ -74,7 +77,7 @@ export default function GoodsTransferDetailPage({
                 onClick={() => setShowDelete(true)}
               >
                 <Trash2 className="mr-2 h-4 w-4" />
-                Delete
+                {tc('delete')}
               </Button>
             )}
             <StatusAction
@@ -90,16 +93,16 @@ export default function GoodsTransferDetailPage({
       <div className="grid gap-6 md:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>Transfer Information</CardTitle>
+            <CardTitle>{t('transferInformation')}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Status</span>
+              <span className="text-muted-foreground">{tc('status')}</span>
               <StatusBadge status={gt.status} />
             </div>
             <Separator />
             <div className="flex justify-between items-center">
-              <span className="text-muted-foreground">Warehouses</span>
+              <span className="text-muted-foreground">{t('warehouses')}</span>
               <span className="font-medium flex items-center gap-2">
                 {gt.fromWarehouse?.name || "—"}
                 <ArrowRight className="h-4 w-4 text-muted-foreground" />
@@ -108,7 +111,7 @@ export default function GoodsTransferDetailPage({
             </div>
             <Separator />
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Transfer Date</span>
+              <span className="text-muted-foreground">{t('transferDate')}</span>
               <span>{gt.transferDate ? formatDate(gt.transferDate) : "—"}</span>
             </div>
           </CardContent>
@@ -116,18 +119,18 @@ export default function GoodsTransferDetailPage({
 
         <Card>
           <CardHeader>
-            <CardTitle>Additional Info</CardTitle>
+            <CardTitle>{t('additionalInfo')}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Created</span>
+              <span className="text-muted-foreground">{tc('created')}</span>
               <span>{formatDate(gt.createdAt)}</span>
             </div>
             {gt.notes && (
               <>
                 <Separator />
                 <div>
-                  <span className="text-muted-foreground">Notes</span>
+                  <span className="text-muted-foreground">{t('notes')}</span>
                   <p className="mt-1">{gt.notes}</p>
                 </div>
               </>
@@ -138,7 +141,7 @@ export default function GoodsTransferDetailPage({
 
       <Card>
         <CardHeader>
-          <CardTitle>Line Items</CardTitle>
+          <CardTitle>{t('lineItems')}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="rounded-md border">
@@ -146,11 +149,11 @@ export default function GoodsTransferDetailPage({
               <TableHeader>
                 <TableRow>
                   <TableHead>#</TableHead>
-                  <TableHead>Product</TableHead>
-                  <TableHead className="text-right">Qty Sent</TableHead>
-                  <TableHead className="text-right">Qty Received</TableHead>
-                  <TableHead className="text-right">Qty Damaged</TableHead>
-                  <TableHead>UOM</TableHead>
+                  <TableHead>{t('product')}</TableHead>
+                  <TableHead className="text-right">{t('qtySent')}</TableHead>
+                  <TableHead className="text-right">{t('qtyReceived')}</TableHead>
+                  <TableHead className="text-right">{t('qtyDamaged')}</TableHead>
+                  <TableHead>{t('uom')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -186,11 +189,11 @@ export default function GoodsTransferDetailPage({
       <ConfirmDialog
         open={showDelete}
         onOpenChange={setShowDelete}
-        title="Delete Goods Transfer"
-        description="Are you sure you want to delete this goods transfer?"
+        title={t('deleteTitle')}
+        description={t('deleteDescription')}
         onConfirm={handleDelete}
         variant="destructive"
-        confirmLabel="Delete"
+        confirmLabel={tc('delete')}
       />
     </div>
   );

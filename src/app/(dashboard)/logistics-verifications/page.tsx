@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { useQueryState, parseAsInteger } from "nuqs";
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2 } from "lucide-react";
@@ -27,6 +28,8 @@ import {
 } from "@/components/ui/dialog";
 
 export default function LogisticsVerificationsPage() {
+  const t = useTranslations("logisticsVerifications");
+  const tc = useTranslations("common");
   const [page, setPage] = useQueryState(
     "page",
     parseAsInteger.withDefault(1)
@@ -56,22 +59,22 @@ export default function LogisticsVerificationsPage() {
   const [deleting, setDeleting] = useState<LogisticsVerification | null>(null);
 
   const columns: Column<LogisticsVerification>[] = [
-    { header: "Reference Type", accessorKey: "referenceType" },
+    { header: t("referenceType"), accessorKey: "referenceType" },
     {
-      header: "Status",
+      header: tc("status"),
       cell: (row) => <StatusBadge status={row.status} />,
     },
     {
-      header: "Verified By",
+      header: t("verifiedBy"),
       cell: (row) => row.verifiedBy || "-",
     },
     {
-      header: "Created",
+      header: tc("created"),
       cell: (row) => formatDate(row.createdAt),
       className: "w-[150px]",
     },
     {
-      header: "Actions",
+      header: tc("actions"),
       cell: (row) => (
         <div className="flex items-center gap-1">
           <Button
@@ -125,7 +128,7 @@ export default function LogisticsVerificationsPage() {
 
   async function handleSubmit() {
     if (!formReferenceType.trim()) {
-      toast.error("Reference type is required");
+      toast.error(tc("required", { field: t("referenceType") }));
       return;
     }
 
@@ -143,13 +146,13 @@ export default function LogisticsVerificationsPage() {
           method: "PATCH",
           body: JSON.stringify(body),
         });
-        toast.success("Verification updated successfully");
+        toast.success(tc("entityUpdated", { entity: t("entity") }));
       } else {
         await fetchApi("/logistics-verifications", {
           method: "POST",
           body: JSON.stringify(body),
         });
-        toast.success("Verification created successfully");
+        toast.success(tc("entityCreated", { entity: t("entity") }));
       }
 
       setDialogOpen(false);
@@ -157,8 +160,8 @@ export default function LogisticsVerificationsPage() {
     } catch {
       toast.error(
         editing
-          ? "Failed to update verification"
-          : "Failed to create verification"
+          ? tc("entityUpdateFailed", { entity: t("entity") })
+          : tc("entityCreateFailed", { entity: t("entity") })
       );
     } finally {
       setIsSubmitting(false);
@@ -172,24 +175,24 @@ export default function LogisticsVerificationsPage() {
       await fetchApi(`/logistics-verifications/${deleting.id}`, {
         method: "DELETE",
       });
-      toast.success("Verification deleted successfully");
+      toast.success(tc("entityDeleted", { entity: t("entity") }));
       setDeleteDialogOpen(false);
       setDeleting(null);
       refetch();
     } catch {
-      toast.error("Failed to delete verification");
+      toast.error(tc("entityDeleteFailed", { entity: t("entity") }));
     }
   }
 
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Logistics Verifications"
-        description="Manage logistics verifications"
+        title={t("title")}
+        description={t("description")}
         actions={
           <Button onClick={handleCreate}>
             <Plus className="mr-2 h-4 w-4" />
-            New Verification
+            {tc("newEntity", { entity: t("entity") })}
           </Button>
         }
       />
@@ -203,17 +206,17 @@ export default function LogisticsVerificationsPage() {
           setSearch(value);
           setPage(1);
         }}
-        searchPlaceholder="Search verifications..."
+        searchPlaceholder={t("searchPlaceholder")}
         page={page}
         totalPages={meta?.totalPages || 1}
         onPageChange={setPage}
         total={meta?.total}
-        emptyTitle="No verifications found"
-        emptyDescription="Get started by creating your first verification."
+        emptyTitle={tc("noResults", { entity: t("entity") })}
+        emptyDescription={tc("getStarted", { entity: t("entity") })}
         emptyAction={
           <Button onClick={handleCreate}>
             <Plus className="mr-2 h-4 w-4" />
-            New Verification
+            {tc("newEntity", { entity: t("entity") })}
           </Button>
         }
       />
@@ -222,48 +225,48 @@ export default function LogisticsVerificationsPage() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {editing ? "Edit Verification" : "New Verification"}
+              {editing ? tc("editEntity", { entity: t("entity") }) : tc("newEntity", { entity: t("entity") })}
             </DialogTitle>
             <DialogDescription>
               {editing
-                ? "Update the verification details below."
-                : "Fill in the details to create a new verification."}
+                ? tc("updateDetails", { entity: t("entity") })
+                : tc("fillDetails", { entity: t("entity") })}
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="referenceType">Reference Type</Label>
+              <Label htmlFor="referenceType">{t("referenceType")}</Label>
               <Input
                 id="referenceType"
-                placeholder="Enter reference type"
+                placeholder={tc("enterField", { field: t("referenceType") })}
                 value={formReferenceType}
                 onChange={(e) => setFormReferenceType(e.target.value)}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="referenceId">Reference ID</Label>
+              <Label htmlFor="referenceId">{t("referenceId")}</Label>
               <Input
                 id="referenceId"
-                placeholder="Enter reference ID"
+                placeholder={tc("enterField", { field: t("referenceId") })}
                 value={formReferenceId}
                 onChange={(e) => setFormReferenceId(e.target.value)}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="verificationType">Verification Type</Label>
+              <Label htmlFor="verificationType">{t("verificationType")}</Label>
               <Input
                 id="verificationType"
-                placeholder="Enter verification type"
+                placeholder={tc("enterField", { field: t("verificationType") })}
                 value={formVerificationType}
                 onChange={(e) => setFormVerificationType(e.target.value)}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="notes">Notes</Label>
+              <Label htmlFor="notes">{t("notes")}</Label>
               <Input
                 id="notes"
-                placeholder="Enter notes"
+                placeholder={tc("enterField", { field: t("notes") })}
                 value={formNotes}
                 onChange={(e) => setFormNotes(e.target.value)}
               />
@@ -276,14 +279,14 @@ export default function LogisticsVerificationsPage() {
               onClick={() => setDialogOpen(false)}
               disabled={isSubmitting}
             >
-              Cancel
+              {tc("cancel")}
             </Button>
             <Button onClick={handleSubmit} disabled={isSubmitting}>
               {isSubmitting
-                ? "Saving..."
+                ? tc("saving")
                 : editing
-                  ? "Update"
-                  : "Create"}
+                  ? tc("update")
+                  : tc("create")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -292,11 +295,11 @@ export default function LogisticsVerificationsPage() {
       <ConfirmDialog
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
-        title="Delete Verification"
-        description="Are you sure you want to delete this verification? This action cannot be undone."
+        title={tc("deleteEntity", { entity: t("entity") })}
+        description={tc("confirmDelete", { name: t("entity") })}
         onConfirm={handleDelete}
         variant="destructive"
-        confirmLabel="Delete"
+        confirmLabel={tc("delete")}
       />
     </div>
   );

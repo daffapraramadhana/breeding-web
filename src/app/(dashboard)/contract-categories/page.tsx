@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { useQueryState, parseAsInteger } from "nuqs";
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2 } from "lucide-react";
@@ -27,6 +28,8 @@ import {
 } from "@/components/ui/dialog";
 
 export default function ContractCategoriesPage() {
+  const t = useTranslations("contractCategories");
+  const tc = useTranslations("common");
   const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(1));
   const [search, setSearch] = useQueryState("search", { defaultValue: "" });
 
@@ -45,11 +48,11 @@ export default function ContractCategoriesPage() {
   const [deleting, setDeleting] = useState<ContractCategory | null>(null);
 
   const columns: Column<ContractCategory>[] = [
-    { header: "Name", accessorKey: "name" },
-    { header: "Description", cell: (row) => row.description || "-" },
-    { header: "Created", cell: (row) => formatDate(row.createdAt), className: "w-[150px]" },
+    { header: tc("name"), accessorKey: "name" },
+    { header: tc("description"), cell: (row) => row.description || "-" },
+    { header: tc("created"), cell: (row) => formatDate(row.createdAt), className: "w-[150px]" },
     {
-      header: "Actions",
+      header: tc("actions"),
       cell: (row) => (
         <div className="flex items-center gap-1">
           <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); handleEdit(row); }}>
@@ -85,7 +88,7 @@ export default function ContractCategoriesPage() {
 
   async function handleSubmit() {
     if (!formName.trim()) {
-      toast.error("Name is required");
+      toast.error(tc("required", { field: tc("name") }));
       return;
     }
 
@@ -101,19 +104,19 @@ export default function ContractCategoriesPage() {
           method: "PATCH",
           body: JSON.stringify(body),
         });
-        toast.success("Contract category updated successfully");
+        toast.success(tc("entityUpdated", { entity: t("entity") }));
       } else {
         await fetchApi("/contract-categories", {
           method: "POST",
           body: JSON.stringify(body),
         });
-        toast.success("Contract category created successfully");
+        toast.success(tc("entityCreated", { entity: t("entity") }));
       }
 
       setDialogOpen(false);
       refetch();
     } catch {
-      toast.error(editing ? "Failed to update contract category" : "Failed to create contract category");
+      toast.error(editing ? tc("entityUpdateFailed", { entity: t("entity") }) : tc("entityCreateFailed", { entity: t("entity") }));
     } finally {
       setIsSubmitting(false);
     }
@@ -123,24 +126,24 @@ export default function ContractCategoriesPage() {
     if (!deleting) return;
     try {
       await fetchApi(`/contract-categories/${deleting.id}`, { method: "DELETE" });
-      toast.success("Contract category deleted successfully");
+      toast.success(tc("entityDeleted", { entity: t("entity") }));
       setDeleteDialogOpen(false);
       setDeleting(null);
       refetch();
     } catch {
-      toast.error("Failed to delete contract category");
+      toast.error(tc("entityDeleteFailed", { entity: t("entity") }));
     }
   }
 
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Contract Categories"
-        description="Manage contract categories"
+        title={t("title")}
+        description={t("description")}
         actions={
           <Button onClick={handleCreate}>
             <Plus className="mr-2 h-4 w-4" />
-            New Category
+            {tc("newEntity", { entity: t("entity") })}
           </Button>
         }
       />
@@ -151,17 +154,17 @@ export default function ContractCategoriesPage() {
         isLoading={isLoading}
         search={search}
         onSearchChange={(value) => { setSearch(value); setPage(1); }}
-        searchPlaceholder="Search contract categories..."
+        searchPlaceholder={t("searchPlaceholder")}
         page={page}
         totalPages={meta?.totalPages || 1}
         onPageChange={setPage}
         total={meta?.total}
-        emptyTitle="No contract categories found"
-        emptyDescription="Get started by creating your first contract category."
+        emptyTitle={tc("noResults", { entity: t("entity") })}
+        emptyDescription={tc("getStarted", { entity: t("entity") })}
         emptyAction={
           <Button onClick={handleCreate}>
             <Plus className="mr-2 h-4 w-4" />
-            New Category
+            {tc("newEntity", { entity: t("entity") })}
           </Button>
         }
       />
@@ -169,22 +172,22 @@ export default function ContractCategoriesPage() {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{editing ? "Edit Contract Category" : "New Contract Category"}</DialogTitle>
+            <DialogTitle>{editing ? tc("editEntity", { entity: t("entity") }) : tc("newEntity", { entity: t("entity") })}</DialogTitle>
             <DialogDescription>
-              {editing ? "Update the contract category details below." : "Fill in the details to create a new contract category."}
+              {editing ? tc("updateDetails", { entity: t("entity") }) : tc("fillDetails", { entity: t("entity") })}
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="cc-name">Name</Label>
-              <Input id="cc-name" placeholder="Enter name" value={formName} onChange={(e) => setFormName(e.target.value)} />
+              <Label htmlFor="cc-name">{tc("name")}</Label>
+              <Input id="cc-name" placeholder={tc("enterField", { field: tc("name") })} value={formName} onChange={(e) => setFormName(e.target.value)} />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="cc-description">Description</Label>
+              <Label htmlFor="cc-description">{tc("description")}</Label>
               <Textarea
                 id="cc-description"
-                placeholder="Enter description (optional)"
+                placeholder={tc("enterFieldOptional", { field: tc("description") })}
                 value={formDescription}
                 onChange={(e) => setFormDescription(e.target.value)}
               />
@@ -192,9 +195,9 @@ export default function ContractCategoriesPage() {
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setDialogOpen(false)} disabled={isSubmitting}>Cancel</Button>
+            <Button variant="outline" onClick={() => setDialogOpen(false)} disabled={isSubmitting}>{tc("cancel")}</Button>
             <Button onClick={handleSubmit} disabled={isSubmitting}>
-              {isSubmitting ? "Saving..." : editing ? "Update Category" : "Create Category"}
+              {isSubmitting ? tc("saving") : editing ? tc("update") : tc("create")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -203,11 +206,11 @@ export default function ContractCategoriesPage() {
       <ConfirmDialog
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
-        title="Delete Contract Category"
-        description={`Are you sure you want to delete "${deleting?.name}"? This action cannot be undone.`}
+        title={tc("deleteEntity", { entity: t("entity") })}
+        description={tc("confirmDelete", { name: deleting?.name ?? "" })}
         onConfirm={handleDelete}
         variant="destructive"
-        confirmLabel="Delete"
+        confirmLabel={tc("delete")}
       />
     </div>
   );

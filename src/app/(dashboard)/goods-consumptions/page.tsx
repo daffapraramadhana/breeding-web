@@ -10,39 +10,42 @@ import { DataTable, Column } from "@/components/shared/data-table";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { usePaginated } from "@/hooks/use-api";
 import { GoodsConsumption } from "@/types/api";
+import { useTranslations } from "next-intl";
 import { formatDate } from "@/lib/utils";
 
-const columns: Column<GoodsConsumption>[] = [
-  {
-    header: "Number",
-    cell: (row) => <span className="font-medium">{row.consumptionNumber}</span>,
-  },
-  {
-    header: "Warehouse",
-    cell: (row) => row.warehouse?.name || "—",
-  },
-  {
-    header: "Purpose",
-    cell: (row) => row.purpose || "—",
-  },
-  {
-    header: "Status",
-    cell: (row) => <StatusBadge status={row.status} />,
-  },
-  {
-    header: "Date",
-    cell: (row) => row.consumptionDate ? formatDate(row.consumptionDate) : "—",
-  },
-  {
-    header: "Created",
-    cell: (row) => formatDate(row.createdAt),
-  },
-];
-
 export default function GoodsConsumptionsPage() {
+  const t = useTranslations('goodsConsumptions');
+  const tc = useTranslations('common');
   const router = useRouter();
   const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(1));
   const [search, setSearch] = useQueryState("search", { defaultValue: "" });
+
+  const columns: Column<GoodsConsumption>[] = [
+    {
+      header: t('consumptionNumber'),
+      cell: (row) => <span className="font-medium">{row.consumptionNumber}</span>,
+    },
+    {
+      header: t('warehouse'),
+      cell: (row) => row.warehouse?.name || "—",
+    },
+    {
+      header: t('purpose'),
+      cell: (row) => row.purpose || "—",
+    },
+    {
+      header: tc('status'),
+      cell: (row) => <StatusBadge status={row.status} />,
+    },
+    {
+      header: t('date'),
+      cell: (row) => row.consumptionDate ? formatDate(row.consumptionDate) : "—",
+    },
+    {
+      header: tc('created'),
+      cell: (row) => formatDate(row.createdAt),
+    },
+  ];
 
   const { data, meta, isLoading } = usePaginated<GoodsConsumption>(
     "/goods-consumptions",
@@ -52,13 +55,13 @@ export default function GoodsConsumptionsPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Goods Consumptions"
-        description="Manage inventory consumption records"
+        title={t('title')}
+        description={t('description')}
         actions={
           <Button asChild>
             <Link href="/goods-consumptions/new">
               <Plus className="mr-2 h-4 w-4" />
-              New Consumption
+              {t('newConsumption')}
             </Link>
           </Button>
         }
@@ -69,7 +72,7 @@ export default function GoodsConsumptionsPage() {
         isLoading={isLoading}
         search={search}
         onSearchChange={setSearch}
-        searchPlaceholder="Search by consumption number..."
+        searchPlaceholder={t('searchPlaceholder')}
         page={page}
         totalPages={meta?.totalPages || 1}
         total={meta?.total}

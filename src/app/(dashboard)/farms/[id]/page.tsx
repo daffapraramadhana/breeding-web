@@ -4,6 +4,8 @@ import { use } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 
+import { useTranslations } from "next-intl";
+
 import { PageHeader } from "@/components/shared/page-header";
 import { FarmInfoCard } from "@/components/farms/farm-info-card";
 import { CoopAccordion } from "@/components/farms/coop-accordion";
@@ -21,6 +23,8 @@ export default function FarmDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
+  const t = useTranslations('farms');
+  const tc = useTranslations('common');
   const router = useRouter();
 
   const { data: farm, isLoading, error, refetch } = useApi<Farm>(`/farms/${id}`);
@@ -44,11 +48,11 @@ export default function FarmDetailPage({
   if (error || !farm) {
     return (
       <div className="space-y-6">
-        <PageHeader title="Farm Not Found" />
+        <PageHeader title={t('notFound')} />
         <Card>
           <CardContent className="pt-6">
             <p className="text-muted-foreground">
-              {error || "The farm you are looking for does not exist."}
+              {error || t('notFoundDescription')}
             </p>
             <Button
               variant="outline"
@@ -56,7 +60,7 @@ export default function FarmDetailPage({
               onClick={() => router.push("/farms")}
             >
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Farms
+              {t('backToFarms')}
             </Button>
           </CardContent>
         </Card>
@@ -68,11 +72,11 @@ export default function FarmDetailPage({
     <div className="space-y-6">
       <PageHeader
         title={farm.name}
-        description={farm.address || "No address specified"}
+        description={farm.address || t('noAddress')}
         actions={
           <Button variant="outline" onClick={() => router.push("/farms")}>
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Farms
+            {t('backToFarms')}
           </Button>
         }
       />

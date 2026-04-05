@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { useApi } from "@/hooks/use-api";
 import { fetchApi } from "@/lib/api";
@@ -13,6 +14,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
 export default function RecordingDeviationPage() {
+  const t = useTranslations("recordingDeviation");
+  const tc = useTranslations("common");
   const { data, isLoading, refetch } = useApi<RecordingDeviation>("/recording-deviation");
 
   const [formMaxDeviationDays, setFormMaxDeviationDays] = useState<number | "">("");
@@ -28,7 +31,7 @@ export default function RecordingDeviationPage() {
 
   async function handleSubmit() {
     if (formMaxDeviationDays === "") {
-      toast.error("Max deviation days is required");
+      toast.error(t("maxDeviationDaysRequired"));
       return;
     }
 
@@ -41,10 +44,10 @@ export default function RecordingDeviationPage() {
           ...(formDescription.trim() && { description: formDescription.trim() }),
         }),
       });
-      toast.success("Recording deviation saved successfully");
+      toast.success(t("savedSuccess"));
       refetch();
     } catch {
-      toast.error("Failed to save recording deviation");
+      toast.error(t("saveFailed"));
     } finally {
       setIsSubmitting(false);
     }
@@ -53,7 +56,7 @@ export default function RecordingDeviationPage() {
   if (isLoading) {
     return (
       <div className="space-y-6">
-        <PageHeader title="Recording Deviation" description="Configure recording deviation settings" />
+        <PageHeader title={t("title")} description={t("description")} />
         <Card>
           <CardContent className="p-6">
             <div className="animate-pulse space-y-4">
@@ -70,35 +73,35 @@ export default function RecordingDeviationPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Recording Deviation" description="Configure recording deviation settings" />
+      <PageHeader title={t("title")} description={t("description")} />
 
       <Card>
         <CardHeader>
-          <CardTitle>Settings</CardTitle>
+          <CardTitle>{t("settings")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="rd-max-days">Max Deviation Days</Label>
+            <Label htmlFor="rd-max-days">{t("maxDeviationDays")}</Label>
             <Input
               id="rd-max-days"
               type="number"
-              placeholder="Enter max deviation days"
+              placeholder={t("enterMaxDeviationDays")}
               value={formMaxDeviationDays}
               onChange={(e) => setFormMaxDeviationDays(e.target.value ? parseInt(e.target.value) : "")}
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="rd-description">Description</Label>
+            <Label htmlFor="rd-description">{tc("description")}</Label>
             <Textarea
               id="rd-description"
-              placeholder="Enter description (optional)"
+              placeholder={tc("enterFieldOptional", { field: tc("description") })}
               value={formDescription}
               onChange={(e) => setFormDescription(e.target.value)}
             />
           </div>
           <div className="flex justify-end">
             <Button onClick={handleSubmit} disabled={isSubmitting}>
-              {isSubmitting ? "Saving..." : "Save Settings"}
+              {isSubmitting ? tc("saving") : t("saveSettings")}
             </Button>
           </div>
         </CardContent>

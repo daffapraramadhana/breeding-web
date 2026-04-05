@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { Plus, Trash2, ChevronRight, ChevronLeft, Check } from "lucide-react";
 import { toast } from "sonner";
 
@@ -83,9 +84,13 @@ function emptyCoop(): CoopForm {
 
 // ─── Step indicator ────────────────────────────────────────────────────────────
 
-const STEPS = ["Farm Details", "Coops & Blocks", "Review"];
+function useStepLabels() {
+  const t = useTranslations("farmWizard");
+  return [t("stepFarmDetails"), t("stepCoopsBlocks"), t("stepReview")];
+}
 
 function StepIndicator({ current }: { current: number }) {
+  const STEPS = useStepLabels();
   return (
     <div className="flex items-center justify-center gap-2 mb-6">
       {STEPS.map((label, i) => (
@@ -132,48 +137,50 @@ function StepFarm({
   form: FarmForm;
   onChange: (f: FarmForm) => void;
 }) {
+  const t = useTranslations("farmWizard");
+  const tc = useTranslations("common");
   return (
     <div className="space-y-4">
       <div className="space-y-2">
-        <Label>Branch <span className="text-destructive">*</span></Label>
+        <Label>{t("branch")} <span className="text-destructive">*</span></Label>
         <BranchCombobox value={form.branchId} onChange={(v) => onChange({ ...form, branchId: v })} />
       </div>
       <div className="space-y-2">
-        <Label>Farm Name <span className="text-destructive">*</span></Label>
+        <Label>{t("farmName")} <span className="text-destructive">*</span></Label>
         <Input
-          placeholder="e.g. Farm Cirebon A"
+          placeholder={t("farmNamePlaceholder")}
           value={form.name}
           onChange={(e) => onChange({ ...form, name: e.target.value })}
         />
       </div>
       <div className="space-y-2">
-        <Label>Address</Label>
+        <Label>{t("farmAddress")}</Label>
         <Input
-          placeholder="Enter farm address (optional)"
+          placeholder={t("farmAddressPlaceholder")}
           value={form.address}
           onChange={(e) => onChange({ ...form, address: e.target.value })}
         />
       </div>
       <div className="space-y-2">
-        <Label>Farm Type</Label>
+        <Label>{t("farmType")}</Label>
         <Input
-          placeholder="e.g. Broiler, Layer (optional)"
+          placeholder={t("farmTypePlaceholder")}
           value={form.farmType}
           onChange={(e) => onChange({ ...form, farmType: e.target.value })}
         />
       </div>
       <div className="space-y-2">
-        <Label>Status</Label>
+        <Label>{tc("status")}</Label>
         <Select
           value={form.status}
           onValueChange={(v) => onChange({ ...form, status: v as FarmStatus })}
         >
           <SelectTrigger>
-            <SelectValue placeholder="Select status (optional)" />
+            <SelectValue placeholder={tc("selectField", { field: tc("status") })} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="OWN">Milik Sendiri (OWN)</SelectItem>
-            <SelectItem value="COOP">Kerjasama (COOP)</SelectItem>
+            <SelectItem value="OWN">{t("statusOwn")}</SelectItem>
+            <SelectItem value="COOP">{t("statusCoop")}</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -196,10 +203,12 @@ function FloorRow({
   onRemove: () => void;
   canRemove: boolean;
 }) {
+  const t = useTranslations("farmWizard");
+  const tc = useTranslations("common");
   return (
     <div className="grid grid-cols-2 gap-2 items-start pl-4 border-l-2 border-muted">
       <div className="space-y-1">
-        <Label className="text-xs">Code *</Label>
+        <Label className="text-xs">{tc("code")} *</Label>
         <Input
           className="h-8 text-sm"
           placeholder="L01"
@@ -208,16 +217,16 @@ function FloorRow({
         />
       </div>
       <div className="space-y-1">
-        <Label className="text-xs">Name *</Label>
+        <Label className="text-xs">{tc("name")} *</Label>
         <Input
           className="h-8 text-sm"
-          placeholder="Blok 1"
+          placeholder={`${t("block")} 1`}
           value={floor.name}
           onChange={(e) => onChange({ ...floor, name: e.target.value })}
         />
       </div>
       <div className="space-y-1">
-        <Label className="text-xs">Populasi / m² *</Label>
+        <Label className="text-xs">{t("populationPerSqm")} *</Label>
         <Input
           className="h-8 text-sm"
           type="number"
@@ -227,7 +236,7 @@ function FloorRow({
         />
       </div>
       <div className="space-y-1">
-        <Label className="text-xs">Luas (m²) *</Label>
+        <Label className="text-xs">{t("areaSqm")} *</Label>
         <Input
           className="h-8 text-sm"
           type="number"
@@ -237,14 +246,14 @@ function FloorRow({
         />
       </div>
       <div className="col-span-2 space-y-1">
-        <Label className="text-xs text-muted-foreground">Max Populasi (otomatis)</Label>
+        <Label className="text-xs text-muted-foreground">{t("maxPopulation")}</Label>
         <Input
           className="h-8 text-sm bg-muted"
           type="number"
           readOnly
           disabled
           value={floor.population && floor.area ? Number(floor.population) * Number(floor.area) : ""}
-          placeholder="Populasi × Luas"
+          placeholder={t("maxPopulationFormula")}
         />
       </div>
       <div className="col-span-2 flex justify-end">
@@ -290,12 +299,14 @@ function CoopCard({
     onChange({ ...coop, floors: [...coop.floors, emptyFloor()] });
   }
 
+  const t = useTranslations("farmWizard");
+  const tc = useTranslations("common");
   return (
     <div className="border rounded-lg p-4 space-y-4 bg-muted/20">
       {/* Coop header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Badge variant="outline" className="text-xs">Kandang {index + 1}</Badge>
+          <Badge variant="outline" className="text-xs">{t("coop")} {index + 1}</Badge>
         </div>
         <Button
           type="button"
@@ -306,14 +317,14 @@ function CoopCard({
           disabled={!canRemove}
         >
           <Trash2 className="w-3.5 h-3.5 mr-1" />
-          Remove
+          {t("remove")}
         </Button>
       </div>
 
       {/* Coop fields */}
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1">
-          <Label className="text-sm">Code <span className="text-destructive">*</span></Label>
+          <Label className="text-sm">{tc("code")} <span className="text-destructive">*</span></Label>
           <Input
             className="h-8"
             placeholder="K01"
@@ -322,16 +333,16 @@ function CoopCard({
           />
         </div>
         <div className="space-y-1">
-          <Label className="text-sm">Name <span className="text-destructive">*</span></Label>
+          <Label className="text-sm">{tc("name")} <span className="text-destructive">*</span></Label>
           <Input
             className="h-8"
-            placeholder="Kandang 1"
+            placeholder={`${t("coop")} 1`}
             value={coop.name}
             onChange={(e) => onChange({ ...coop, name: e.target.value })}
           />
         </div>
         <div className="space-y-1">
-          <Label className="text-sm">Capacity <span className="text-destructive">*</span></Label>
+          <Label className="text-sm">{t("capacity")} <span className="text-destructive">*</span></Label>
           <Input
             className="h-8"
             type="number"
@@ -341,27 +352,27 @@ function CoopCard({
           />
         </div>
         <div className="space-y-1">
-          <Label className="text-sm">Status</Label>
+          <Label className="text-sm">{tc("status")}</Label>
           <Select
             value={coop.status}
             onValueChange={(v) => onChange({ ...coop, status: v as CoopStatus })}
           >
             <SelectTrigger className="h-8">
-              <SelectValue placeholder="Optional" />
+              <SelectValue placeholder={tc("optional")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="ACTIVE">Active</SelectItem>
-              <SelectItem value="INACTIVE">Inactive</SelectItem>
-              <SelectItem value="MAINTENANCE">Maintenance</SelectItem>
+              <SelectItem value="ACTIVE">{tc("active")}</SelectItem>
+              <SelectItem value="INACTIVE">{tc("inactive")}</SelectItem>
+              <SelectItem value="MAINTENANCE">{t("maintenance")}</SelectItem>
             </SelectContent>
           </Select>
         </div>
       </div>
 
-      {/* Blok */}
+      {/* Block */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <Label className="text-sm font-medium">Blok</Label>
+          <Label className="text-sm font-medium">{t("block")}</Label>
           <Button
             type="button"
             variant="ghost"
@@ -370,7 +381,7 @@ function CoopCard({
             onClick={addFloor}
           >
             <Plus className="w-3 h-3 mr-1" />
-            Add Blok
+            {t("addBlock")}
           </Button>
         </div>
         <div className="space-y-2">
@@ -407,10 +418,11 @@ function StepCoops({
     onChange(coops.filter((_, idx) => idx !== i));
   }
 
+  const t = useTranslations("farmWizard");
   return (
     <div className="space-y-4">
       <p className="text-sm text-muted-foreground">
-        Add one or more kandang. Each kandang can have multiple blok.
+        {t("coopDescription")}
       </p>
       {coops.map((coop, i) => (
         <CoopCard
@@ -429,7 +441,7 @@ function StepCoops({
         onClick={() => onChange([...coops, emptyCoop()])}
       >
         <Plus className="w-4 h-4 mr-2" />
-        Add Kandang
+        {t("addCoop")}
       </Button>
     </div>
   );
@@ -438,38 +450,40 @@ function StepCoops({
 // ─── Step 3 — Review ─────────────────────────────────────────────────────────
 
 function StepReview({ farm, coops }: { farm: FarmForm; coops: CoopForm[] }) {
+  const t = useTranslations("farmWizard");
+  const tc = useTranslations("common");
   return (
     <div className="space-y-4">
       <div className="rounded-lg border p-4 space-y-2">
-        <p className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Farm</p>
+        <p className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">{t("reviewFarm")}</p>
         <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
-          <span className="text-muted-foreground">Name</span><span className="font-medium">{farm.name}</span>
-          {farm.address && <><span className="text-muted-foreground">Address</span><span>{farm.address}</span></>}
-          {farm.farmType && <><span className="text-muted-foreground">Type</span><span>{farm.farmType}</span></>}
-          {farm.status && <><span className="text-muted-foreground">Status</span><span>{farm.status}</span></>}
+          <span className="text-muted-foreground">{tc("name")}</span><span className="font-medium">{farm.name}</span>
+          {farm.address && <><span className="text-muted-foreground">{tc("address")}</span><span>{farm.address}</span></>}
+          {farm.farmType && <><span className="text-muted-foreground">{tc("type")}</span><span>{farm.farmType}</span></>}
+          {farm.status && <><span className="text-muted-foreground">{tc("status")}</span><span>{farm.status}</span></>}
         </div>
       </div>
 
       <div className="space-y-2">
         <p className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-          {coops.length} Kandang
+          {t("reviewCoopCount", { count: coops.length })}
         </p>
         {coops.map((coop, i) => (
           <div key={coop.id} className="rounded-lg border p-3 space-y-2">
             <div className="flex items-center gap-2">
               <Badge variant="secondary">{coop.code}</Badge>
               <span className="font-medium text-sm">{coop.name}</span>
-              <span className="text-xs text-muted-foreground ml-auto">Capacity: {coop.capacity}</span>
+              <span className="text-xs text-muted-foreground ml-auto">{t("capacity")}: {coop.capacity}</span>
             </div>
             {coop.floors.length > 0 && (
               <div className="space-y-1 pl-2 border-l-2 border-muted">
                 {coop.floors.map((floor, fi) => (
                   <div key={floor.id} className="flex items-center gap-3 text-xs text-muted-foreground">
                     <span className="font-medium text-foreground">{floor.code} — {floor.name}</span>
-                    {floor.area && <span>Luas: {floor.area}m²</span>}
-                    {floor.population && <span>Pop/m²: {floor.population}</span>}
+                    {floor.area && <span>{t("area")}: {floor.area}m²</span>}
+                    {floor.population && <span>{t("popPerSqm")}: {floor.population}</span>}
                     {floor.population && floor.area && (
-                      <span className="font-medium text-foreground">Max: {Number(floor.population) * Number(floor.area)}</span>
+                      <span className="font-medium text-foreground">{t("max")}: {Number(floor.population) * Number(floor.area)}</span>
                     )}
                   </div>
                 ))}
@@ -491,6 +505,8 @@ interface Props {
 }
 
 export function CreateFarmWizard({ open, onOpenChange, onSuccess }: Props) {
+  const t = useTranslations("farmWizard");
+  const tc = useTranslations("common");
   const [step, setStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -517,27 +533,27 @@ export function CreateFarmWizard({ open, onOpenChange, onSuccess }: Props) {
 
   // Validation per step
   function validateStep0(): string | null {
-    if (!farm.branchId) return "Please select a branch";
-    if (!farm.name.trim()) return "Farm name is required";
+    if (!farm.branchId) return t("selectBranch");
+    if (!farm.name.trim()) return t("farmNameRequired");
     return null;
   }
 
   function validateStep1(): string | null {
     for (let ci = 0; ci < coops.length; ci++) {
       const c = coops[ci];
-      if (!c.code.trim()) return `Kandang ${ci + 1}: code is required`;
-      if (!c.name.trim()) return `Kandang ${ci + 1}: name is required`;
+      if (!c.code.trim()) return t("coopCodeRequired", { index: ci + 1 });
+      if (!c.name.trim()) return t("coopNameRequired", { index: ci + 1 });
       if (!c.capacity || isNaN(Number(c.capacity)) || Number(c.capacity) < 1)
-        return `Kandang ${ci + 1}: valid capacity is required`;
+        return t("coopCapacityRequired", { index: ci + 1 });
 
       for (let fi = 0; fi < c.floors.length; fi++) {
         const f = c.floors[fi];
-        if (!f.code.trim()) return `Kandang ${ci + 1}, Blok ${fi + 1}: code is required`;
-        if (!f.name.trim()) return `Kandang ${ci + 1}, Blok ${fi + 1}: name is required`;
+        if (!f.code.trim()) return t("blockCodeRequired", { coopIndex: ci + 1, blockIndex: fi + 1 });
+        if (!f.name.trim()) return t("blockNameRequired", { coopIndex: ci + 1, blockIndex: fi + 1 });
         if (!f.population || isNaN(Number(f.population)) || Number(f.population) < 1)
-          return `Kandang ${ci + 1}, Blok ${fi + 1}: populasi per m² harus diisi`;
+          return t("blockPopulationRequired", { coopIndex: ci + 1, blockIndex: fi + 1 });
         if (!f.area || isNaN(Number(f.area)) || Number(f.area) < 1)
-          return `Kandang ${ci + 1}, Blok ${fi + 1}: luas harus diisi`;
+          return t("blockAreaRequired", { coopIndex: ci + 1, blockIndex: fi + 1 });
       }
     }
     return null;
@@ -588,11 +604,11 @@ export function CreateFarmWizard({ open, onOpenChange, onSuccess }: Props) {
         body: JSON.stringify(payload),
       });
 
-      toast.success("Farm, coops, dan blok berhasil dibuat! 🎉");
+      toast.success(t("createdSuccess"));
       handleClose();
       onSuccess();
     } catch (err: any) {
-      toast.error(err?.message || "Failed to create farm");
+      toast.error(err?.message || t("createFailed"));
     } finally {
       setIsSubmitting(false);
     }
@@ -602,9 +618,9 @@ export function CreateFarmWizard({ open, onOpenChange, onSuccess }: Props) {
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Create New Farm</DialogTitle>
+          <DialogTitle>{t("title")}</DialogTitle>
           <DialogDescription>
-            Set up your farm, kandang, dan blok in one step.
+            {t("description")}
           </DialogDescription>
         </DialogHeader>
 
@@ -623,19 +639,19 @@ export function CreateFarmWizard({ open, onOpenChange, onSuccess }: Props) {
             disabled={isSubmitting}
           >
             {step === 0 ? (
-              "Cancel"
+              tc("cancel")
             ) : (
-              <><ChevronLeft className="w-4 h-4 mr-1" /> Back</>
+              <><ChevronLeft className="w-4 h-4 mr-1" /> {t("back")}</>
             )}
           </Button>
 
           {step < 2 ? (
             <Button onClick={handleNext}>
-              Next <ChevronRight className="w-4 h-4 ml-1" />
+              {t("next")} <ChevronRight className="w-4 h-4 ml-1" />
             </Button>
           ) : (
             <Button onClick={handleSubmit} disabled={isSubmitting}>
-              {isSubmitting ? "Creating..." : "Create Farm 🚀"}
+              {isSubmitting ? t("creating") : t("createFarm")}
             </Button>
           )}
         </div>

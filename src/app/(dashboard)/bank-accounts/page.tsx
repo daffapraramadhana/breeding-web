@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { useQueryState, parseAsInteger } from "nuqs";
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2 } from "lucide-react";
@@ -27,6 +28,8 @@ import {
 } from "@/components/ui/dialog";
 
 export default function BankAccountsPage() {
+  const t = useTranslations("bankAccounts");
+  const tc = useTranslations("common");
   const [page, setPage] = useQueryState(
     "page",
     parseAsInteger.withDefault(1)
@@ -56,20 +59,20 @@ export default function BankAccountsPage() {
   const [deleting, setDeleting] = useState<BankAccount | null>(null);
 
   const columns: Column<BankAccount>[] = [
-    { header: "Bank Name", accessorKey: "bankName" },
-    { header: "Account Number", accessorKey: "accountNumber" },
-    { header: "Account Holder", accessorKey: "accountHolder" },
+    { header: t("bankName"), accessorKey: "bankName" },
+    { header: t("accountNumber"), accessorKey: "accountNumber" },
+    { header: t("accountHolder"), accessorKey: "accountHolder" },
     {
-      header: "Branch",
+      header: t("branch"),
       cell: (row) => row.branch?.name || "-",
     },
     {
-      header: "Created",
+      header: tc("created"),
       cell: (row) => formatDate(row.createdAt),
       className: "w-[150px]",
     },
     {
-      header: "Actions",
+      header: tc("actions"),
       cell: (row) => (
         <div className="flex items-center gap-1">
           <Button
@@ -123,7 +126,7 @@ export default function BankAccountsPage() {
 
   async function handleSubmit() {
     if (!formBankName.trim()) {
-      toast.error("Bank name is required");
+      toast.error(tc("required", { field: t("bankName") }));
       return;
     }
 
@@ -141,13 +144,13 @@ export default function BankAccountsPage() {
           method: "PATCH",
           body: JSON.stringify(body),
         });
-        toast.success("Bank account updated successfully");
+        toast.success(tc("entityUpdated", { entity: t("entity") }));
       } else {
         await fetchApi("/bank-accounts", {
           method: "POST",
           body: JSON.stringify(body),
         });
-        toast.success("Bank account created successfully");
+        toast.success(tc("entityCreated", { entity: t("entity") }));
       }
 
       setDialogOpen(false);
@@ -155,8 +158,8 @@ export default function BankAccountsPage() {
     } catch {
       toast.error(
         editing
-          ? "Failed to update bank account"
-          : "Failed to create bank account"
+          ? tc("entityUpdateFailed", { entity: t("entity") })
+          : tc("entityCreateFailed", { entity: t("entity") })
       );
     } finally {
       setIsSubmitting(false);
@@ -170,24 +173,24 @@ export default function BankAccountsPage() {
       await fetchApi(`/bank-accounts/${deleting.id}`, {
         method: "DELETE",
       });
-      toast.success("Bank account deleted successfully");
+      toast.success(tc("entityDeleted", { entity: t("entity") }));
       setDeleteDialogOpen(false);
       setDeleting(null);
       refetch();
     } catch {
-      toast.error("Failed to delete bank account");
+      toast.error(tc("entityDeleteFailed", { entity: t("entity") }));
     }
   }
 
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Bank Accounts"
-        description="Manage bank accounts"
+        title={t("title")}
+        description={t("description")}
         actions={
           <Button onClick={handleCreate}>
             <Plus className="mr-2 h-4 w-4" />
-            New Bank Account
+            {tc("newEntity", { entity: t("entity") })}
           </Button>
         }
       />
@@ -201,17 +204,17 @@ export default function BankAccountsPage() {
           setSearch(value);
           setPage(1);
         }}
-        searchPlaceholder="Search bank accounts..."
+        searchPlaceholder={t("searchPlaceholder")}
         page={page}
         totalPages={meta?.totalPages || 1}
         onPageChange={setPage}
         total={meta?.total}
-        emptyTitle="No bank accounts found"
-        emptyDescription="Get started by creating your first bank account."
+        emptyTitle={tc("noResults", { entity: t("entity") })}
+        emptyDescription={tc("getStarted", { entity: t("entity") })}
         emptyAction={
           <Button onClick={handleCreate}>
             <Plus className="mr-2 h-4 w-4" />
-            New Bank Account
+            {tc("newEntity", { entity: t("entity") })}
           </Button>
         }
       />
@@ -220,46 +223,46 @@ export default function BankAccountsPage() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {editing ? "Edit Bank Account" : "New Bank Account"}
+              {editing ? tc("editEntity", { entity: t("entity") }) : tc("newEntity", { entity: t("entity") })}
             </DialogTitle>
             <DialogDescription>
               {editing
-                ? "Update the bank account details below."
-                : "Fill in the details to create a new bank account."}
+                ? tc("updateDetails", { entity: t("entity") })
+                : tc("fillDetails", { entity: t("entity") })}
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label>Branch</Label>
+              <Label>{t("branch")}</Label>
               <BranchCombobox
                 value={formBranchId}
                 onChange={setFormBranchId}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="bankName">Bank Name</Label>
+              <Label htmlFor="bankName">{t("bankName")}</Label>
               <Input
                 id="bankName"
-                placeholder="Enter bank name"
+                placeholder={tc("enterField", { field: t("bankName") })}
                 value={formBankName}
                 onChange={(e) => setFormBankName(e.target.value)}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="accountNumber">Account Number</Label>
+              <Label htmlFor="accountNumber">{t("accountNumber")}</Label>
               <Input
                 id="accountNumber"
-                placeholder="Enter account number"
+                placeholder={tc("enterField", { field: t("accountNumber") })}
                 value={formAccountNumber}
                 onChange={(e) => setFormAccountNumber(e.target.value)}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="accountHolder">Account Holder</Label>
+              <Label htmlFor="accountHolder">{t("accountHolder")}</Label>
               <Input
                 id="accountHolder"
-                placeholder="Enter account holder"
+                placeholder={tc("enterField", { field: t("accountHolder") })}
                 value={formAccountHolder}
                 onChange={(e) => setFormAccountHolder(e.target.value)}
               />
@@ -272,14 +275,14 @@ export default function BankAccountsPage() {
               onClick={() => setDialogOpen(false)}
               disabled={isSubmitting}
             >
-              Cancel
+              {tc("cancel")}
             </Button>
             <Button onClick={handleSubmit} disabled={isSubmitting}>
               {isSubmitting
-                ? "Saving..."
+                ? tc("saving")
                 : editing
-                  ? "Update"
-                  : "Create"}
+                  ? tc("update")
+                  : tc("create")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -288,11 +291,11 @@ export default function BankAccountsPage() {
       <ConfirmDialog
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
-        title="Delete Bank Account"
-        description="Are you sure you want to delete this bank account? This action cannot be undone."
+        title={tc("deleteEntity", { entity: t("entity") })}
+        description={tc("confirmDelete", { name: t("entity") })}
         onConfirm={handleDelete}
         variant="destructive"
-        confirmLabel="Delete"
+        confirmLabel={tc("delete")}
       />
     </div>
   );

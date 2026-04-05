@@ -6,6 +6,8 @@ import { useQueryState, parseAsInteger } from "nuqs";
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 
+import { useTranslations } from "next-intl";
+
 import { DataTable, Column } from "@/components/shared/data-table";
 import { PageHeader } from "@/components/shared/page-header";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
@@ -37,6 +39,8 @@ import {
 } from "@/components/ui/dialog";
 
 export default function FarmsPage() {
+  const t = useTranslations('farms');
+  const tc = useTranslations('common');
   const router = useRouter();
 
   // URL state for pagination and search
@@ -72,34 +76,34 @@ export default function FarmsPage() {
   // Table columns
   const columns: Column<Farm>[] = [
     {
-      header: "Name",
+      header: tc('name'),
       accessorKey: "name",
     },
     {
-      header: "Branch",
+      header: t('branch'),
       cell: (row) => row.branch?.name || "-",
     },
     {
-      header: "Address",
+      header: tc('address'),
       accessorKey: "address",
     },
     {
-      header: "Farm Type",
+      header: t('farmType'),
       cell: (row) => row.farmType || "-",
     },
     {
-      header: "Status",
+      header: tc('status'),
       cell: (row) =>
         row.status ? <StatusBadge status={row.status} /> : "-",
       className: "w-[120px]",
     },
     {
-      header: "Created",
+      header: tc('created'),
       cell: (row) => formatDate(row.createdAt),
       className: "w-[150px]",
     },
     {
-      header: "Actions",
+      header: tc('actions'),
       cell: (row) => (
         <div className="flex items-center gap-1">
           <Button
@@ -153,12 +157,12 @@ export default function FarmsPage() {
   // Submit create/edit
   async function handleSubmit() {
     if (!formName.trim()) {
-      toast.error("Farm name is required");
+      toast.error(tc('required', { field: tc('name') }));
       return;
     }
 
     if (!formBranchId) {
-      toast.error("Branch is required");
+      toast.error(tc('required', { field: t('branch') }));
       return;
     }
 
@@ -177,14 +181,14 @@ export default function FarmsPage() {
           method: "PATCH",
           body: JSON.stringify(body),
         });
-        toast.success("Farm updated successfully");
+        toast.success(tc('entityUpdated', { entity: t('entity') }));
       }
 
       setDialogOpen(false);
       refetch();
     } catch (error) {
       toast.error(
-        editingFarm ? "Failed to update farm" : "Failed to create farm"
+        editingFarm ? tc('entityUpdateFailed', { entity: t('entity') }) : tc('entityCreateFailed', { entity: t('entity') })
       );
     } finally {
       setIsSubmitting(false);
@@ -199,24 +203,24 @@ export default function FarmsPage() {
       await fetchApi(`/farms/${deletingFarm.id}`, {
         method: "DELETE",
       });
-      toast.success("Farm deleted successfully");
+      toast.success(tc('entityDeleted', { entity: t('entity') }));
       setDeleteDialogOpen(false);
       setDeletingFarm(null);
       refetch();
     } catch (error) {
-      toast.error("Failed to delete farm");
+      toast.error(tc('entityDeleteFailed', { entity: t('entity') }));
     }
   }
 
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Farms"
-        description="Manage your farms and their locations"
+        title={t('title')}
+        description={t('description')}
         actions={
           <Button onClick={handleCreate}>
             <Plus className="mr-2 h-4 w-4" />
-            New Farm
+            {tc('newEntity', { entity: t('entity') })}
           </Button>
         }
       />
@@ -230,18 +234,18 @@ export default function FarmsPage() {
           setSearch(value);
           setPage(1);
         }}
-        searchPlaceholder="Search farms..."
+        searchPlaceholder={tc('search')}
         page={page}
         totalPages={meta?.totalPages || 1}
         onPageChange={setPage}
         total={meta?.total}
         onRowClick={(farm) => router.push(`/farms/${farm.id}`)}
-        emptyTitle="No farms found"
-        emptyDescription="Get started by creating your first farm."
+        emptyTitle={tc('noResults')}
+        emptyDescription={tc('getStarted', { entity: t('entity') })}
         emptyAction={
           <Button onClick={handleCreate}>
             <Plus className="mr-2 h-4 w-4" />
-            New Farm
+            {tc('newEntity', { entity: t('entity') })}
           </Button>
         }
       />
@@ -257,23 +261,23 @@ export default function FarmsPage() {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Edit Farm</DialogTitle>
-            <DialogDescription>Update the farm details below.</DialogDescription>
+            <DialogTitle>{tc('editEntity', { entity: t('entity') })}</DialogTitle>
+            <DialogDescription>{tc('updateDetails', { entity: t('entity') })}</DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="farm-branch">Branch</Label>
+              <Label htmlFor="farm-branch">{t('branch')}</Label>
               <BranchCombobox
                 value={formBranchId}
                 onChange={setFormBranchId}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="farm-name">Name</Label>
+              <Label htmlFor="farm-name">{tc('name')}</Label>
               <Input
                 id="farm-name"
-                placeholder="Enter farm name"
+                placeholder={tc('enterField', { field: tc('name') })}
                 value={formName}
                 onChange={(e) => setFormName(e.target.value)}
                 onKeyDown={(e) => {
@@ -282,10 +286,10 @@ export default function FarmsPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="farm-address">Address</Label>
+              <Label htmlFor="farm-address">{tc('address')}</Label>
               <Input
                 id="farm-address"
-                placeholder="Enter farm address (optional)"
+                placeholder={tc('enterFieldOptional', { field: tc('address') })}
                 value={formAddress}
                 onChange={(e) => setFormAddress(e.target.value)}
                 onKeyDown={(e) => {
@@ -294,10 +298,10 @@ export default function FarmsPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="farm-type">Farm Type</Label>
+              <Label htmlFor="farm-type">{t('farmType')}</Label>
               <Input
                 id="farm-type"
-                placeholder="Enter farm type (optional)"
+                placeholder={tc('enterFieldOptional', { field: t('farmType') })}
                 value={formFarmType}
                 onChange={(e) => setFormFarmType(e.target.value)}
                 onKeyDown={(e) => {
@@ -306,17 +310,17 @@ export default function FarmsPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="farm-status">Status</Label>
+              <Label htmlFor="farm-status">{tc('status')}</Label>
               <Select
                 value={formStatus}
                 onValueChange={(val) => setFormStatus(val as FarmStatus)}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select status (optional)" />
+                  <SelectValue placeholder={tc('selectField', { field: tc('status') })} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="OWN">Milik Sendiri (OWN)</SelectItem>
-                  <SelectItem value="COOP">Kerjasama (COOP)</SelectItem>
+                  <SelectItem value="OWN">{t('statusOwn')}</SelectItem>
+                  <SelectItem value="COOP">{t('statusCoop')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -328,10 +332,10 @@ export default function FarmsPage() {
               onClick={() => setDialogOpen(false)}
               disabled={isSubmitting}
             >
-              Cancel
+              {tc('cancel')}
             </Button>
             <Button onClick={handleSubmit} disabled={isSubmitting}>
-              {isSubmitting ? "Saving..." : "Update Farm"}
+              {isSubmitting ? tc('saving') : tc('updateEntity', { entity: t('entity') })}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -341,11 +345,11 @@ export default function FarmsPage() {
       <ConfirmDialog
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
-        title="Delete Farm"
-        description={`Are you sure you want to delete "${deletingFarm?.name}"? This action cannot be undone.`}
+        title={tc('deleteEntity', { entity: t('entity') })}
+        description={tc('confirmDelete', { name: deletingFarm?.name || '' })}
         onConfirm={handleDelete}
         variant="destructive"
-        confirmLabel="Delete"
+        confirmLabel={tc('delete')}
       />
     </div>
   );

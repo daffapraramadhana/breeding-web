@@ -5,6 +5,8 @@ import { useQueryState, parseAsInteger } from "nuqs";
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 
+import { useTranslations } from "next-intl";
+
 import { DataTable, Column } from "@/components/shared/data-table";
 import { PageHeader } from "@/components/shared/page-header";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
@@ -28,6 +30,9 @@ import {
 } from "@/components/ui/dialog";
 
 export default function CoopFloorsPage() {
+  const t = useTranslations('coopFloors');
+  const tc = useTranslations('common');
+
   // URL state for pagination and search
   const [page, setPage] = useQueryState(
     "page",
@@ -61,41 +66,41 @@ export default function CoopFloorsPage() {
   // Table columns
   const columns: Column<CoopFloor>[] = [
     {
-      header: "Coop",
+      header: t('coop'),
       cell: (row) =>
         row.coop ? `${row.coop.code} - ${row.coop.name}` : "-",
     },
     {
-      header: "Code",
+      header: tc('code'),
       accessorKey: "code",
       className: "w-[120px]",
     },
     {
-      header: "Name",
+      header: tc('name'),
       accessorKey: "name",
     },
     {
-      header: "Luas (m²)",
+      header: t('area'),
       cell: (row) => row.area?.toLocaleString() || "-",
       className: "w-[100px]",
     },
     {
-      header: "Populasi/m²",
+      header: t('populationPerSqm'),
       cell: (row) => row.population?.toLocaleString() || "-",
       className: "w-[110px]",
     },
     {
-      header: "Max Populasi",
+      header: t('maxPopulation'),
       cell: (row) => row.maxPopulation?.toLocaleString() || "-",
       className: "w-[120px]",
     },
     {
-      header: "Created",
+      header: tc('created'),
       cell: (row) => formatDate(row.createdAt),
       className: "w-[150px]",
     },
     {
-      header: "Actions",
+      header: tc('actions'),
       cell: (row) => (
         <div className="flex items-center gap-1">
           <Button
@@ -161,36 +166,36 @@ export default function CoopFloorsPage() {
   // Submit create/edit
   async function handleSubmit() {
     if (!formCoopId) {
-      toast.error("Coop is required");
+      toast.error(tc('required', { field: t('coop') }));
       return;
     }
 
     if (!formCode.trim()) {
-      toast.error("Code is required");
+      toast.error(tc('required', { field: tc('code') }));
       return;
     }
 
     if (!formName.trim()) {
-      toast.error("Name is required");
+      toast.error(tc('required', { field: tc('name') }));
       return;
     }
 
     if (!formPopulation || Number(formPopulation) <= 0) {
-      toast.error("Populasi per m² is required");
+      toast.error(tc('required', { field: t('populationPerSqm') }));
       return;
     }
     if (!formArea || Number(formArea) <= 0) {
-      toast.error("Luas is required");
+      toast.error(tc('required', { field: t('area') }));
       return;
     }
     const maxPopulation = Number(formPopulation) * Number(formArea);
     if (maxPopulation <= 0) {
-      toast.error("Max populasi harus lebih dari 0");
+      toast.error(t('maxPopulationMustBePositive'));
       return;
     }
 
     if (!formFarmId || !formBranchId) {
-      toast.error("Please select a coop to auto-fill farm and branch");
+      toast.error(t('selectCoopToAutofill'));
       return;
     }
 
@@ -213,13 +218,13 @@ export default function CoopFloorsPage() {
           method: "PATCH",
           body: JSON.stringify(body),
         });
-        toast.success("Coop blok berhasil diupdate");
+        toast.success(tc('entityUpdated', { entity: t('entity') }));
       } else {
         await fetchApi("/coop-floors", {
           method: "POST",
           body: JSON.stringify(body),
         });
-        toast.success("Coop blok berhasil dibuat");
+        toast.success(tc('entityCreated', { entity: t('entity') }));
       }
 
       setDialogOpen(false);
@@ -227,8 +232,8 @@ export default function CoopFloorsPage() {
     } catch (error) {
       toast.error(
         editingFloor
-          ? "Failed to update coop blok"
-          : "Failed to create coop blok"
+          ? tc('entityUpdateFailed', { entity: t('entity') })
+          : tc('entityCreateFailed', { entity: t('entity') })
       );
     } finally {
       setIsSubmitting(false);
@@ -243,24 +248,24 @@ export default function CoopFloorsPage() {
       await fetchApi(`/coop-floors/${deletingFloor.id}`, {
         method: "DELETE",
       });
-      toast.success("Coop blok berhasil dihapus");
+      toast.success(tc('entityDeleted', { entity: t('entity') }));
       setDeleteDialogOpen(false);
       setDeletingFloor(null);
       refetch();
     } catch (error) {
-      toast.error("Failed to delete coop blok");
+      toast.error(tc('entityDeleteFailed', { entity: t('entity') }));
     }
   }
 
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Coop Bloks"
-        description="Kelola blok kandang"
+        title={t('title')}
+        description={t('description')}
         actions={
           <Button onClick={handleCreate}>
             <Plus className="mr-2 h-4 w-4" />
-            New Coop Blok
+            {tc('newEntity', { entity: t('entity') })}
           </Button>
         }
       />
@@ -274,17 +279,17 @@ export default function CoopFloorsPage() {
           setSearch(value);
           setPage(1);
         }}
-        searchPlaceholder="Search coop bloks..."
+        searchPlaceholder={tc('search')}
         page={page}
         totalPages={meta?.totalPages || 1}
         onPageChange={setPage}
         total={meta?.total}
-        emptyTitle="No coop bloks found"
-        emptyDescription="Get started by creating your first coop blok."
+        emptyTitle={tc('noResults')}
+        emptyDescription={tc('getStarted', { entity: t('entity') })}
         emptyAction={
           <Button onClick={handleCreate}>
             <Plus className="mr-2 h-4 w-4" />
-            New Coop Blok
+            {tc('newEntity', { entity: t('entity') })}
           </Button>
         }
       />
@@ -294,18 +299,18 @@ export default function CoopFloorsPage() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {editingFloor ? "Edit Coop Blok" : "New Coop Blok"}
+              {editingFloor ? tc('editEntity', { entity: t('entity') }) : tc('newEntity', { entity: t('entity') })}
             </DialogTitle>
             <DialogDescription>
               {editingFloor
-                ? "Update detail blok kandang."
-                : "Isi detail untuk membuat blok kandang baru."}
+                ? tc('updateDetails', { entity: t('entity') })
+                : tc('fillDetails', { entity: t('entity') })}
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="floor-coop">Coop</Label>
+              <Label htmlFor="floor-coop">{t('coop')}</Label>
               <CoopCombobox
                 value={formCoopId}
                 onChange={setFormCoopId}
@@ -318,10 +323,10 @@ export default function CoopFloorsPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="floor-code">Code</Label>
+              <Label htmlFor="floor-code">{tc('code')}</Label>
               <Input
                 id="floor-code"
-                placeholder="Enter kode blok"
+                placeholder={tc('enterField', { field: tc('code') })}
                 value={formCode}
                 onChange={(e) => setFormCode(e.target.value)}
                 onKeyDown={(e) => {
@@ -330,10 +335,10 @@ export default function CoopFloorsPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="floor-name">Name</Label>
+              <Label htmlFor="floor-name">{tc('name')}</Label>
               <Input
                 id="floor-name"
-                placeholder="Enter nama blok"
+                placeholder={tc('enterField', { field: tc('name') })}
                 value={formName}
                 onChange={(e) => setFormName(e.target.value)}
                 onKeyDown={(e) => {
@@ -342,27 +347,27 @@ export default function CoopFloorsPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="floor-population">Populasi / m²</Label>
+              <Label htmlFor="floor-population">{t('populationPerSqm')}</Label>
               <Input
                 id="floor-population"
                 type="number"
-                placeholder="Populasi per m²"
+                placeholder={tc('enterField', { field: t('populationPerSqm') })}
                 value={formPopulation}
                 onChange={(e) => setFormPopulation(e.target.value)}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="floor-area">Luas (m²)</Label>
+              <Label htmlFor="floor-area">{t('area')}</Label>
               <Input
                 id="floor-area"
                 type="number"
-                placeholder="Luas kandang dalam m²"
+                placeholder={tc('enterField', { field: t('area') })}
                 value={formArea}
                 onChange={(e) => setFormArea(e.target.value)}
               />
             </div>
             <div className="space-y-2">
-              <Label>Max Populasi (otomatis)</Label>
+              <Label>{t('maxPopulationAuto')}</Label>
               <Input
                 type="number"
                 readOnly
@@ -372,20 +377,20 @@ export default function CoopFloorsPage() {
                     ? Number(formPopulation) * Number(formArea)
                     : ""
                 }
-                placeholder="Populasi × Luas"
+                placeholder={t('populationTimesArea')}
                 className="bg-muted text-muted-foreground"
               />
               {formPopulation && formArea && (
                 <p className="text-xs text-muted-foreground">
-                  {formPopulation} × {formArea} = {Number(formPopulation) * Number(formArea)} ekor
+                  {formPopulation} × {formArea} = {Number(formPopulation) * Number(formArea)} {t('heads')}
                 </p>
               )}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="floor-description">Description</Label>
+              <Label htmlFor="floor-description">{tc('description')}</Label>
               <Textarea
                 id="floor-description"
-                placeholder="Enter description (optional)"
+                placeholder={tc('enterFieldOptional', { field: tc('description') })}
                 value={formDescription}
                 onChange={(e) => setFormDescription(e.target.value)}
               />
@@ -398,14 +403,14 @@ export default function CoopFloorsPage() {
               onClick={() => setDialogOpen(false)}
               disabled={isSubmitting}
             >
-              Cancel
+              {tc('cancel')}
             </Button>
             <Button onClick={handleSubmit} disabled={isSubmitting}>
               {isSubmitting
-                ? "Saving..."
+                ? tc('saving')
                 : editingFloor
-                  ? "Update Coop Blok"
-                  : "Create Coop Blok"}
+                  ? tc('updateEntity', { entity: t('entity') })
+                  : tc('createEntity', { entity: t('entity') })}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -415,11 +420,11 @@ export default function CoopFloorsPage() {
       <ConfirmDialog
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
-        title="Delete Coop Blok"
-        description={`Are you sure you want to delete "${deletingFloor?.name}"? This action cannot be undone.`}
+        title={tc('deleteEntity', { entity: t('entity') })}
+        description={tc('confirmDelete', { name: deletingFloor?.name || '' })}
         onConfirm={handleDelete}
         variant="destructive"
-        confirmLabel="Delete"
+        confirmLabel={tc('delete')}
       />
     </div>
   );

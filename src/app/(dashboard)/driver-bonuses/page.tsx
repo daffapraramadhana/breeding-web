@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { useQueryState, parseAsInteger } from "nuqs";
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2 } from "lucide-react";
@@ -28,6 +29,8 @@ import {
 } from "@/components/ui/dialog";
 
 export default function DriverBonusesPage() {
+  const t = useTranslations("driverBonuses");
+  const tc = useTranslations("common");
   const [page, setPage] = useQueryState(
     "page",
     parseAsInteger.withDefault(1)
@@ -56,23 +59,23 @@ export default function DriverBonusesPage() {
   const [deleting, setDeleting] = useState<DriverBonus | null>(null);
 
   const columns: Column<DriverBonus>[] = [
-    { header: "Delivery ID", accessorKey: "deliveryId" },
+    { header: t("deliveryId"), accessorKey: "deliveryId" },
     {
-      header: "Employee",
+      header: t("employee"),
       cell: (row) => row.employee?.name || "-",
     },
-    { header: "Amount", accessorKey: "amount" },
+    { header: t("amount"), accessorKey: "amount" },
     {
-      header: "Payment Status",
+      header: t("paymentStatus"),
       cell: (row) => <StatusBadge status={row.paymentStatus} />,
     },
     {
-      header: "Created",
+      header: tc("created"),
       cell: (row) => formatDate(row.createdAt),
       className: "w-[150px]",
     },
     {
-      header: "Actions",
+      header: tc("actions"),
       cell: (row) => (
         <div className="flex items-center gap-1">
           <Button
@@ -124,7 +127,7 @@ export default function DriverBonusesPage() {
 
   async function handleSubmit() {
     if (!formDeliveryId.trim()) {
-      toast.error("Delivery ID is required");
+      toast.error(tc("required", { field: t("deliveryId") }));
       return;
     }
 
@@ -141,13 +144,13 @@ export default function DriverBonusesPage() {
           method: "PATCH",
           body: JSON.stringify(body),
         });
-        toast.success("Driver bonus updated successfully");
+        toast.success(tc("entityUpdated", { entity: t("entity") }));
       } else {
         await fetchApi("/driver-bonuses", {
           method: "POST",
           body: JSON.stringify(body),
         });
-        toast.success("Driver bonus created successfully");
+        toast.success(tc("entityCreated", { entity: t("entity") }));
       }
 
       setDialogOpen(false);
@@ -155,8 +158,8 @@ export default function DriverBonusesPage() {
     } catch {
       toast.error(
         editing
-          ? "Failed to update driver bonus"
-          : "Failed to create driver bonus"
+          ? tc("entityUpdateFailed", { entity: t("entity") })
+          : tc("entityCreateFailed", { entity: t("entity") })
       );
     } finally {
       setIsSubmitting(false);
@@ -170,24 +173,24 @@ export default function DriverBonusesPage() {
       await fetchApi(`/driver-bonuses/${deleting.id}`, {
         method: "DELETE",
       });
-      toast.success("Driver bonus deleted successfully");
+      toast.success(tc("entityDeleted", { entity: t("entity") }));
       setDeleteDialogOpen(false);
       setDeleting(null);
       refetch();
     } catch {
-      toast.error("Failed to delete driver bonus");
+      toast.error(tc("entityDeleteFailed", { entity: t("entity") }));
     }
   }
 
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Driver Bonuses"
-        description="Manage driver bonuses"
+        title={t("title")}
+        description={t("description")}
         actions={
           <Button onClick={handleCreate}>
             <Plus className="mr-2 h-4 w-4" />
-            New Driver Bonus
+            {tc("newEntity", { entity: t("entity") })}
           </Button>
         }
       />
@@ -201,17 +204,17 @@ export default function DriverBonusesPage() {
           setSearch(value);
           setPage(1);
         }}
-        searchPlaceholder="Search driver bonuses..."
+        searchPlaceholder={t("searchPlaceholder")}
         page={page}
         totalPages={meta?.totalPages || 1}
         onPageChange={setPage}
         total={meta?.total}
-        emptyTitle="No driver bonuses found"
-        emptyDescription="Get started by creating your first driver bonus."
+        emptyTitle={tc("noResults", { entity: t("entity") })}
+        emptyDescription={tc("getStarted", { entity: t("entity") })}
         emptyAction={
           <Button onClick={handleCreate}>
             <Plus className="mr-2 h-4 w-4" />
-            New Driver Bonus
+            {tc("newEntity", { entity: t("entity") })}
           </Button>
         }
       />
@@ -220,37 +223,37 @@ export default function DriverBonusesPage() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {editing ? "Edit Driver Bonus" : "New Driver Bonus"}
+              {editing ? tc("editEntity", { entity: t("entity") }) : tc("newEntity", { entity: t("entity") })}
             </DialogTitle>
             <DialogDescription>
               {editing
-                ? "Update the driver bonus details below."
-                : "Fill in the details to create a new driver bonus."}
+                ? tc("updateDetails", { entity: t("entity") })
+                : tc("fillDetails", { entity: t("entity") })}
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="deliveryId">Delivery ID</Label>
+              <Label htmlFor="deliveryId">{t("deliveryId")}</Label>
               <Input
                 id="deliveryId"
-                placeholder="Enter delivery ID"
+                placeholder={tc("enterField", { field: t("deliveryId") })}
                 value={formDeliveryId}
                 onChange={(e) => setFormDeliveryId(e.target.value)}
               />
             </div>
             <div className="space-y-2">
-              <Label>Employee</Label>
+              <Label>{t("employee")}</Label>
               <EmployeeCombobox
                 value={formEmployeeId}
                 onChange={setFormEmployeeId}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="amount">Amount</Label>
+              <Label htmlFor="amount">{t("amount")}</Label>
               <Input
                 id="amount"
-                placeholder="Enter amount"
+                placeholder={tc("enterField", { field: t("amount") })}
                 value={formAmount}
                 onChange={(e) => setFormAmount(e.target.value)}
               />
@@ -263,14 +266,14 @@ export default function DriverBonusesPage() {
               onClick={() => setDialogOpen(false)}
               disabled={isSubmitting}
             >
-              Cancel
+              {tc("cancel")}
             </Button>
             <Button onClick={handleSubmit} disabled={isSubmitting}>
               {isSubmitting
-                ? "Saving..."
+                ? tc("saving")
                 : editing
-                  ? "Update"
-                  : "Create"}
+                  ? tc("update")
+                  : tc("create")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -279,11 +282,11 @@ export default function DriverBonusesPage() {
       <ConfirmDialog
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
-        title="Delete Driver Bonus"
-        description="Are you sure you want to delete this driver bonus? This action cannot be undone."
+        title={tc("deleteEntity", { entity: t("entity") })}
+        description={tc("confirmDelete", { name: t("entity") })}
         onConfirm={handleDelete}
         variant="destructive"
-        confirmLabel="Delete"
+        confirmLabel={tc("delete")}
       />
     </div>
   );

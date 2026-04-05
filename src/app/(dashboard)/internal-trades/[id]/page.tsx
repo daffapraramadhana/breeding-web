@@ -29,6 +29,7 @@ import { InternalTrade } from "@/types/api";
 import { fetchApi } from "@/lib/api";
 import { formatDate, formatCurrency, formatQuantity, parseDecimal } from "@/lib/utils";
 import { INTERNAL_TRADE_STATUS_TRANSITIONS } from "@/lib/constants";
+import { useTranslations } from "next-intl";
 import { ArrowLeft, ArrowRight, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -37,6 +38,8 @@ export default function InternalTradeDetailPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  const t = useTranslations('internalTrades');
+  const tc = useTranslations('common');
   const { id } = use(params);
   const router = useRouter();
   const { data: trade, isLoading, refetch } = useApi<InternalTrade>(
@@ -45,15 +48,15 @@ export default function InternalTradeDetailPage({
   const [showDelete, setShowDelete] = useState(false);
 
   if (isLoading) return <PageSkeleton />;
-  if (!trade) return <div>Internal Trade not found</div>;
+  if (!trade) return <div>{t('notFound')}</div>;
 
   async function handleDelete() {
     try {
       await fetchApi(`/internal-trades/${id}`, { method: "DELETE" });
-      toast.success("Internal Trade deleted");
+      toast.success(tc('entityDeleted', { entity: t('entity') }));
       router.push("/internal-trades");
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to delete");
+      toast.error(err instanceof Error ? err.message : tc('entityDeleteFailed', { entity: t('entity') }));
     }
   }
 
@@ -71,7 +74,7 @@ export default function InternalTradeDetailPage({
             <Button variant="outline" asChild>
               <Link href="/internal-trades">
                 <ArrowLeft className="mr-2 h-4 w-4" />
-                Back
+                {tc('back')}
               </Link>
             </Button>
             {trade.status === "PROCESSING" && (
@@ -80,7 +83,7 @@ export default function InternalTradeDetailPage({
                 onClick={() => setShowDelete(true)}
               >
                 <Trash2 className="mr-2 h-4 w-4" />
-                Delete
+                {tc('delete')}
               </Button>
             )}
             <StatusAction
@@ -96,16 +99,16 @@ export default function InternalTradeDetailPage({
       <div className="grid gap-6 md:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>Trade Information</CardTitle>
+            <CardTitle>{t('tradeInformation')}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Status</span>
+              <span className="text-muted-foreground">{tc('status')}</span>
               <StatusBadge status={trade.status} />
             </div>
             <Separator />
             <div className="flex justify-between items-center">
-              <span className="text-muted-foreground">Warehouses</span>
+              <span className="text-muted-foreground">{t('warehouses')}</span>
               <span className="font-medium flex items-center gap-2">
                 {trade.fromWarehouse?.name || "—"}
                 <ArrowRight className="h-4 w-4 text-muted-foreground" />
@@ -114,7 +117,7 @@ export default function InternalTradeDetailPage({
             </div>
             <Separator />
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Total Trade Value</span>
+              <span className="text-muted-foreground">{t('totalTradeValue')}</span>
               <span className="text-lg font-bold">
                 {formatCurrency(grandTotal)}
               </span>
@@ -124,18 +127,18 @@ export default function InternalTradeDetailPage({
 
         <Card>
           <CardHeader>
-            <CardTitle>Additional Info</CardTitle>
+            <CardTitle>{t('additionalInfo')}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Created</span>
+              <span className="text-muted-foreground">{tc('created')}</span>
               <span>{formatDate(trade.createdAt)}</span>
             </div>
             {trade.notes && (
               <>
                 <Separator />
                 <div>
-                  <span className="text-muted-foreground">Notes</span>
+                  <span className="text-muted-foreground">{t('notes')}</span>
                   <p className="mt-1">{trade.notes}</p>
                 </div>
               </>
@@ -146,7 +149,7 @@ export default function InternalTradeDetailPage({
 
       <Card>
         <CardHeader>
-          <CardTitle>Line Items</CardTitle>
+          <CardTitle>{t('lineItems')}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="rounded-md border">
@@ -154,11 +157,11 @@ export default function InternalTradeDetailPage({
               <TableHeader>
                 <TableRow>
                   <TableHead>#</TableHead>
-                  <TableHead>Product</TableHead>
-                  <TableHead className="text-right">Qty</TableHead>
-                  <TableHead>UOM</TableHead>
-                  <TableHead className="text-right">Unit Price</TableHead>
-                  <TableHead className="text-right">Total</TableHead>
+                  <TableHead>{t('product')}</TableHead>
+                  <TableHead className="text-right">{t('qty')}</TableHead>
+                  <TableHead>{t('uom')}</TableHead>
+                  <TableHead className="text-right">{t('unitPrice')}</TableHead>
+                  <TableHead className="text-right">{t('total')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -190,7 +193,7 @@ export default function InternalTradeDetailPage({
                     colSpan={5}
                     className="text-right font-medium"
                   >
-                    Grand Total
+                    {t('grandTotal')}
                   </TableCell>
                   <TableCell className="text-right text-lg font-bold">
                     {formatCurrency(grandTotal)}
@@ -205,11 +208,11 @@ export default function InternalTradeDetailPage({
       <ConfirmDialog
         open={showDelete}
         onOpenChange={setShowDelete}
-        title="Delete Internal Trade"
-        description="Are you sure you want to delete this internal trade?"
+        title={t('deleteTitle')}
+        description={t('deleteDescription')}
         onConfirm={handleDelete}
         variant="destructive"
-        confirmLabel="Delete"
+        confirmLabel={tc('delete')}
       />
     </div>
   );

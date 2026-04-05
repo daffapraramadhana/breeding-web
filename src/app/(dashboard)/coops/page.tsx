@@ -5,6 +5,8 @@ import { useQueryState, parseAsInteger } from "nuqs";
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 
+import { useTranslations } from "next-intl";
+
 import { DataTable, Column } from "@/components/shared/data-table";
 import { PageHeader } from "@/components/shared/page-header";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
@@ -37,6 +39,9 @@ import {
 } from "@/components/ui/dialog";
 
 export default function CoopsPage() {
+  const t = useTranslations('coops');
+  const tc = useTranslations('common');
+
   // URL state for pagination and search
   const [page, setPage] = useQueryState(
     "page",
@@ -69,35 +74,35 @@ export default function CoopsPage() {
   // Table columns
   const columns: Column<Coop>[] = [
     {
-      header: "Code",
+      header: tc('code'),
       accessorKey: "code",
       className: "w-[120px]",
     },
     {
-      header: "Name",
+      header: tc('name'),
       accessorKey: "name",
     },
     {
-      header: "Farm",
+      header: t('farm'),
       cell: (row) => row.farm?.name || "-",
     },
     {
-      header: "Capacity",
+      header: t('capacity'),
       cell: (row) => row.capacity?.toLocaleString() || "-",
       className: "w-[100px]",
     },
     {
-      header: "Status",
+      header: tc('status'),
       cell: (row) => <StatusBadge status={row.status} />,
       className: "w-[120px]",
     },
     {
-      header: "Created",
+      header: tc('created'),
       cell: (row) => formatDate(row.createdAt),
       className: "w-[150px]",
     },
     {
-      header: "Actions",
+      header: tc('actions'),
       cell: (row) => (
         <div className="flex items-center gap-1">
           <Button
@@ -161,22 +166,22 @@ export default function CoopsPage() {
   // Submit create/edit
   async function handleSubmit() {
     if (!formCode.trim()) {
-      toast.error("Coop code is required");
+      toast.error(tc('required', { field: tc('code') }));
       return;
     }
 
     if (!formName.trim()) {
-      toast.error("Coop name is required");
+      toast.error(tc('required', { field: tc('name') }));
       return;
     }
 
     if (!formFarmId) {
-      toast.error("Farm is required");
+      toast.error(tc('required', { field: t('farm') }));
       return;
     }
 
     if (!formBranchId) {
-      toast.error("Branch is required");
+      toast.error(tc('required', { field: t('branch') }));
       return;
     }
 
@@ -197,20 +202,20 @@ export default function CoopsPage() {
           method: "PATCH",
           body: JSON.stringify(body),
         });
-        toast.success("Coop updated successfully");
+        toast.success(tc('entityUpdated', { entity: t('entity') }));
       } else {
         await fetchApi("/coops", {
           method: "POST",
           body: JSON.stringify(body),
         });
-        toast.success("Coop created successfully");
+        toast.success(tc('entityCreated', { entity: t('entity') }));
       }
 
       setDialogOpen(false);
       refetch();
     } catch (error) {
       toast.error(
-        editingCoop ? "Failed to update coop" : "Failed to create coop"
+        editingCoop ? tc('entityUpdateFailed', { entity: t('entity') }) : tc('entityCreateFailed', { entity: t('entity') })
       );
     } finally {
       setIsSubmitting(false);
@@ -225,24 +230,24 @@ export default function CoopsPage() {
       await fetchApi(`/coops/${deletingCoop.id}`, {
         method: "DELETE",
       });
-      toast.success("Coop deleted successfully");
+      toast.success(tc('entityDeleted', { entity: t('entity') }));
       setDeleteDialogOpen(false);
       setDeletingCoop(null);
       refetch();
     } catch (error) {
-      toast.error("Failed to delete coop");
+      toast.error(tc('entityDeleteFailed', { entity: t('entity') }));
     }
   }
 
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Coops"
-        description="Manage your coops and their configurations"
+        title={t('title')}
+        description={t('description')}
         actions={
           <Button onClick={handleCreate}>
             <Plus className="mr-2 h-4 w-4" />
-            New Coop
+            {tc('newEntity', { entity: t('entity') })}
           </Button>
         }
       />
@@ -256,17 +261,17 @@ export default function CoopsPage() {
           setSearch(value);
           setPage(1);
         }}
-        searchPlaceholder="Search coops..."
+        searchPlaceholder={tc('search')}
         page={page}
         totalPages={meta?.totalPages || 1}
         onPageChange={setPage}
         total={meta?.total}
-        emptyTitle="No coops found"
-        emptyDescription="Get started by creating your first coop."
+        emptyTitle={tc('noResults')}
+        emptyDescription={tc('getStarted', { entity: t('entity') })}
         emptyAction={
           <Button onClick={handleCreate}>
             <Plus className="mr-2 h-4 w-4" />
-            New Coop
+            {tc('newEntity', { entity: t('entity') })}
           </Button>
         }
       />
@@ -276,35 +281,35 @@ export default function CoopsPage() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {editingCoop ? "Edit Coop" : "New Coop"}
+              {editingCoop ? tc('editEntity', { entity: t('entity') }) : tc('newEntity', { entity: t('entity') })}
             </DialogTitle>
             <DialogDescription>
               {editingCoop
-                ? "Update the coop details below."
-                : "Fill in the details to create a new coop."}
+                ? tc('updateDetails', { entity: t('entity') })
+                : tc('fillDetails', { entity: t('entity') })}
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="coop-branch">Branch</Label>
+              <Label htmlFor="coop-branch">{t('branch')}</Label>
               <BranchCombobox
                 value={formBranchId}
                 onChange={setFormBranchId}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="coop-farm">Farm</Label>
+              <Label htmlFor="coop-farm">{t('farm')}</Label>
               <FarmCombobox
                 value={formFarmId}
                 onChange={setFormFarmId}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="coop-code">Code</Label>
+              <Label htmlFor="coop-code">{tc('code')}</Label>
               <Input
                 id="coop-code"
-                placeholder="Enter coop code"
+                placeholder={tc('enterField', { field: tc('code') })}
                 value={formCode}
                 onChange={(e) => setFormCode(e.target.value)}
                 onKeyDown={(e) => {
@@ -313,10 +318,10 @@ export default function CoopsPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="coop-name">Name</Label>
+              <Label htmlFor="coop-name">{tc('name')}</Label>
               <Input
                 id="coop-name"
-                placeholder="Enter coop name"
+                placeholder={tc('enterField', { field: tc('name') })}
                 value={formName}
                 onChange={(e) => setFormName(e.target.value)}
                 onKeyDown={(e) => {
@@ -325,11 +330,11 @@ export default function CoopsPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="coop-capacity">Capacity</Label>
+              <Label htmlFor="coop-capacity">{t('capacity')}</Label>
               <Input
                 id="coop-capacity"
                 type="number"
-                placeholder="Enter capacity"
+                placeholder={tc('enterField', { field: t('capacity') })}
                 value={formCapacity}
                 onChange={(e) => setFormCapacity(e.target.value)}
                 onKeyDown={(e) => {
@@ -338,26 +343,26 @@ export default function CoopsPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="coop-status">Status</Label>
+              <Label htmlFor="coop-status">{tc('status')}</Label>
               <Select
                 value={formStatus}
                 onValueChange={(val) => setFormStatus(val as CoopStatus)}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select status" />
+                  <SelectValue placeholder={tc('selectField', { field: tc('status') })} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="ACTIVE">Active</SelectItem>
-                  <SelectItem value="INACTIVE">Inactive</SelectItem>
-                  <SelectItem value="MAINTENANCE">Maintenance</SelectItem>
+                  <SelectItem value="ACTIVE">{tc('active')}</SelectItem>
+                  <SelectItem value="INACTIVE">{tc('inactive')}</SelectItem>
+                  <SelectItem value="MAINTENANCE">{t('maintenance')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="coop-description">Description</Label>
+              <Label htmlFor="coop-description">{tc('description')}</Label>
               <Textarea
                 id="coop-description"
-                placeholder="Enter description (optional)"
+                placeholder={tc('enterFieldOptional', { field: tc('description') })}
                 value={formDescription}
                 onChange={(e) => setFormDescription(e.target.value)}
               />
@@ -370,14 +375,14 @@ export default function CoopsPage() {
               onClick={() => setDialogOpen(false)}
               disabled={isSubmitting}
             >
-              Cancel
+              {tc('cancel')}
             </Button>
             <Button onClick={handleSubmit} disabled={isSubmitting}>
               {isSubmitting
-                ? "Saving..."
+                ? tc('saving')
                 : editingCoop
-                  ? "Update Coop"
-                  : "Create Coop"}
+                  ? tc('updateEntity', { entity: t('entity') })
+                  : tc('createEntity', { entity: t('entity') })}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -387,11 +392,11 @@ export default function CoopsPage() {
       <ConfirmDialog
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
-        title="Delete Coop"
-        description={`Are you sure you want to delete "${deletingCoop?.name}"? This action cannot be undone.`}
+        title={tc('deleteEntity', { entity: t('entity') })}
+        description={tc('confirmDelete', { name: deletingCoop?.name || '' })}
         onConfirm={handleDelete}
         variant="destructive"
-        confirmLabel="Delete"
+        confirmLabel={tc('delete')}
       />
     </div>
   );

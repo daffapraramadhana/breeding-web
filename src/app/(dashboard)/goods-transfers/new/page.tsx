@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,28 +14,31 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { PageHeader } from "@/components/shared/page-header";
 import { LineItemsField, LineItem } from "@/components/forms/line-items-field";
-import { WarehouseCombobox } from "@/components/forms/warehouse-combobox";
+import { WarehouseGroupedCombobox } from "@/components/forms/warehouse-grouped-combobox";
 import { fetchApi } from "@/lib/api";
 import { WarehouseOwnerType } from "@/types/api";
 import { toast } from "sonner";
 import { ArrowLeft } from "lucide-react";
 
-const OWNER_TYPE_LABELS: Record<WarehouseOwnerType, string> = {
-  BRANCH: "Cabang",
-  FARM: "Farm",
-  COOP: "Kandang Ownfarm",
-};
+function useGroupLabels(): Record<WarehouseOwnerType, string> {
+  const t = useTranslations("goodsTransferNew");
+  return {
+    BRANCH: t("ownerBranch"),
+    FARM: t("ownerFarm"),
+    COOP: t("ownerCoop"),
+  };
+}
 
 export default function NewGoodsTransferPage() {
+  const t = useTranslations("goodsTransferNew");
+  const tc = useTranslations("common");
+  const groupLabels = useGroupLabels();
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [form, setForm] = useState({
-    fromOwnerType: "" as WarehouseOwnerType | "",
     fromWarehouseId: "",
-    toOwnerType: "" as WarehouseOwnerType | "",
     toWarehouseId: "",
     transferDate: "",
     notes: "",
@@ -47,18 +51,18 @@ export default function NewGoodsTransferPage() {
     e.preventDefault();
 
     if (!form.fromWarehouseId || !form.toWarehouseId) {
-      toast.error("Please select both source and destination warehouse");
+      toast.error(t("selectBothWarehouses"));
       return;
     }
 
     if (form.fromWarehouseId === form.toWarehouseId) {
-      toast.error("Source and destination warehouse must be different");
+      toast.error(t("warehouseMustDiffer"));
       return;
     }
 
     const validLines = lines.filter((l) => l.productId && l.quantity);
     if (validLines.length === 0) {
-      toast.error("Please add at least one line item");
+      toast.error(t("addLineItem"));
       return;
     }
 
@@ -81,11 +85,11 @@ export default function NewGoodsTransferPage() {
         body: JSON.stringify(body),
       });
 
-      toast.success("Goods Transfer created successfully");
+      toast.success(t("createdSuccess"));
       router.push(`/goods-transfers/${result.id}`);
     } catch (err) {
       toast.error(
-        err instanceof Error ? err.message : "Failed to create goods transfer"
+        err instanceof Error ? err.message : t("createFailed")
       );
     } finally {
       setIsSubmitting(false);
@@ -95,12 +99,12 @@ export default function NewGoodsTransferPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Create Goods Transfer"
+        title={t("title")}
         actions={
           <Button variant="outline" asChild>
             <Link href="/goods-transfers">
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Back
+              {t("back")}
             </Link>
           </Button>
         }
@@ -109,90 +113,35 @@ export default function NewGoodsTransferPage() {
       <form onSubmit={handleSubmit} className="space-y-6">
         <Card>
           <CardHeader>
-            <CardTitle>Transfer Details</CardTitle>
+            <CardTitle>{t("transferDetails")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="grid gap-6 md:grid-cols-2">
-              <div className="space-y-3">
-                <Label>From Warehouse *</Label>
-                <RadioGroup
-                  value={form.fromOwnerType}
-                  onValueChange={(v) =>
-                    setForm((prev) => ({
-                      ...prev,
-                      fromOwnerType: v as WarehouseOwnerType,
-                      fromWarehouseId: "",
-                    }))
+              <div className="space-y-2">
+                <Label>{t("fromWarehouse")} *</Label>
+                <WarehouseGroupedCombobox
+                  value={form.fromWarehouseId}
+                  onChange={(id) =>
+                    setForm((prev) => ({ ...prev, fromWarehouseId: id }))
                   }
-                  className="flex gap-4"
-                >
-                  {(Object.keys(OWNER_TYPE_LABELS) as WarehouseOwnerType[]).map(
-                    (type) => (
-                      <div key={type} className="flex items-center space-x-2">
-                        <RadioGroupItem value={type} id={`from-${type}`} />
-                        <Label
-                          htmlFor={`from-${type}`}
-                          className="cursor-pointer font-normal"
-                        >
-                          {OWNER_TYPE_LABELS[type]}
-                        </Label>
-                      </div>
-                    )
-                  )}
-                </RadioGroup>
-                {form.fromOwnerType && (
-                  <WarehouseCombobox
-                    value={form.fromWarehouseId}
-                    onChange={(id) =>
-                      setForm((prev) => ({ ...prev, fromWarehouseId: id }))
-                    }
-                    ownerType={form.fromOwnerType}
-                  />
-                )}
+                  groupLabels={groupLabels}
+                />
               </div>
-
-              <div className="space-y-3">
-                <Label>To Warehouse *</Label>
-                <RadioGroup
-                  value={form.toOwnerType}
-                  onValueChange={(v) =>
-                    setForm((prev) => ({
-                      ...prev,
-                      toOwnerType: v as WarehouseOwnerType,
-                      toWarehouseId: "",
-                    }))
+              <div className="space-y-2">
+                <Label>{t("toWarehouse")} *</Label>
+                <WarehouseGroupedCombobox
+                  value={form.toWarehouseId}
+                  onChange={(id) =>
+                    setForm((prev) => ({ ...prev, toWarehouseId: id }))
                   }
-                  className="flex gap-4"
-                >
-                  {(Object.keys(OWNER_TYPE_LABELS) as WarehouseOwnerType[]).map(
-                    (type) => (
-                      <div key={type} className="flex items-center space-x-2">
-                        <RadioGroupItem value={type} id={`to-${type}`} />
-                        <Label
-                          htmlFor={`to-${type}`}
-                          className="cursor-pointer font-normal"
-                        >
-                          {OWNER_TYPE_LABELS[type]}
-                        </Label>
-                      </div>
-                    )
-                  )}
-                </RadioGroup>
-                {form.toOwnerType && (
-                  <WarehouseCombobox
-                    value={form.toWarehouseId}
-                    onChange={(id) =>
-                      setForm((prev) => ({ ...prev, toWarehouseId: id }))
-                    }
-                    ownerType={form.toOwnerType}
-                  />
-                )}
+                  groupLabels={groupLabels}
+                />
               </div>
             </div>
 
             <div className="grid gap-6 md:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="transferDate">Transfer Date *</Label>
+                <Label htmlFor="transferDate">{t("transferDate")} *</Label>
                 <Input
                   id="transferDate"
                   type="date"
@@ -204,14 +153,14 @@ export default function NewGoodsTransferPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="notes">Notes</Label>
+                <Label htmlFor="notes">{t("notes")}</Label>
                 <Textarea
                   id="notes"
                   value={form.notes}
                   onChange={(e) =>
                     setForm({ ...form, notes: e.target.value })
                   }
-                  placeholder="Additional notes..."
+                  placeholder={t("notesPlaceholder")}
                 />
               </div>
             </div>
@@ -220,7 +169,7 @@ export default function NewGoodsTransferPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Line Items</CardTitle>
+            <CardTitle>{t("lineItems")}</CardTitle>
           </CardHeader>
           <CardContent>
             <LineItemsField
@@ -233,10 +182,10 @@ export default function NewGoodsTransferPage() {
 
         <div className="flex justify-end gap-3">
           <Button type="button" variant="outline" asChild>
-            <Link href="/goods-transfers">Cancel</Link>
+            <Link href="/goods-transfers">{tc("cancel")}</Link>
           </Button>
           <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "Creating..." : "Create Goods Transfer"}
+            {isSubmitting ? t("creating") : t("createGoodsTransfer")}
           </Button>
         </div>
       </form>

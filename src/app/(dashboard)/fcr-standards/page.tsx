@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { useQueryState, parseAsInteger } from "nuqs";
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2, X } from "lucide-react";
@@ -27,6 +28,8 @@ import {
 } from "@/components/ui/dialog";
 
 export default function FcrStandardsPage() {
+  const t = useTranslations("fcrStandards");
+  const tc = useTranslations("common");
   const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(1));
   const [search, setSearch] = useQueryState("search", { defaultValue: "" });
 
@@ -46,11 +49,11 @@ export default function FcrStandardsPage() {
   const [deleting, setDeleting] = useState<FcrStandard | null>(null);
 
   const columns: Column<FcrStandard>[] = [
-    { header: "Name", accessorKey: "name" },
-    { header: "Description", cell: (row) => row.description || "-" },
-    { header: "Created", cell: (row) => formatDate(row.createdAt), className: "w-[150px]" },
+    { header: tc("name"), accessorKey: "name" },
+    { header: tc("description"), cell: (row) => row.description || "-" },
+    { header: tc("created"), cell: (row) => formatDate(row.createdAt), className: "w-[150px]" },
     {
-      header: "Actions",
+      header: tc("actions"),
       cell: (row) => (
         <div className="flex items-center gap-1">
           <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); handleEdit(row); }}>
@@ -102,7 +105,7 @@ export default function FcrStandardsPage() {
 
   async function handleSubmit() {
     if (!formName.trim()) {
-      toast.error("Name is required");
+      toast.error(tc("required", { field: tc("name") }));
       return;
     }
 
@@ -119,19 +122,19 @@ export default function FcrStandardsPage() {
           method: "PATCH",
           body: JSON.stringify(body),
         });
-        toast.success("FCR standard updated successfully");
+        toast.success(tc("entityUpdated", { entity: t("entity") }));
       } else {
         await fetchApi("/fcr-standards", {
           method: "POST",
           body: JSON.stringify(body),
         });
-        toast.success("FCR standard created successfully");
+        toast.success(tc("entityCreated", { entity: t("entity") }));
       }
 
       setDialogOpen(false);
       refetch();
     } catch {
-      toast.error(editing ? "Failed to update FCR standard" : "Failed to create FCR standard");
+      toast.error(editing ? tc("entityUpdateFailed", { entity: t("entity") }) : tc("entityCreateFailed", { entity: t("entity") }));
     } finally {
       setIsSubmitting(false);
     }
@@ -141,24 +144,24 @@ export default function FcrStandardsPage() {
     if (!deleting) return;
     try {
       await fetchApi(`/fcr-standards/${deleting.id}`, { method: "DELETE" });
-      toast.success("FCR standard deleted successfully");
+      toast.success(tc("entityDeleted", { entity: t("entity") }));
       setDeleteDialogOpen(false);
       setDeleting(null);
       refetch();
     } catch {
-      toast.error("Failed to delete FCR standard");
+      toast.error(tc("entityDeleteFailed", { entity: t("entity") }));
     }
   }
 
   return (
     <div className="space-y-6">
       <PageHeader
-        title="FCR Standards"
-        description="Manage feed conversion ratio standards"
+        title={t("title")}
+        description={t("description")}
         actions={
           <Button onClick={handleCreate}>
             <Plus className="mr-2 h-4 w-4" />
-            New Standard
+            {tc("newEntity", { entity: t("entity") })}
           </Button>
         }
       />
@@ -169,17 +172,17 @@ export default function FcrStandardsPage() {
         isLoading={isLoading}
         search={search}
         onSearchChange={(value) => { setSearch(value); setPage(1); }}
-        searchPlaceholder="Search FCR standards..."
+        searchPlaceholder={t("searchPlaceholder")}
         page={page}
         totalPages={meta?.totalPages || 1}
         onPageChange={setPage}
         total={meta?.total}
-        emptyTitle="No FCR standards found"
-        emptyDescription="Get started by creating your first FCR standard."
+        emptyTitle={tc("noResults", { entity: t("entity") })}
+        emptyDescription={tc("getStarted", { entity: t("entity") })}
         emptyAction={
           <Button onClick={handleCreate}>
             <Plus className="mr-2 h-4 w-4" />
-            New Standard
+            {tc("newEntity", { entity: t("entity") })}
           </Button>
         }
       />
@@ -187,22 +190,22 @@ export default function FcrStandardsPage() {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{editing ? "Edit FCR Standard" : "New FCR Standard"}</DialogTitle>
+            <DialogTitle>{editing ? tc("editEntity", { entity: t("entity") }) : tc("newEntity", { entity: t("entity") })}</DialogTitle>
             <DialogDescription>
-              {editing ? "Update the FCR standard details below." : "Fill in the details to create a new FCR standard."}
+              {editing ? tc("updateDetails", { entity: t("entity") }) : tc("fillDetails", { entity: t("entity") })}
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="fcr-name">Name</Label>
-              <Input id="fcr-name" placeholder="Enter name" value={formName} onChange={(e) => setFormName(e.target.value)} />
+              <Label htmlFor="fcr-name">{tc("name")}</Label>
+              <Input id="fcr-name" placeholder={tc("enterField", { field: tc("name") })} value={formName} onChange={(e) => setFormName(e.target.value)} />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="fcr-description">Description</Label>
+              <Label htmlFor="fcr-description">{tc("description")}</Label>
               <Textarea
                 id="fcr-description"
-                placeholder="Enter description (optional)"
+                placeholder={tc("enterFieldOptional", { field: tc("description") })}
                 value={formDescription}
                 onChange={(e) => setFormDescription(e.target.value)}
               />
@@ -210,10 +213,10 @@ export default function FcrStandardsPage() {
 
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label>Details</Label>
+                <Label>{t("details")}</Label>
                 <Button type="button" variant="outline" size="sm" onClick={addDetail}>
                   <Plus className="mr-1 h-3 w-3" />
-                  Add Detail
+                  {t("addDetail")}
                 </Button>
               </div>
               {formDetails.length > 0 && (
@@ -223,14 +226,14 @@ export default function FcrStandardsPage() {
                       <div className="flex-1">
                         <Input
                           type="number"
-                          placeholder="Day"
+                          placeholder={t("day")}
                           value={detail.day || ""}
                           onChange={(e) => updateDetail(index, "day", parseInt(e.target.value) || 0)}
                         />
                       </div>
                       <div className="flex-1">
                         <Input
-                          placeholder="FCR"
+                          placeholder={t("fcr")}
                           value={detail.fcr}
                           onChange={(e) => updateDetail(index, "fcr", e.target.value)}
                         />
@@ -246,9 +249,9 @@ export default function FcrStandardsPage() {
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setDialogOpen(false)} disabled={isSubmitting}>Cancel</Button>
+            <Button variant="outline" onClick={() => setDialogOpen(false)} disabled={isSubmitting}>{tc("cancel")}</Button>
             <Button onClick={handleSubmit} disabled={isSubmitting}>
-              {isSubmitting ? "Saving..." : editing ? "Update Standard" : "Create Standard"}
+              {isSubmitting ? tc("saving") : editing ? tc("update") : tc("create")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -257,11 +260,11 @@ export default function FcrStandardsPage() {
       <ConfirmDialog
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
-        title="Delete FCR Standard"
-        description={`Are you sure you want to delete "${deleting?.name}"? This action cannot be undone.`}
+        title={tc("deleteEntity", { entity: t("entity") })}
+        description={tc("confirmDelete", { name: deleting?.name ?? "" })}
         onConfirm={handleDelete}
         variant="destructive"
-        confirmLabel="Delete"
+        confirmLabel={tc("delete")}
       />
     </div>
   );

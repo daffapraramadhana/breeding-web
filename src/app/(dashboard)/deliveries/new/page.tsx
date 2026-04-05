@@ -17,6 +17,7 @@ import { PageHeader } from "@/components/shared/page-header";
 import { CustomerCombobox } from "@/components/forms/customer-combobox";
 import { EmployeeCombobox } from "@/components/forms/employee-combobox";
 import { fetchApi } from "@/lib/api";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { ArrowLeft, Plus, Trash2 } from "lucide-react";
 
@@ -28,6 +29,8 @@ interface DeliveryLine {
 }
 
 export default function NewDeliveryPage() {
+  const t = useTranslations('deliveries');
+  const tc = useTranslations('common');
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [form, setForm] = useState({
@@ -63,7 +66,7 @@ export default function NewDeliveryPage() {
     e.preventDefault();
 
     if (!form.salesOrderId) {
-      toast.error("Please enter a sales order ID");
+      toast.error(t('pleaseFillSalesOrder'));
       return;
     }
 
@@ -93,10 +96,10 @@ export default function NewDeliveryPage() {
         body: JSON.stringify(body),
       });
 
-      toast.success("Delivery created successfully");
+      toast.success(tc('entityCreated', { entity: t('entity') }));
       router.push(`/deliveries/${result.id}`);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to create delivery");
+      toast.error(err instanceof Error ? err.message : tc('entityCreateFailed', { entity: t('entity') }));
     } finally {
       setIsSubmitting(false);
     }
@@ -105,12 +108,12 @@ export default function NewDeliveryPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Create Delivery"
+        title={tc('createEntity', { entity: t('entity') })}
         actions={
           <Button variant="outline" asChild>
             <Link href="/deliveries">
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Back
+              {tc('back')}
             </Link>
           </Button>
         }
@@ -119,51 +122,51 @@ export default function NewDeliveryPage() {
       <form onSubmit={handleSubmit} className="space-y-6">
         <Card>
           <CardHeader>
-            <CardTitle>Delivery Details</CardTitle>
+            <CardTitle>{t('deliveryDetails')}</CardTitle>
           </CardHeader>
           <CardContent className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="salesOrderId">Sales Order ID *</Label>
+              <Label htmlFor="salesOrderId">{t('salesOrderId')} *</Label>
               <Input
                 id="salesOrderId"
                 value={form.salesOrderId}
                 onChange={(e) => setForm({ ...form, salesOrderId: e.target.value })}
-                placeholder="Enter sales order ID"
+                placeholder={t('enterSalesOrderId')}
                 required
               />
             </div>
             <div className="space-y-2">
-              <Label>Customer</Label>
+              <Label>{t('customer')}</Label>
               <CustomerCombobox
                 value={form.customerId}
                 onChange={(id) => setForm({ ...form, customerId: id })}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="vehicleId">Vehicle ID</Label>
+              <Label htmlFor="vehicleId">{t('vehicleId')}</Label>
               <Input
                 id="vehicleId"
                 value={form.vehicleId}
                 onChange={(e) => setForm({ ...form, vehicleId: e.target.value })}
-                placeholder="Enter vehicle ID"
+                placeholder={t('enterVehicleId')}
               />
             </div>
             <div className="space-y-2">
-              <Label>Driver</Label>
+              <Label>{t('driver')}</Label>
               <EmployeeCombobox
                 value={form.driverEmployeeId}
                 onChange={(id) => setForm({ ...form, driverEmployeeId: id })}
               />
             </div>
             <div className="space-y-2">
-              <Label>Helper</Label>
+              <Label>{t('helper')}</Label>
               <EmployeeCombobox
                 value={form.helperEmployeeId}
                 onChange={(id) => setForm({ ...form, helperEmployeeId: id })}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="deliveryDate">Delivery Date</Label>
+              <Label htmlFor="deliveryDate">{t('deliveryDate')}</Label>
               <Input
                 id="deliveryDate"
                 type="date"
@@ -172,21 +175,21 @@ export default function NewDeliveryPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="destinationCity">Destination City</Label>
+              <Label htmlFor="destinationCity">{t('destinationCity')}</Label>
               <Input
                 id="destinationCity"
                 value={form.destinationCity}
                 onChange={(e) => setForm({ ...form, destinationCity: e.target.value })}
-                placeholder="Enter destination city"
+                placeholder={t('enterDestinationCity')}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="notes">Notes</Label>
+              <Label htmlFor="notes">{t('notes')}</Label>
               <Textarea
                 id="notes"
                 value={form.notes}
                 onChange={(e) => setForm({ ...form, notes: e.target.value })}
-                placeholder="Additional notes..."
+                placeholder={t('additionalNotes')}
               />
             </div>
           </CardContent>
@@ -195,10 +198,10 @@ export default function NewDeliveryPage() {
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
-              <CardTitle>Line Items</CardTitle>
+              <CardTitle>{t('lineItems')}</CardTitle>
               <Button type="button" variant="outline" size="sm" onClick={addLine}>
                 <Plus className="mr-2 h-4 w-4" />
-                Add Line
+                {t('addLine')}
               </Button>
             </div>
           </CardHeader>
@@ -207,15 +210,15 @@ export default function NewDeliveryPage() {
               {lines.map((line, idx) => (
                 <div key={idx} className="grid gap-3 md:grid-cols-5 items-end border-b pb-4 last:border-0">
                   <div className="space-y-1">
-                    <Label className="text-xs">Customer DO Number</Label>
+                    <Label className="text-xs">{t('customerDoNumber')}</Label>
                     <Input
                       value={line.customerDoNumber}
                       onChange={(e) => updateLine(idx, "customerDoNumber", e.target.value)}
-                      placeholder="DO Number"
+                      placeholder={t('doNumber')}
                     />
                   </div>
                   <div className="space-y-1">
-                    <Label className="text-xs">Bird Count</Label>
+                    <Label className="text-xs">{t('birdCount')}</Label>
                     <Input
                       type="number"
                       value={line.birdCount}
@@ -224,7 +227,7 @@ export default function NewDeliveryPage() {
                     />
                   </div>
                   <div className="space-y-1">
-                    <Label className="text-xs">Weight (kg)</Label>
+                    <Label className="text-xs">{t('weightKg')}</Label>
                     <Input
                       type="number"
                       step="0.01"
@@ -234,11 +237,11 @@ export default function NewDeliveryPage() {
                     />
                   </div>
                   <div className="space-y-1">
-                    <Label className="text-xs">Delivery Notes</Label>
+                    <Label className="text-xs">{t('deliveryNotes')}</Label>
                     <Input
                       value={line.deliveryNotes}
                       onChange={(e) => updateLine(idx, "deliveryNotes", e.target.value)}
-                      placeholder="Notes"
+                      placeholder={t('notes')}
                     />
                   </div>
                   <div className="flex items-end">
@@ -261,10 +264,10 @@ export default function NewDeliveryPage() {
 
         <div className="flex justify-end gap-3">
           <Button type="button" variant="outline" asChild>
-            <Link href="/deliveries">Cancel</Link>
+            <Link href="/deliveries">{tc('cancel')}</Link>
           </Button>
           <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "Creating..." : "Create Delivery"}
+            {isSubmitting ? tc('saving') : tc('createEntity', { entity: t('entity') })}
           </Button>
         </div>
       </form>

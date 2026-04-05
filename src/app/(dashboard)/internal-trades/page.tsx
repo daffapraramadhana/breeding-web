@@ -10,35 +10,38 @@ import { DataTable, Column } from "@/components/shared/data-table";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { usePaginated } from "@/hooks/use-api";
 import { InternalTrade } from "@/types/api";
+import { useTranslations } from "next-intl";
 import { formatDate } from "@/lib/utils";
 
-const columns: Column<InternalTrade>[] = [
-  {
-    header: "Number",
-    cell: (row) => <span className="font-medium">{row.tradeNumber}</span>,
-  },
-  {
-    header: "From Warehouse",
-    cell: (row) => row.fromWarehouse?.name || "—",
-  },
-  {
-    header: "To Warehouse",
-    cell: (row) => row.toWarehouse?.name || "—",
-  },
-  {
-    header: "Status",
-    cell: (row) => <StatusBadge status={row.status} />,
-  },
-  {
-    header: "Created",
-    cell: (row) => formatDate(row.createdAt),
-  },
-];
-
 export default function InternalTradesPage() {
+  const t = useTranslations('internalTrades');
+  const tc = useTranslations('common');
   const router = useRouter();
   const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(1));
   const [search, setSearch] = useQueryState("search", { defaultValue: "" });
+
+  const columns: Column<InternalTrade>[] = [
+    {
+      header: t('tradeNumber'),
+      cell: (row) => <span className="font-medium">{row.tradeNumber}</span>,
+    },
+    {
+      header: t('fromWarehouse'),
+      cell: (row) => row.fromWarehouse?.name || "—",
+    },
+    {
+      header: t('toWarehouse'),
+      cell: (row) => row.toWarehouse?.name || "—",
+    },
+    {
+      header: tc('status'),
+      cell: (row) => <StatusBadge status={row.status} />,
+    },
+    {
+      header: tc('created'),
+      cell: (row) => formatDate(row.createdAt),
+    },
+  ];
 
   const { data, meta, isLoading } = usePaginated<InternalTrade>(
     "/internal-trades",
@@ -48,13 +51,13 @@ export default function InternalTradesPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Internal Trades"
-        description="Manage internal trade transactions"
+        title={t('title')}
+        description={t('description')}
         actions={
           <Button asChild>
             <Link href="/internal-trades/new">
               <Plus className="mr-2 h-4 w-4" />
-              New Trade
+              {t('newTrade')}
             </Link>
           </Button>
         }
@@ -65,7 +68,7 @@ export default function InternalTradesPage() {
         isLoading={isLoading}
         search={search}
         onSearchChange={setSearch}
-        searchPlaceholder="Search by trade number..."
+        searchPlaceholder={t('searchPlaceholder')}
         page={page}
         totalPages={meta?.totalPages || 1}
         total={meta?.total}

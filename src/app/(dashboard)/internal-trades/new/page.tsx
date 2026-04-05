@@ -17,10 +17,13 @@ import { LineItemsField, LineItem } from "@/components/forms/line-items-field";
 import { BranchCombobox } from "@/components/forms/branch-combobox";
 import { WarehouseCombobox } from "@/components/forms/warehouse-combobox";
 import { fetchApi } from "@/lib/api";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { ArrowLeft } from "lucide-react";
 
 export default function NewInternalTradePage() {
+  const t = useTranslations('internalTrades');
+  const tc = useTranslations('common');
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [form, setForm] = useState({
@@ -37,13 +40,13 @@ export default function NewInternalTradePage() {
     e.preventDefault();
 
     if (form.fromWarehouseId === form.toWarehouseId) {
-      toast.error("Source and destination warehouse must be different");
+      toast.error(t('sameWarehouseError'));
       return;
     }
 
     const validLines = lines.filter((l) => l.productId && l.quantity);
     if (validLines.length === 0) {
-      toast.error("Please add at least one line item");
+      toast.error(t('addLineItem'));
       return;
     }
 
@@ -67,11 +70,11 @@ export default function NewInternalTradePage() {
         body: JSON.stringify(body),
       });
 
-      toast.success("Internal Trade created successfully");
+      toast.success(tc('entityCreated', { entity: t('entity') }));
       router.push(`/internal-trades/${result.id}`);
     } catch (err) {
       toast.error(
-        err instanceof Error ? err.message : "Failed to create internal trade"
+        err instanceof Error ? err.message : tc('entityCreateFailed', { entity: t('entity') })
       );
     } finally {
       setIsSubmitting(false);
@@ -81,12 +84,12 @@ export default function NewInternalTradePage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Create Internal Trade"
+        title={tc('createEntity', { entity: t('entity') })}
         actions={
           <Button variant="outline" asChild>
             <Link href="/internal-trades">
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Back
+              {tc('back')}
             </Link>
           </Button>
         }
@@ -95,37 +98,37 @@ export default function NewInternalTradePage() {
       <form onSubmit={handleSubmit} className="space-y-6">
         <Card>
           <CardHeader>
-            <CardTitle>Trade Details</CardTitle>
+            <CardTitle>{t('tradeDetails')}</CardTitle>
           </CardHeader>
           <CardContent className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
-              <Label>Branch *</Label>
+              <Label>{t('branch')} *</Label>
               <BranchCombobox
                 value={form.branchId}
                 onChange={(v) => setForm({ ...form, branchId: v })}
               />
             </div>
             <div className="space-y-2">
-              <Label>From Warehouse *</Label>
+              <Label>{t('fromWarehouse')} *</Label>
               <WarehouseCombobox
                 value={form.fromWarehouseId}
                 onChange={(v) => setForm({ ...form, fromWarehouseId: v })}
               />
             </div>
             <div className="space-y-2">
-              <Label>To Warehouse *</Label>
+              <Label>{t('toWarehouse')} *</Label>
               <WarehouseCombobox
                 value={form.toWarehouseId}
                 onChange={(v) => setForm({ ...form, toWarehouseId: v })}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="notes">Notes</Label>
+              <Label htmlFor="notes">{t('notes')}</Label>
               <Textarea
                 id="notes"
                 value={form.notes}
                 onChange={(e) => setForm({ ...form, notes: e.target.value })}
-                placeholder="Additional notes..."
+                placeholder={t('additionalNotes')}
               />
             </div>
           </CardContent>
@@ -133,24 +136,24 @@ export default function NewInternalTradePage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Line Items</CardTitle>
+            <CardTitle>{t('lineItems')}</CardTitle>
           </CardHeader>
           <CardContent>
             <LineItemsField
               lines={lines}
               onChange={setLines}
               showPrice
-              priceLabel="Unit Price"
+              priceLabel={t('unitPrice')}
             />
           </CardContent>
         </Card>
 
         <div className="flex justify-end gap-3">
           <Button type="button" variant="outline" asChild>
-            <Link href="/internal-trades">Cancel</Link>
+            <Link href="/internal-trades">{tc('cancel')}</Link>
           </Button>
           <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "Creating..." : "Create Internal Trade"}
+            {isSubmitting ? tc('saving') : tc('createEntity', { entity: t('entity') })}
           </Button>
         </div>
       </form>

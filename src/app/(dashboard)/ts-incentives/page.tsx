@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { useQueryState, parseAsInteger } from "nuqs";
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2 } from "lucide-react";
@@ -26,6 +27,8 @@ import {
 } from "@/components/ui/dialog";
 
 export default function TsIncentivesPage() {
+  const t = useTranslations("tsIncentives");
+  const tc = useTranslations("common");
   const [page, setPage] = useQueryState(
     "page",
     parseAsInteger.withDefault(1)
@@ -54,19 +57,19 @@ export default function TsIncentivesPage() {
   const [deleting, setDeleting] = useState<TsIncentive | null>(null);
 
   const columns: Column<TsIncentive>[] = [
-    { header: "Name", accessorKey: "name" },
-    { header: "Amount", accessorKey: "amount" },
+    { header: tc("name"), accessorKey: "name" },
+    { header: t("amount"), accessorKey: "amount" },
     {
-      header: "Description",
+      header: tc("description"),
       cell: (row) => row.description || "-",
     },
     {
-      header: "Created",
+      header: tc("created"),
       cell: (row) => formatDate(row.createdAt),
       className: "w-[150px]",
     },
     {
-      header: "Actions",
+      header: tc("actions"),
       cell: (row) => (
         <div className="flex items-center gap-1">
           <Button
@@ -118,7 +121,7 @@ export default function TsIncentivesPage() {
 
   async function handleSubmit() {
     if (!formName.trim()) {
-      toast.error("Name is required");
+      toast.error(tc("required", { field: tc("name") }));
       return;
     }
 
@@ -135,13 +138,13 @@ export default function TsIncentivesPage() {
           method: "PATCH",
           body: JSON.stringify(body),
         });
-        toast.success("TS incentive updated successfully");
+        toast.success(tc("entityUpdated", { entity: t("entity") }));
       } else {
         await fetchApi("/ts-incentives", {
           method: "POST",
           body: JSON.stringify(body),
         });
-        toast.success("TS incentive created successfully");
+        toast.success(tc("entityCreated", { entity: t("entity") }));
       }
 
       setDialogOpen(false);
@@ -149,8 +152,8 @@ export default function TsIncentivesPage() {
     } catch {
       toast.error(
         editing
-          ? "Failed to update TS incentive"
-          : "Failed to create TS incentive"
+          ? tc("entityUpdateFailed", { entity: t("entity") })
+          : tc("entityCreateFailed", { entity: t("entity") })
       );
     } finally {
       setIsSubmitting(false);
@@ -164,24 +167,24 @@ export default function TsIncentivesPage() {
       await fetchApi(`/ts-incentives/${deleting.id}`, {
         method: "DELETE",
       });
-      toast.success("TS incentive deleted successfully");
+      toast.success(tc("entityDeleted", { entity: t("entity") }));
       setDeleteDialogOpen(false);
       setDeleting(null);
       refetch();
     } catch {
-      toast.error("Failed to delete TS incentive");
+      toast.error(tc("entityDeleteFailed", { entity: t("entity") }));
     }
   }
 
   return (
     <div className="space-y-6">
       <PageHeader
-        title="TS Incentives"
-        description="Manage TS incentives"
+        title={t("title")}
+        description={t("description")}
         actions={
           <Button onClick={handleCreate}>
             <Plus className="mr-2 h-4 w-4" />
-            New TS Incentive
+            {tc("newEntity", { entity: t("entity") })}
           </Button>
         }
       />
@@ -195,17 +198,17 @@ export default function TsIncentivesPage() {
           setSearch(value);
           setPage(1);
         }}
-        searchPlaceholder="Search TS incentives..."
+        searchPlaceholder={t("searchPlaceholder")}
         page={page}
         totalPages={meta?.totalPages || 1}
         onPageChange={setPage}
         total={meta?.total}
-        emptyTitle="No TS incentives found"
-        emptyDescription="Get started by creating your first TS incentive."
+        emptyTitle={tc("noResults", { entity: t("entity") })}
+        emptyDescription={tc("getStarted", { entity: t("entity") })}
         emptyAction={
           <Button onClick={handleCreate}>
             <Plus className="mr-2 h-4 w-4" />
-            New TS Incentive
+            {tc("newEntity", { entity: t("entity") })}
           </Button>
         }
       />
@@ -214,39 +217,39 @@ export default function TsIncentivesPage() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {editing ? "Edit TS Incentive" : "New TS Incentive"}
+              {editing ? tc("editEntity", { entity: t("entity") }) : tc("newEntity", { entity: t("entity") })}
             </DialogTitle>
             <DialogDescription>
               {editing
-                ? "Update the TS incentive details below."
-                : "Fill in the details to create a new TS incentive."}
+                ? tc("updateDetails", { entity: t("entity") })
+                : tc("fillDetails", { entity: t("entity") })}
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Name</Label>
+              <Label htmlFor="name">{tc("name")}</Label>
               <Input
                 id="name"
-                placeholder="Enter name"
+                placeholder={tc("enterField", { field: tc("name") })}
                 value={formName}
                 onChange={(e) => setFormName(e.target.value)}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="amount">Amount</Label>
+              <Label htmlFor="amount">{t("amount")}</Label>
               <Input
                 id="amount"
-                placeholder="Enter amount"
+                placeholder={tc("enterField", { field: t("amount") })}
                 value={formAmount}
                 onChange={(e) => setFormAmount(e.target.value)}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
+              <Label htmlFor="description">{tc("description")}</Label>
               <Input
                 id="description"
-                placeholder="Enter description"
+                placeholder={tc("enterField", { field: tc("description") })}
                 value={formDescription}
                 onChange={(e) => setFormDescription(e.target.value)}
               />
@@ -259,14 +262,14 @@ export default function TsIncentivesPage() {
               onClick={() => setDialogOpen(false)}
               disabled={isSubmitting}
             >
-              Cancel
+              {tc("cancel")}
             </Button>
             <Button onClick={handleSubmit} disabled={isSubmitting}>
               {isSubmitting
-                ? "Saving..."
+                ? tc("saving")
                 : editing
-                  ? "Update"
-                  : "Create"}
+                  ? tc("update")
+                  : tc("create")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -275,11 +278,11 @@ export default function TsIncentivesPage() {
       <ConfirmDialog
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
-        title="Delete TS Incentive"
-        description={`Are you sure you want to delete "${deleting?.name}"? This action cannot be undone.`}
+        title={tc("deleteEntity", { entity: t("entity") })}
+        description={tc("confirmDelete", { name: deleting?.name ?? "" })}
         onConfirm={handleDelete}
         variant="destructive"
-        confirmLabel="Delete"
+        confirmLabel={tc("delete")}
       />
     </div>
   );

@@ -25,10 +25,13 @@ import { LineItemsField, LineItem } from "@/components/forms/line-items-field";
 import { BranchCombobox } from "@/components/forms/branch-combobox";
 import { WarehouseCombobox } from "@/components/forms/warehouse-combobox";
 import { fetchApi } from "@/lib/api";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { ArrowLeft } from "lucide-react";
 
 export default function NewGoodsConsumptionPage() {
+  const t = useTranslations('goodsConsumptions');
+  const tc = useTranslations('common');
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [form, setForm] = useState({
@@ -47,7 +50,7 @@ export default function NewGoodsConsumptionPage() {
 
     const validLines = lines.filter((l) => l.productId && l.quantity);
     if (validLines.length === 0) {
-      toast.error("Please add at least one line item");
+      toast.error(t('addLineItem'));
       return;
     }
 
@@ -72,11 +75,11 @@ export default function NewGoodsConsumptionPage() {
         body: JSON.stringify(body),
       });
 
-      toast.success("Goods Consumption created successfully");
+      toast.success(tc('entityCreated', { entity: t('entity') }));
       router.push(`/goods-consumptions/${result.id}`);
     } catch (err) {
       toast.error(
-        err instanceof Error ? err.message : "Failed to create goods consumption"
+        err instanceof Error ? err.message : tc('entityCreateFailed', { entity: t('entity') })
       );
     } finally {
       setIsSubmitting(false);
@@ -86,12 +89,12 @@ export default function NewGoodsConsumptionPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Create Goods Consumption"
+        title={tc('createEntity', { entity: t('entity') })}
         actions={
           <Button variant="outline" asChild>
             <Link href="/goods-consumptions">
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Back
+              {tc('back')}
             </Link>
           </Button>
         }
@@ -100,41 +103,41 @@ export default function NewGoodsConsumptionPage() {
       <form onSubmit={handleSubmit} className="space-y-6">
         <Card>
           <CardHeader>
-            <CardTitle>Consumption Details</CardTitle>
+            <CardTitle>{t('consumptionDetails')}</CardTitle>
           </CardHeader>
           <CardContent className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
-              <Label>Branch *</Label>
+              <Label>{t('branch')} *</Label>
               <BranchCombobox
                 value={form.branchId}
                 onChange={(v) => setForm({ ...form, branchId: v })}
               />
             </div>
             <div className="space-y-2">
-              <Label>Warehouse *</Label>
+              <Label>{t('warehouse')} *</Label>
               <WarehouseCombobox
                 value={form.warehouseId}
                 onChange={(v) => setForm({ ...form, warehouseId: v })}
               />
             </div>
             <div className="space-y-2">
-              <Label>Purpose</Label>
+              <Label>{t('purpose')}</Label>
               <Select
                 value={form.purpose}
                 onValueChange={(v) => setForm({ ...form, purpose: v })}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select purpose..." />
+                  <SelectValue placeholder={t('selectPurpose')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="PRODUCTION">Production</SelectItem>
-                  <SelectItem value="MAINTENANCE">Maintenance</SelectItem>
-                  <SelectItem value="OTHER">Other</SelectItem>
+                  <SelectItem value="PRODUCTION">{t('production')}</SelectItem>
+                  <SelectItem value="MAINTENANCE">{t('maintenance')}</SelectItem>
+                  <SelectItem value="OTHER">{t('other')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="consumptionDate">Consumption Date</Label>
+              <Label htmlFor="consumptionDate">{t('consumptionDate')}</Label>
               <Input
                 id="consumptionDate"
                 type="date"
@@ -145,12 +148,12 @@ export default function NewGoodsConsumptionPage() {
               />
             </div>
             <div className="space-y-2 md:col-span-2">
-              <Label htmlFor="notes">Notes</Label>
+              <Label htmlFor="notes">{t('notes')}</Label>
               <Textarea
                 id="notes"
                 value={form.notes}
                 onChange={(e) => setForm({ ...form, notes: e.target.value })}
-                placeholder="Additional notes..."
+                placeholder={t('additionalNotes')}
               />
             </div>
           </CardContent>
@@ -158,24 +161,24 @@ export default function NewGoodsConsumptionPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Line Items</CardTitle>
+            <CardTitle>{t('lineItems')}</CardTitle>
           </CardHeader>
           <CardContent>
             <LineItemsField
               lines={lines}
               onChange={setLines}
               showPrice
-              priceLabel="Unit Cost"
+              priceLabel={t('unitCost')}
             />
           </CardContent>
         </Card>
 
         <div className="flex justify-end gap-3">
           <Button type="button" variant="outline" asChild>
-            <Link href="/goods-consumptions">Cancel</Link>
+            <Link href="/goods-consumptions">{tc('cancel')}</Link>
           </Button>
           <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "Creating..." : "Create Goods Consumption"}
+            {isSubmitting ? tc('saving') : tc('createEntity', { entity: t('entity') })}
           </Button>
         </div>
       </form>

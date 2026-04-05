@@ -10,39 +10,42 @@ import { DataTable, Column } from "@/components/shared/data-table";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { usePaginated } from "@/hooks/use-api";
 import { GoodsReceipt } from "@/types/api";
+import { useTranslations } from "next-intl";
 import { formatDate } from "@/lib/utils";
 
-const columns: Column<GoodsReceipt>[] = [
-  {
-    header: "Receipt Number",
-    cell: (row) => <span className="font-medium">{row.receiptNumber}</span>,
-  },
-  {
-    header: "PO Number",
-    cell: (row) => row.purchaseOrder?.poNumber || "—",
-  },
-  {
-    header: "Supplier",
-    cell: (row) => row.supplier?.name || "—",
-  },
-  {
-    header: "Warehouse",
-    cell: (row) => row.warehouse?.name || "—",
-  },
-  {
-    header: "Created",
-    cell: (row) => formatDate(row.createdAt),
-  },
-  {
-    header: "Status",
-    cell: (row) => <StatusBadge status={row.status} />,
-  },
-];
-
 export default function GoodsReceiptsPage() {
+  const t = useTranslations('goodsReceipts');
+  const tc = useTranslations('common');
   const router = useRouter();
   const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(1));
   const [search, setSearch] = useQueryState("search", { defaultValue: "" });
+
+  const columns: Column<GoodsReceipt>[] = [
+    {
+      header: t('receiptNumber'),
+      cell: (row) => <span className="font-medium">{row.receiptNumber}</span>,
+    },
+    {
+      header: t('poNumber'),
+      cell: (row) => row.purchaseOrder?.poNumber || "—",
+    },
+    {
+      header: t('supplier'),
+      cell: (row) => row.supplier?.name || "—",
+    },
+    {
+      header: t('warehouse'),
+      cell: (row) => row.warehouse?.name || "—",
+    },
+    {
+      header: tc('created'),
+      cell: (row) => formatDate(row.createdAt),
+    },
+    {
+      header: tc('status'),
+      cell: (row) => <StatusBadge status={row.status} />,
+    },
+  ];
 
   const { data, meta, isLoading } = usePaginated<GoodsReceipt>(
     "/goods-receipts",
@@ -52,13 +55,13 @@ export default function GoodsReceiptsPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Goods Receipts"
-        description="Receive goods from purchase orders"
+        title={t('title')}
+        description={t('description')}
         actions={
           <Button asChild>
             <Link href="/goods-receipts/new">
               <Plus className="mr-2 h-4 w-4" />
-              New Receipt
+              {t('newReceipt')}
             </Link>
           </Button>
         }
@@ -69,7 +72,7 @@ export default function GoodsReceiptsPage() {
         isLoading={isLoading}
         search={search}
         onSearchChange={setSearch}
-        searchPlaceholder="Search by receipt number..."
+        searchPlaceholder={t('searchPlaceholder')}
         page={page}
         totalPages={meta?.totalPages || 1}
         total={meta?.total}

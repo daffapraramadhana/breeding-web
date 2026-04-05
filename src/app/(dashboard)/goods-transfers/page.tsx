@@ -10,39 +10,42 @@ import { DataTable, Column } from "@/components/shared/data-table";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { usePaginated } from "@/hooks/use-api";
 import { GoodsTransfer } from "@/types/api";
+import { useTranslations } from "next-intl";
 import { formatDate } from "@/lib/utils";
 
-const columns: Column<GoodsTransfer>[] = [
-  {
-    header: "Transfer Number",
-    cell: (row) => <span className="font-medium">{row.transferNumber}</span>,
-  },
-  {
-    header: "From Warehouse",
-    cell: (row) => row.fromWarehouse?.name || "—",
-  },
-  {
-    header: "To Warehouse",
-    cell: (row) => row.toWarehouse?.name || "—",
-  },
-  {
-    header: "Transfer Date",
-    cell: (row) => row.transferDate ? formatDate(row.transferDate) : "—",
-  },
-  {
-    header: "Status",
-    cell: (row) => <StatusBadge status={row.status} />,
-  },
-  {
-    header: "Created",
-    cell: (row) => formatDate(row.createdAt),
-  },
-];
-
 export default function GoodsTransfersPage() {
+  const t = useTranslations('goodsTransfers');
+  const tc = useTranslations('common');
   const router = useRouter();
   const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(1));
   const [search, setSearch] = useQueryState("search", { defaultValue: "" });
+
+  const columns: Column<GoodsTransfer>[] = [
+    {
+      header: t('transferNumber'),
+      cell: (row) => <span className="font-medium">{row.transferNumber}</span>,
+    },
+    {
+      header: t('fromWarehouse'),
+      cell: (row) => row.fromWarehouse?.name || "—",
+    },
+    {
+      header: t('toWarehouse'),
+      cell: (row) => row.toWarehouse?.name || "—",
+    },
+    {
+      header: t('transferDate'),
+      cell: (row) => row.transferDate ? formatDate(row.transferDate) : "—",
+    },
+    {
+      header: tc('status'),
+      cell: (row) => <StatusBadge status={row.status} />,
+    },
+    {
+      header: tc('created'),
+      cell: (row) => formatDate(row.createdAt),
+    },
+  ];
 
   const { data, meta, isLoading } = usePaginated<GoodsTransfer>(
     "/goods-transfers",
@@ -52,13 +55,13 @@ export default function GoodsTransfersPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Goods Transfers"
-        description="Transfer inventory between warehouses"
+        title={t('title')}
+        description={t('description')}
         actions={
           <Button asChild>
             <Link href="/goods-transfers/new">
               <Plus className="mr-2 h-4 w-4" />
-              New Transfer
+              {t('newTransfer')}
             </Link>
           </Button>
         }
@@ -69,7 +72,7 @@ export default function GoodsTransfersPage() {
         isLoading={isLoading}
         search={search}
         onSearchChange={setSearch}
-        searchPlaceholder="Search transfers..."
+        searchPlaceholder={t('searchPlaceholder')}
         page={page}
         totalPages={meta?.totalPages || 1}
         total={meta?.total}

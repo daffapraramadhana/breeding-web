@@ -5,6 +5,8 @@ import { useQueryState, parseAsInteger } from "nuqs";
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 
+import { useTranslations } from "next-intl";
+
 import { DataTable, Column } from "@/components/shared/data-table";
 import { PageHeader } from "@/components/shared/page-header";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
@@ -26,6 +28,9 @@ import {
 } from "@/components/ui/dialog";
 
 export default function BranchesPage() {
+  const t = useTranslations('branches');
+  const tc = useTranslations('common');
+
   // URL state for pagination and search
   const [page, setPage] = useQueryState(
     "page",
@@ -54,25 +59,25 @@ export default function BranchesPage() {
   // Table columns
   const columns: Column<Branch>[] = [
     {
-      header: "Code",
+      header: tc('code'),
       accessorKey: "code",
       className: "w-[120px]",
     },
     {
-      header: "Name",
+      header: tc('name'),
       accessorKey: "name",
     },
     {
-      header: "Region",
+      header: t('region'),
       cell: (row) => row.region || "-",
     },
     {
-      header: "Created",
+      header: tc('created'),
       cell: (row) => formatDate(row.createdAt),
       className: "w-[150px]",
     },
     {
-      header: "Actions",
+      header: tc('actions'),
       cell: (row) => (
         <div className="flex items-center gap-1">
           <Button
@@ -128,12 +133,12 @@ export default function BranchesPage() {
   // Submit create/edit
   async function handleSubmit() {
     if (!formCode.trim()) {
-      toast.error("Branch code is required");
+      toast.error(tc('required', { field: tc('code') }));
       return;
     }
 
     if (!formName.trim()) {
-      toast.error("Branch name is required");
+      toast.error(tc('required', { field: tc('name') }));
       return;
     }
 
@@ -150,20 +155,20 @@ export default function BranchesPage() {
           method: "PATCH",
           body: JSON.stringify(body),
         });
-        toast.success("Branch updated successfully");
+        toast.success(tc('entityUpdated', { entity: t('entity') }));
       } else {
         await fetchApi("/branches", {
           method: "POST",
           body: JSON.stringify(body),
         });
-        toast.success("Branch created successfully");
+        toast.success(tc('entityCreated', { entity: t('entity') }));
       }
 
       setDialogOpen(false);
       refetch();
     } catch (error) {
       toast.error(
-        editingBranch ? "Failed to update branch" : "Failed to create branch"
+        editingBranch ? tc('entityUpdateFailed', { entity: t('entity') }) : tc('entityCreateFailed', { entity: t('entity') })
       );
     } finally {
       setIsSubmitting(false);
@@ -178,24 +183,24 @@ export default function BranchesPage() {
       await fetchApi(`/branches/${deletingBranch.id}`, {
         method: "DELETE",
       });
-      toast.success("Branch deleted successfully");
+      toast.success(tc('entityDeleted', { entity: t('entity') }));
       setDeleteDialogOpen(false);
       setDeletingBranch(null);
       refetch();
     } catch (error) {
-      toast.error("Failed to delete branch");
+      toast.error(tc('entityDeleteFailed', { entity: t('entity') }));
     }
   }
 
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Branches"
-        description="Manage your organization branches"
+        title={t('title')}
+        description={t('description')}
         actions={
           <Button onClick={handleCreate}>
             <Plus className="mr-2 h-4 w-4" />
-            New Branch
+            {tc('newEntity', { entity: t('entity') })}
           </Button>
         }
       />
@@ -209,17 +214,17 @@ export default function BranchesPage() {
           setSearch(value);
           setPage(1);
         }}
-        searchPlaceholder="Search branches..."
+        searchPlaceholder={tc('search')}
         page={page}
         totalPages={meta?.totalPages || 1}
         onPageChange={setPage}
         total={meta?.total}
-        emptyTitle="No branches found"
-        emptyDescription="Get started by creating your first branch."
+        emptyTitle={tc('noResults')}
+        emptyDescription={tc('getStarted', { entity: t('entity') })}
         emptyAction={
           <Button onClick={handleCreate}>
             <Plus className="mr-2 h-4 w-4" />
-            New Branch
+            {tc('newEntity', { entity: t('entity') })}
           </Button>
         }
       />
@@ -229,21 +234,21 @@ export default function BranchesPage() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {editingBranch ? "Edit Branch" : "New Branch"}
+              {editingBranch ? tc('editEntity', { entity: t('entity') }) : tc('newEntity', { entity: t('entity') })}
             </DialogTitle>
             <DialogDescription>
               {editingBranch
-                ? "Update the branch details below."
-                : "Fill in the details to create a new branch."}
+                ? tc('updateDetails', { entity: t('entity') })
+                : tc('fillDetails', { entity: t('entity') })}
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="branch-code">Code</Label>
+              <Label htmlFor="branch-code">{tc('code')}</Label>
               <Input
                 id="branch-code"
-                placeholder="Enter branch code"
+                placeholder={tc('enterField', { field: tc('code') })}
                 value={formCode}
                 onChange={(e) => setFormCode(e.target.value)}
                 onKeyDown={(e) => {
@@ -252,10 +257,10 @@ export default function BranchesPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="branch-name">Name</Label>
+              <Label htmlFor="branch-name">{tc('name')}</Label>
               <Input
                 id="branch-name"
-                placeholder="Enter branch name"
+                placeholder={tc('enterField', { field: tc('name') })}
                 value={formName}
                 onChange={(e) => setFormName(e.target.value)}
                 onKeyDown={(e) => {
@@ -264,10 +269,10 @@ export default function BranchesPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="branch-region">Region</Label>
+              <Label htmlFor="branch-region">{t('region')}</Label>
               <Input
                 id="branch-region"
-                placeholder="Enter region (optional)"
+                placeholder={tc('enterFieldOptional', { field: t('region') })}
                 value={formRegion}
                 onChange={(e) => setFormRegion(e.target.value)}
                 onKeyDown={(e) => {
@@ -283,14 +288,14 @@ export default function BranchesPage() {
               onClick={() => setDialogOpen(false)}
               disabled={isSubmitting}
             >
-              Cancel
+              {tc('cancel')}
             </Button>
             <Button onClick={handleSubmit} disabled={isSubmitting}>
               {isSubmitting
-                ? "Saving..."
+                ? tc('saving')
                 : editingBranch
-                  ? "Update Branch"
-                  : "Create Branch"}
+                  ? tc('updateEntity', { entity: t('entity') })
+                  : tc('createEntity', { entity: t('entity') })}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -300,11 +305,11 @@ export default function BranchesPage() {
       <ConfirmDialog
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
-        title="Delete Branch"
-        description={`Are you sure you want to delete "${deletingBranch?.name}"? This action cannot be undone.`}
+        title={tc('deleteEntity', { entity: t('entity') })}
+        description={tc('confirmDelete', { name: deletingBranch?.name || '' })}
         onConfirm={handleDelete}
         variant="destructive"
-        confirmLabel="Delete"
+        confirmLabel={tc('delete')}
       />
     </div>
   );
