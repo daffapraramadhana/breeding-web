@@ -80,7 +80,7 @@ export default function EditWarehousePage() {
         address: form.address.trim() || undefined,
         ownerType: form.ownerType,
         ownerId: form.ownerId,
-        branchId: form.ownerType === "BRANCH" ? form.ownerId : form.branchId,
+        ...(form.ownerType === "BRANCH" && { branchId: form.ownerId }),
       };
 
       await fetchApi(`/warehouses/${id}`, {
