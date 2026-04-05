@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -13,26 +13,28 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { PageHeader } from "@/components/shared/page-header";
 import { LineItemsField, LineItem } from "@/components/forms/line-items-field";
-import { fetchApi, fetchPaginated } from "@/lib/api";
-import { Warehouse } from "@/types/api";
+import { WarehouseCombobox } from "@/components/forms/warehouse-combobox";
+import { fetchApi } from "@/lib/api";
+import { WarehouseOwnerType } from "@/types/api";
 import { toast } from "sonner";
 import { ArrowLeft } from "lucide-react";
+
+const OWNER_TYPE_LABELS: Record<WarehouseOwnerType, string> = {
+  BRANCH: "Cabang",
+  FARM: "Farm",
+  COOP: "Kandang Ownfarm",
+};
 
 export default function NewGoodsTransferPage() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [warehouses, setWarehouses] = useState<Warehouse[]>([]);
   const [form, setForm] = useState({
+    fromOwnerType: "" as WarehouseOwnerType | "",
     fromWarehouseId: "",
+    toOwnerType: "" as WarehouseOwnerType | "",
     toWarehouseId: "",
     transferDate: "",
     notes: "",
@@ -41,14 +43,13 @@ export default function NewGoodsTransferPage() {
     { productId: "", uomId: "", quantity: "", unitPrice: "" },
   ]);
 
-  useEffect(() => {
-    fetchPaginated<Warehouse>("/warehouses", { limit: 100 })
-      .then((res) => setWarehouses(res.data))
-      .catch(() => {});
-  }, []);
-
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+
+    if (!form.fromWarehouseId || !form.toWarehouseId) {
+      toast.error("Please select both source and destination warehouse");
+      return;
+    }
 
     if (form.fromWarehouseId === form.toWarehouseId) {
       toast.error("Source and destination warehouse must be different");
@@ -70,7 +71,7 @@ export default function NewGoodsTransferPage() {
         notes: form.notes || undefined,
         lines: validLines.map((l) => ({
           productId: l.productId,
-          quantity: l.quantity,
+          quantitySent: String(l.quantity),
           uomId: l.uomId,
         })),
       };
@@ -110,67 +111,109 @@ export default function NewGoodsTransferPage() {
           <CardHeader>
             <CardTitle>Transfer Details</CardTitle>
           </CardHeader>
-          <CardContent className="grid gap-4 md:grid-cols-2">
-            <div className="space-y-2">
-              <Label>From Warehouse *</Label>
-              <Select
-                value={form.fromWarehouseId}
-                onValueChange={(v) =>
-                  setForm({ ...form, fromWarehouseId: v })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select source warehouse..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {warehouses.map((wh) => (
-                    <SelectItem key={wh.id} value={wh.id}>
-                      {wh.code} - {wh.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+          <CardContent className="space-y-6">
+            <div className="grid gap-6 md:grid-cols-2">
+              <div className="space-y-3">
+                <Label>From Warehouse *</Label>
+                <RadioGroup
+                  value={form.fromOwnerType}
+                  onValueChange={(v) =>
+                    setForm((prev) => ({
+                      ...prev,
+                      fromOwnerType: v as WarehouseOwnerType,
+                      fromWarehouseId: "",
+                    }))
+                  }
+                  className="flex gap-4"
+                >
+                  {(Object.keys(OWNER_TYPE_LABELS) as WarehouseOwnerType[]).map(
+                    (type) => (
+                      <div key={type} className="flex items-center space-x-2">
+                        <RadioGroupItem value={type} id={`from-${type}`} />
+                        <Label
+                          htmlFor={`from-${type}`}
+                          className="cursor-pointer font-normal"
+                        >
+                          {OWNER_TYPE_LABELS[type]}
+                        </Label>
+                      </div>
+                    )
+                  )}
+                </RadioGroup>
+                {form.fromOwnerType && (
+                  <WarehouseCombobox
+                    value={form.fromWarehouseId}
+                    onChange={(id) =>
+                      setForm((prev) => ({ ...prev, fromWarehouseId: id }))
+                    }
+                    ownerType={form.fromOwnerType}
+                  />
+                )}
+              </div>
+
+              <div className="space-y-3">
+                <Label>To Warehouse *</Label>
+                <RadioGroup
+                  value={form.toOwnerType}
+                  onValueChange={(v) =>
+                    setForm((prev) => ({
+                      ...prev,
+                      toOwnerType: v as WarehouseOwnerType,
+                      toWarehouseId: "",
+                    }))
+                  }
+                  className="flex gap-4"
+                >
+                  {(Object.keys(OWNER_TYPE_LABELS) as WarehouseOwnerType[]).map(
+                    (type) => (
+                      <div key={type} className="flex items-center space-x-2">
+                        <RadioGroupItem value={type} id={`to-${type}`} />
+                        <Label
+                          htmlFor={`to-${type}`}
+                          className="cursor-pointer font-normal"
+                        >
+                          {OWNER_TYPE_LABELS[type]}
+                        </Label>
+                      </div>
+                    )
+                  )}
+                </RadioGroup>
+                {form.toOwnerType && (
+                  <WarehouseCombobox
+                    value={form.toWarehouseId}
+                    onChange={(id) =>
+                      setForm((prev) => ({ ...prev, toWarehouseId: id }))
+                    }
+                    ownerType={form.toOwnerType}
+                  />
+                )}
+              </div>
             </div>
-            <div className="space-y-2">
-              <Label>To Warehouse *</Label>
-              <Select
-                value={form.toWarehouseId}
-                onValueChange={(v) =>
-                  setForm({ ...form, toWarehouseId: v })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select destination warehouse..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {warehouses.map((wh) => (
-                    <SelectItem key={wh.id} value={wh.id}>
-                      {wh.code} - {wh.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="transferDate">Transfer Date *</Label>
-              <Input
-                id="transferDate"
-                type="date"
-                value={form.transferDate}
-                onChange={(e) =>
-                  setForm({ ...form, transferDate: e.target.value })
-                }
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="notes">Notes</Label>
-              <Textarea
-                id="notes"
-                value={form.notes}
-                onChange={(e) => setForm({ ...form, notes: e.target.value })}
-                placeholder="Additional notes..."
-              />
+
+            <div className="grid gap-6 md:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="transferDate">Transfer Date *</Label>
+                <Input
+                  id="transferDate"
+                  type="date"
+                  value={form.transferDate}
+                  onChange={(e) =>
+                    setForm({ ...form, transferDate: e.target.value })
+                  }
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="notes">Notes</Label>
+                <Textarea
+                  id="notes"
+                  value={form.notes}
+                  onChange={(e) =>
+                    setForm({ ...form, notes: e.target.value })
+                  }
+                  placeholder="Additional notes..."
+                />
+              </div>
             </div>
           </CardContent>
         </Card>
