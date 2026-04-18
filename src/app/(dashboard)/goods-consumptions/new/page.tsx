@@ -70,8 +70,10 @@ export default function NewGoodsConsumptionPage() {
         lines: validLines.map((l) => ({
           productId: l.productId,
           uomId: l.uomId || undefined,
+          goodsReceiptLineId: l.goodsReceiptLineId || undefined,
           quantity: l.quantity,
           unitCost: l.unitPrice || undefined,
+          notes: l.notes || undefined,
         })),
       };
 
@@ -175,6 +177,9 @@ export default function NewGoodsConsumptionPage() {
               onChange={setLines}
               showPrice
               priceLabel={t('unitCost')}
+              showGoodsReceiptRef
+              showLineNotes
+              warehouseId={form.warehouseId}
             />
           </CardContent>
         </Card>
