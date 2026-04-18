@@ -33,8 +33,8 @@ interface WarehouseGroupedComboboxProps {
 
 const DEFAULT_GROUP_LABELS: Record<GroupKey, string> = {
   BRANCH: "Cabang",
-  FARM_OWN: "Farm",
-  FARM_COOP: "Kandang Ownfarm",
+  FARM_OWN: "Kandang Ownfarm",
+  FARM_COOP: "Kandang Kemitraan",
 };
 
 function getGroupKey(wh: Warehouse): GroupKey {
