@@ -238,7 +238,7 @@ export function AppSidebar() {
                     >
                       <Link href={section.url}>
                         <Icon />
-                        <span>{t(section.title)}</span>
+                        <span className="uppercase tracking-[1.5px] text-[11px]">{t(section.title)}</span>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -272,7 +272,7 @@ export function AppSidebar() {
                         >
                           <Link href={item.url}>
                             {ItemIcon && <ItemIcon />}
-                            <span>{t(item.title)}</span>
+                            <span className="uppercase tracking-[1.5px] text-[11px]">{t(item.title)}</span>
                           </Link>
                         </SidebarMenuSubButton>
                       </SidebarMenuSubItem>
