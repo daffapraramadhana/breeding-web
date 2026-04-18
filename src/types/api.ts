@@ -301,6 +301,8 @@ export interface GoodsReceiptLine {
   quantityDamaged: string;
   receiptDate?: string;
   notes?: string;
+  goodsReceiptId?: string;
+  goodsReceipt?: Pick<GoodsReceipt, "id" | "receiptNumber"> & { receiptDate?: string };
 }
 
 export interface GoodsReceipt {
@@ -491,6 +493,8 @@ export interface GoodsConsumptionLine {
   unitCost?: string;
   totalCost?: string;
   notes?: string;
+  goodsReceiptLineId?: string;
+  goodsReceiptLine?: GoodsReceiptLine;
 }
 
 export interface GoodsConsumption {
