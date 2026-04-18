@@ -95,6 +95,7 @@ export function LineItemsField({
             productName: product.name,
             uomId: product.baseUomId || line.uomId,
             uomName: product.baseUom?.name || "",
+            goodsReceiptLineId: undefined,
           }
         : line
     );
