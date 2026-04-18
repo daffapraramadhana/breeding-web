@@ -685,7 +685,10 @@
     "addLineItem": "Please add at least one line item",
     "ownerBranch": "Branch",
     "ownerFarm": "Own Farm",
-    "ownerCoop": "Partner Farm"
+    "ownerCoop": "Partner Farm",
+    "goodsReceiptReference": "BPB",
+    "lineNotes": "Notes",
+    "selectReceiptLine": "Select receipt..."
   },
   "deliveries": {
     "title": "Deliveries",

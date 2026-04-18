@@ -685,7 +685,10 @@
     "addLineItem": "Tambahkan minimal satu item baris",
     "ownerBranch": "Cabang",
     "ownerFarm": "Kandang Ownfarm",
-    "ownerCoop": "Kandang Kemitraan"
+    "ownerCoop": "Kandang Kemitraan",
+    "goodsReceiptReference": "No. BPB",
+    "lineNotes": "Keterangan",
+    "selectReceiptLine": "Pilih BPB..."
   },
   "deliveries": {
     "title": "Pengiriman",
