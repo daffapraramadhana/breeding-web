@@ -164,10 +164,12 @@ export default function GoodsConsumptionDetailPage({
                 <TableRow>
                   <TableHead>#</TableHead>
                   <TableHead>{t('product')}</TableHead>
+                  <TableHead>{t('goodsReceiptReference')}</TableHead>
                   <TableHead className="text-right">{t('qty')}</TableHead>
                   <TableHead>{t('uom')}</TableHead>
                   <TableHead className="text-right">{t('unitCost')}</TableHead>
                   <TableHead className="text-right">{t('total')}</TableHead>
+                  <TableHead>{t('lineNotes')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -182,6 +184,9 @@ export default function GoodsConsumptionDetailPage({
                         {line.product?.name}
                       </span>
                     </TableCell>
+                    <TableCell>
+                      {line.goodsReceiptLine?.goodsReceipt?.receiptNumber || "—"}
+                    </TableCell>
                     <TableCell className="text-right">
                       {formatQuantity(line.quantity)}
                     </TableCell>
@@ -192,11 +197,14 @@ export default function GoodsConsumptionDetailPage({
                     <TableCell className="text-right font-medium">
                       {formatCurrency(line.totalCost || "0")}
                     </TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {line.notes || "—"}
+                    </TableCell>
                   </TableRow>
                 ))}
                 <TableRow>
                   <TableCell
-                    colSpan={5}
+                    colSpan={6}
                     className="text-right font-medium"
                   >
                     {t('grandTotal')}
@@ -204,6 +212,7 @@ export default function GoodsConsumptionDetailPage({
                   <TableCell className="text-right text-lg font-bold">
                     {formatCurrency(grandTotal)}
                   </TableCell>
+                  <TableCell />
                 </TableRow>
               </TableBody>
             </Table>
