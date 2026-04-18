@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/table";
 import { Trash2, Plus } from "lucide-react";
 import { ProductCombobox } from "@/components/forms/product-combobox";
+import { GoodsReceiptLineCombobox } from "@/components/forms/goods-receipt-line-combobox";
 import { formatCurrency, parseDecimal } from "@/lib/utils";
 import { Product, UnitOfMeasure } from "@/types/api";
 import { fetchPaginated } from "@/lib/api";
@@ -25,6 +26,8 @@ export interface LineItem {
   uomName?: string;
   quantity: string;
   unitPrice: string;
+  goodsReceiptLineId?: string;
+  notes?: string;
 }
 
 interface LineItemsFieldProps {
@@ -34,6 +37,9 @@ interface LineItemsFieldProps {
   priceLabel?: string;
   disabled?: boolean;
   supplierId?: string;
+  showGoodsReceiptRef?: boolean;
+  showLineNotes?: boolean;
+  warehouseId?: string;
 }
 
 export function LineItemsField({
@@ -43,6 +49,9 @@ export function LineItemsField({
   priceLabel = "Unit Price",
   disabled = false,
   supplierId,
+  showGoodsReceiptRef = false,
+  showLineNotes = false,
+  warehouseId,
 }: LineItemsFieldProps) {
   const [uomMap, setUomMap] = useState<Record<string, string>>({});
 
@@ -96,6 +105,10 @@ export function LineItemsField({
     return sum + parseDecimal(line.quantity) * parseDecimal(line.unitPrice);
   }, 0);
 
+  const colCount =
+    1 + 1 + (showGoodsReceiptRef ? 1 : 0) + 1 + 1 +
+    (showPrice ? 2 : 0) + (showLineNotes ? 1 : 0) + 1;
+
   return (
     <div className="space-y-3">
       <div className="rounded-md border">
@@ -104,6 +117,9 @@ export function LineItemsField({
             <TableRow>
               <TableHead className="w-[40px]">#</TableHead>
               <TableHead className="min-w-[250px]">Product</TableHead>
+              {showGoodsReceiptRef && (
+                <TableHead className="min-w-[200px]">BPB</TableHead>
+              )}
               <TableHead className="w-[120px]">Qty</TableHead>
               <TableHead className="w-[100px]">UOM</TableHead>
               {showPrice && (
@@ -112,6 +128,9 @@ export function LineItemsField({
                   <TableHead className="w-[150px]">Total</TableHead>
                 </>
               )}
+              {showLineNotes && (
+                <TableHead className="min-w-[180px]">Notes</TableHead>
+              )}
               <TableHead className="w-[50px]" />
             </TableRow>
           </TableHeader>
@@ -119,7 +138,7 @@ export function LineItemsField({
             {lines.length === 0 ? (
               <TableRow>
                 <TableCell
-                  colSpan={showPrice ? 7 : 5}
+                  colSpan={colCount - 1}
                   className="text-center text-muted-foreground py-8"
                 >
                   No items added. Click &quot;Add Item&quot; to add a line.
@@ -144,6 +163,19 @@ export function LineItemsField({
                         supplierId={supplierId}
                       />
                     </TableCell>
+                    {showGoodsReceiptRef && (
+                      <TableCell>
+                        <GoodsReceiptLineCombobox
+                          value={line.goodsReceiptLineId || ""}
+                          onChange={(id) =>
+                            updateLine(idx, "goodsReceiptLineId", id)
+                          }
+                          warehouseId={warehouseId}
+                          productId={line.productId}
+                          disabled={disabled}
+                        />
+                      </TableCell>
+                    )}
                     <TableCell>
                       <Input
                         type="number"
@@ -186,6 +218,18 @@ export function LineItemsField({
                           {formatCurrency(lineTotal)}
                         </TableCell>
                       </>
+                    )}
+                    {showLineNotes && (
+                      <TableCell>
+                        <Input
+                          value={line.notes || ""}
+                          onChange={(e) =>
+                            updateLine(idx, "notes", e.target.value)
+                          }
+                          disabled={disabled}
+                          placeholder="Notes..."
+                        />
+                      </TableCell>
                     )}
                     <TableCell>
                       {!disabled && (
