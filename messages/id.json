@@ -682,7 +682,10 @@
     "maintenance": "Pemeliharaan",
     "other": "Lainnya",
     "additionalNotes": "Catatan tambahan...",
-    "addLineItem": "Tambahkan minimal satu item baris"
+    "addLineItem": "Tambahkan minimal satu item baris",
+    "ownerBranch": "Cabang",
+    "ownerFarm": "Kandang Ownfarm",
+    "ownerCoop": "Kandang Kemitraan"
   },
   "deliveries": {
     "title": "Pengiriman",

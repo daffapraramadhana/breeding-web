@@ -23,7 +23,7 @@ import {
 import { PageHeader } from "@/components/shared/page-header";
 import { LineItemsField, LineItem } from "@/components/forms/line-items-field";
 import { BranchCombobox } from "@/components/forms/branch-combobox";
-import { WarehouseCombobox } from "@/components/forms/warehouse-combobox";
+import { WarehouseGroupedCombobox } from "@/components/forms/warehouse-grouped-combobox";
 import { fetchApi } from "@/lib/api";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
@@ -32,6 +32,11 @@ import { ArrowLeft } from "lucide-react";
 export default function NewGoodsConsumptionPage() {
   const t = useTranslations('goodsConsumptions');
   const tc = useTranslations('common');
+  const groupLabels = {
+    BRANCH: t('ownerBranch'),
+    FARM_OWN: t('ownerFarm'),
+    FARM_COOP: t('ownerCoop'),
+  };
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [form, setForm] = useState({
@@ -115,9 +120,10 @@ export default function NewGoodsConsumptionPage() {
             </div>
             <div className="space-y-2">
               <Label>{t('warehouse')} *</Label>
-              <WarehouseCombobox
+              <WarehouseGroupedCombobox
                 value={form.warehouseId}
                 onChange={(v) => setForm({ ...form, warehouseId: v })}
+                groupLabels={groupLabels}
               />
             </div>
             <div className="space-y-2">
