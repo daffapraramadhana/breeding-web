@@ -29,8 +29,10 @@ import { TRANSFER_STATUS_TRANSITIONS } from "@/lib/constants";
 import { fetchApi } from "@/lib/api";
 import { formatDate, formatQuantity } from "@/lib/utils";
 import { useTranslations } from "next-intl";
-import { ArrowLeft, ArrowRight, Trash2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, Trash2, Truck } from "lucide-react";
 import { toast } from "sonner";
+import { useAuth } from "@/hooks/use-auth";
+import { DispatchDialog } from "./dispatch-dialog";
 
 export default function GoodsTransferDetailPage({
   params,
@@ -45,6 +47,9 @@ export default function GoodsTransferDetailPage({
     `/goods-transfers/${id}`
   );
   const [showDelete, setShowDelete] = useState(false);
+  const { user } = useAuth();
+  const canDispatch = ["SUPER_ADMIN", "TENANT_ADMIN", "MANAGER"].includes(user?.role ?? "");
+  const [showDispatch, setShowDispatch] = useState(false);
 
   if (isLoading) return <div className="p-6">{t('loading')}</div>;
   if (!gt) return <div className="p-6">{t('notFound')}</div>;
@@ -78,6 +83,12 @@ export default function GoodsTransferDetailPage({
               >
                 <Trash2 className="mr-2 h-4 w-4" />
                 {tc('delete')}
+              </Button>
+            )}
+            {gt.status === "PREPARING" && canDispatch && (
+              <Button onClick={() => setShowDispatch(true)}>
+                <Truck className="mr-2 h-4 w-4" />
+                {t('dispatch')}
               </Button>
             )}
             <StatusAction
@@ -141,6 +152,39 @@ export default function GoodsTransferDetailPage({
 
       <Card>
         <CardHeader>
+          <CardTitle>{t('expedition')}</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div className="flex justify-between">
+            <span className="text-muted-foreground">{t('carrier')}</span>
+            <span className="font-medium">{gt.carrierSupplier?.name || "—"}</span>
+          </div>
+          <Separator />
+          <div className="flex justify-between">
+            <span className="text-muted-foreground">{t('deliveryNoteNumber')}</span>
+            <span className="font-mono">{gt.deliveryNoteNumber || "—"}</span>
+          </div>
+          <Separator />
+          {gt.dispatchedAt ? (
+            <>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">{t('dispatchedAt')}</span>
+                <span>{formatDate(gt.dispatchedAt)}</span>
+              </div>
+              <Separator />
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">{t('dispatchedBy')}</span>
+                <span>{gt.dispatchedBy?.name || "—"}</span>
+              </div>
+            </>
+          ) : (
+            <p className="text-sm text-muted-foreground">{t('notDispatched')}</p>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
           <CardTitle>{t('lineItems')}</CardTitle>
         </CardHeader>
         <CardContent>
@@ -150,6 +194,7 @@ export default function GoodsTransferDetailPage({
                 <TableRow>
                   <TableHead>#</TableHead>
                   <TableHead>{t('product')}</TableHead>
+                  <TableHead>{t('sourceReceipt')}</TableHead>
                   <TableHead className="text-right">{t('qtySent')}</TableHead>
                   <TableHead className="text-right">{t('qtyReceived')}</TableHead>
                   <TableHead className="text-right">{t('qtyDamaged')}</TableHead>
@@ -167,6 +212,18 @@ export default function GoodsTransferDetailPage({
                       <span className="ml-2 text-muted-foreground">
                         {line.product?.name}
                       </span>
+                    </TableCell>
+                    <TableCell>
+                      {line.goodsReceiptLine?.goodsReceipt ? (
+                        <Link
+                          href={`/goods-receipts/${line.goodsReceiptLine.goodsReceipt.id}`}
+                          className="text-primary underline"
+                        >
+                          {line.goodsReceiptLine.goodsReceipt.receiptNumber}
+                        </Link>
+                      ) : (
+                        "—"
+                      )}
                     </TableCell>
                     <TableCell className="text-right">
                       {formatQuantity(line.quantitySent)}
@@ -194,6 +251,13 @@ export default function GoodsTransferDetailPage({
         onConfirm={handleDelete}
         variant="destructive"
         confirmLabel={tc('delete')}
+      />
+
+      <DispatchDialog
+        open={showDispatch}
+        onOpenChange={setShowDispatch}
+        transfer={gt}
+        onSuccess={refetch}
       />
     </div>
   );
