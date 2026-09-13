@@ -212,6 +212,7 @@ export const RECEIPT_STATUS_TRANSITIONS: Record<string, string[]> = {
 };
 
 export const TRANSFER_STATUS_TRANSITIONS: Record<string, string[]> = {
+  PREPARING: ["CANCELLED"],
   IN_TRANSIT: ["RECEIVED", "PARTIAL", "DAMAGED_IN_TRANSIT", "CANCELLED"],
   PARTIAL: ["RECEIVED"],
 };

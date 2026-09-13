@@ -17,6 +17,7 @@ import {
 import { PageHeader } from "@/components/shared/page-header";
 import { LineItemsField, LineItem } from "@/components/forms/line-items-field";
 import { WarehouseGroupedCombobox } from "@/components/forms/warehouse-grouped-combobox";
+import { SupplierCombobox } from "@/components/forms/supplier-combobox";
 import { fetchApi } from "@/lib/api";
 import { toast } from "sonner";
 import { ArrowLeft } from "lucide-react";
@@ -41,6 +42,8 @@ export default function NewGoodsTransferPage() {
     toWarehouseId: "",
     transferDate: "",
     notes: "",
+    carrierSupplierId: "",
+    deliveryNoteNumber: "",
   });
   const [lines, setLines] = useState<LineItem[]>([
     { productId: "", uomId: "", quantity: "", unitPrice: "" },
@@ -72,10 +75,14 @@ export default function NewGoodsTransferPage() {
         toWarehouseId: form.toWarehouseId,
         transferDate: form.transferDate,
         notes: form.notes || undefined,
+        carrierSupplierId: form.carrierSupplierId || undefined,
+        deliveryNoteNumber: form.deliveryNoteNumber.trim() || undefined,
         lines: validLines.map((l) => ({
           productId: l.productId,
           quantitySent: String(l.quantity),
           uomId: l.uomId,
+          goodsReceiptLineId: l.goodsReceiptLineId || undefined,
+          notes: l.notes || undefined,
         })),
       };
 
@@ -120,9 +127,10 @@ export default function NewGoodsTransferPage() {
                 <Label>{t("fromWarehouse")} *</Label>
                 <WarehouseGroupedCombobox
                   value={form.fromWarehouseId}
-                  onChange={(id) =>
-                    setForm((prev) => ({ ...prev, fromWarehouseId: id }))
-                  }
+                  onChange={(id) => {
+                    setForm((prev) => ({ ...prev, fromWarehouseId: id }));
+                    setLines((prev) => prev.map((l) => ({ ...l, goodsReceiptLineId: undefined })));
+                  }}
                   groupLabels={groupLabels}
                 />
               </div>
@@ -168,6 +176,34 @@ export default function NewGoodsTransferPage() {
 
         <Card>
           <CardHeader>
+            <CardTitle>{t("expeditionSection")}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-6 md:grid-cols-2">
+              <div className="space-y-2">
+                <Label>{t("carrier")}</Label>
+                <SupplierCombobox
+                  value={form.carrierSupplierId}
+                  onChange={(id) => setForm((prev) => ({ ...prev, carrierSupplierId: id }))}
+                  expeditionOnly
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="deliveryNoteNumber">{t("deliveryNoteNumber")}</Label>
+                <Input
+                  id="deliveryNoteNumber"
+                  maxLength={100}
+                  value={form.deliveryNoteNumber}
+                  onChange={(e) => setForm({ ...form, deliveryNoteNumber: e.target.value })}
+                  placeholder={t("deliveryNotePlaceholder")}
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
             <CardTitle>{t("lineItems")}</CardTitle>
           </CardHeader>
           <CardContent>
@@ -175,6 +211,9 @@ export default function NewGoodsTransferPage() {
               lines={lines}
               onChange={setLines}
               showPrice={false}
+              showGoodsReceiptRef
+              showLineNotes
+              warehouseId={form.fromWarehouseId}
             />
           </CardContent>
         </Card>

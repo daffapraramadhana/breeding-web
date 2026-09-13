@@ -421,7 +421,11 @@
     "createdSuccess": "Goods Transfer created successfully",
     "createFailed": "Failed to create goods transfer",
     "creating": "Creating...",
-    "createGoodsTransfer": "Create Goods Transfer"
+    "createGoodsTransfer": "Create Goods Transfer",
+    "carrier": "Expedition",
+    "deliveryNoteNumber": "Delivery note no.",
+    "deliveryNotePlaceholder": "Number on the carrier's surat jalan (optional)",
+    "expeditionSection": "Expedition"
   },
   "farmWizard": {
     "title": "Create New Farm",
@@ -594,7 +598,21 @@
     "loading": "Loading...",
     "notFound": "Goods Transfer not found",
     "deleteTitle": "Delete Goods Transfer",
-    "deleteDescription": "Are you sure you want to delete this goods transfer?"
+    "deleteDescription": "Are you sure you want to delete this goods transfer?",
+    "expedition": "Expedition",
+    "carrier": "Expedition",
+    "deliveryNoteNumber": "Delivery note no.",
+    "dispatchedAt": "Dispatched at",
+    "dispatchedBy": "Dispatched by",
+    "notDispatched": "Not dispatched yet",
+    "dispatch": "Dispatch",
+    "dispatchTitle": "Dispatch transfer",
+    "dispatchDescription": "Confirm the expedition and delivery note. Status becomes In Transit.",
+    "dispatching": "Dispatching...",
+    "dispatchSuccess": "Transfer dispatched",
+    "carrierRequired": "Select an expedition before dispatching",
+    "sourceReceipt": "Source BPB",
+    "statusFilterAll": "All statuses"
   },
   "goodsReceipts": {
     "title": "Goods Receipts",

@@ -421,7 +421,11 @@
     "createdSuccess": "Transfer Barang berhasil dibuat",
     "createFailed": "Gagal membuat transfer barang",
     "creating": "Membuat...",
-    "createGoodsTransfer": "Buat Transfer Barang"
+    "createGoodsTransfer": "Buat Transfer Barang",
+    "carrier": "Ekspedisi",
+    "deliveryNoteNumber": "No. surat jalan",
+    "deliveryNotePlaceholder": "Nomor di surat jalan ekspedisi (opsional)",
+    "expeditionSection": "Ekspedisi"
   },
   "farmWizard": {
     "title": "Buat Farm Baru",
@@ -594,7 +598,21 @@
     "loading": "Memuat...",
     "notFound": "Transfer Barang tidak ditemukan",
     "deleteTitle": "Hapus Transfer Barang",
-    "deleteDescription": "Apakah Anda yakin ingin menghapus transfer barang ini?"
+    "deleteDescription": "Apakah Anda yakin ingin menghapus transfer barang ini?",
+    "expedition": "Ekspedisi",
+    "carrier": "Ekspedisi",
+    "deliveryNoteNumber": "No. surat jalan",
+    "dispatchedAt": "Diberangkatkan pada",
+    "dispatchedBy": "Diberangkatkan oleh",
+    "notDispatched": "Belum diberangkatkan",
+    "dispatch": "Berangkatkan",
+    "dispatchTitle": "Berangkatkan pindah barang",
+    "dispatchDescription": "Pastikan ekspedisi dan surat jalan. Status menjadi Dalam Perjalanan.",
+    "dispatching": "Memproses...",
+    "dispatchSuccess": "Pindah barang diberangkatkan",
+    "carrierRequired": "Pilih ekspedisi dulu sebelum diberangkatkan",
+    "sourceReceipt": "BPB asal",
+    "statusFilterAll": "Semua status"
   },
   "goodsReceipts": {
     "title": "Penerimaan Barang",

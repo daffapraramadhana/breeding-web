@@ -39,7 +39,7 @@ export type CoopStatus = "ACTIVE" | "INACTIVE" | "MAINTENANCE";
 export type EmployeeStatus = "ACTIVE" | "INACTIVE" | "ON_LEAVE" | "TERMINATED";
 export type PurchaseStatus = "ORDERED" | "RECEIVED" | "PROCESSING" | "VERIFIED" | "REJECTED";
 export type ReceiptStatus = "PROCESSING" | "PARTIAL" | "COMPLETE" | "PENDING_VERIFICATION" | "REJECTED";
-export type TransferStatus = "IN_TRANSIT" | "RECEIVED" | "PARTIAL" | "DAMAGED_IN_TRANSIT" | "CANCELLED";
+export type TransferStatus = "PREPARING" | "IN_TRANSIT" | "RECEIVED" | "PARTIAL" | "DAMAGED_IN_TRANSIT" | "CANCELLED";
 export type ConsumptionStatus = "PROCESSING" | "APPROVED" | "CONSUMED" | "REJECTED" | "CANCELLED";
 export type ReturnStatus = "PROCESSING" | "SUPPLIER_APPROVED" | "SUPPLIER_REJECTED" | "RETURNED" | "CANCELLED";
 export type InternalTradeStatus = "PROCESSING" | "IN_TRANSIT" | "PARTIAL" | "RECEIVED" | "REJECTED";
@@ -469,6 +469,8 @@ export interface GoodsTransferLine {
   quantityDamaged?: string;
   valueAmount?: string;
   notes?: string;
+  goodsReceiptLineId?: string;
+  goodsReceiptLine?: { id: string; goodsReceipt?: { id: string; receiptNumber: string } };
 }
 
 export interface GoodsTransfer {
@@ -485,6 +487,12 @@ export interface GoodsTransfer {
   reason?: string;
   status: TransferStatus;
   notes?: string;
+  carrierSupplierId?: string;
+  carrierSupplier?: Pick<Supplier, "id" | "name">;
+  deliveryNoteNumber?: string;
+  dispatchedAt?: string;
+  dispatchedById?: string;
+  dispatchedBy?: Pick<User, "id" | "name">;
   lines: GoodsTransferLine[];
   createdAt: string;
   updatedAt: string;
