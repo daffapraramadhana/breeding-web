@@ -52,7 +52,8 @@
     "confirm": "Konfirmasi",
     "totalRecords": "{total} total data",
     "pageOf": "Halaman {page} dari {totalPages}",
-    "noDataFound": "Data tidak ditemukan"
+    "noDataFound": "Data tidak ditemukan",
+    "expedition": "Ekspedisi"
   },
   "navigation": {
     "Dashboard": "Dasbor",
@@ -132,13 +133,19 @@
     "entity": "kategori",
     "purchasePurpose": "Tujuan Pembelian",
     "overheadCategory": "Kategori Overhead",
-    "priceType": "Tipe Harga"
+    "priceType": "Tipe Harga",
+    "isExpedition": "Kategori jasa ekspedisi / angkutan",
+    "expeditionBadge": "Ekspedisi"
   },
   "suppliers": {
     "title": "Pemasok",
     "description": "Kelola pemasok dan kontak vendor Anda",
     "entity": "pemasok",
-    "contactPerson": "Kontak Person"
+    "code": "Kode supplier",
+    "categories": "Klasifikasi kategori",
+    "noCategories": "Belum ada kategori — buat dulu di Kategori Produk.",
+    "selectExpedition": "Pilih ekspedisi...",
+    "noExpeditionFound": "Tidak ada supplier ekspedisi. Klasifikasikan supplier ke kategori ekspedisi dulu."
   },
   "customers": {
     "title": "Pelanggan",

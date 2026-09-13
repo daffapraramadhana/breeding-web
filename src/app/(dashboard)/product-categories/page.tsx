@@ -17,6 +17,8 @@ import { ProductCategory } from "@/types/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
@@ -50,6 +52,7 @@ export default function ProductCategoriesPage() {
   const [formPurchasePurpose, setFormPurchasePurpose] = useState("");
   const [formOverheadCategory, setFormOverheadCategory] = useState("");
   const [formPriceType, setFormPriceType] = useState("");
+  const [formIsExpedition, setFormIsExpedition] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Delete state
@@ -70,6 +73,12 @@ export default function ProductCategoriesPage() {
       header: tc('created'),
       cell: (row) => formatDate(row.createdAt),
       className: "w-[150px]",
+    },
+    {
+      header: t('expeditionBadge'),
+      cell: (row) =>
+        row.isExpedition ? <Badge variant="secondary">{t('expeditionBadge')}</Badge> : "-",
+      className: "w-[120px]",
     },
     {
       header: tc('actions'),
@@ -108,6 +117,7 @@ export default function ProductCategoriesPage() {
     setFormPurchasePurpose("");
     setFormOverheadCategory("");
     setFormPriceType("");
+    setFormIsExpedition(false);
     setDialogOpen(true);
   }
 
@@ -118,6 +128,7 @@ export default function ProductCategoriesPage() {
     setFormPurchasePurpose(category.purchasePurpose || "");
     setFormOverheadCategory(category.overheadCategory || "");
     setFormPriceType(category.priceType || "");
+    setFormIsExpedition(category.isExpedition ?? false);
     setDialogOpen(true);
   }
 
@@ -141,6 +152,7 @@ export default function ProductCategoriesPage() {
         ...(formPurchasePurpose.trim() && { purchasePurpose: formPurchasePurpose.trim() }),
         ...(formOverheadCategory.trim() && { overheadCategory: formOverheadCategory.trim() }),
         ...(formPriceType.trim() && { priceType: formPriceType.trim() }),
+        isExpedition: formIsExpedition,
       };
 
       if (editingCategory) {
@@ -275,6 +287,14 @@ export default function ProductCategoriesPage() {
                   if (e.key === "Enter") handleSubmit();
                 }}
               />
+            </div>
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="category-is-expedition"
+                checked={formIsExpedition}
+                onCheckedChange={(v) => setFormIsExpedition(v === true)}
+              />
+              <Label htmlFor="category-is-expedition">{t('isExpedition')}</Label>
             </div>
           </div>
 

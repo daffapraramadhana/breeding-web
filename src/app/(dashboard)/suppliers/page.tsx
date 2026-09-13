@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQueryState, parseAsInteger } from "nuqs";
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2 } from "lucide-react";
@@ -10,13 +10,15 @@ import { DataTable, Column } from "@/components/shared/data-table";
 import { PageHeader } from "@/components/shared/page-header";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { usePaginated } from "@/hooks/use-api";
-import { fetchApi } from "@/lib/api";
+import { fetchApi, fetchPaginated } from "@/lib/api";
 import { formatDate } from "@/lib/utils";
-import { Supplier } from "@/types/api";
+import { ProductCategory, Supplier } from "@/types/api";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
@@ -46,34 +48,55 @@ export default function SuppliersPage() {
   // Dialog state
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null);
+  const [formCode, setFormCode] = useState("");
   const [formName, setFormName] = useState("");
-  const [formContactPerson, setFormContactPerson] = useState("");
-  const [formPhone, setFormPhone] = useState("");
-  const [formEmail, setFormEmail] = useState("");
   const [formAddress, setFormAddress] = useState("");
+  const [formCategoryIds, setFormCategoryIds] = useState<string[]>([]);
+  const [categories, setCategories] = useState<ProductCategory[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Delete state
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deletingSupplier, setDeletingSupplier] = useState<Supplier | null>(null);
 
+  useEffect(() => {
+    if (!dialogOpen) return;
+    fetchPaginated<ProductCategory>("/product-categories", { limit: 100 })
+      .then((res) => setCategories(res.data))
+      .catch(() => setCategories([]));
+  }, [dialogOpen]);
+
+  function toggleCategory(id: string, checked: boolean) {
+    setFormCategoryIds((prev) =>
+      checked ? Array.from(new Set([...prev, id])) : prev.filter((c) => c !== id)
+    );
+  }
+
   // Table columns
   const columns: Column<Supplier>[] = [
+    {
+      header: t('code'),
+      cell: (row) => <span className="font-mono text-xs">{row.code}</span>,
+      className: "w-[120px]",
+    },
     {
       header: tc('name'),
       accessorKey: "name",
     },
     {
-      header: t('contactPerson'),
-      cell: (row) => row.contactPerson || "-",
-    },
-    {
-      header: tc('phone'),
-      cell: (row) => row.phone || "-",
-    },
-    {
-      header: tc('email'),
-      cell: (row) => row.email || "-",
+      header: t('categories'),
+      cell: (row) =>
+        row.categories && row.categories.length > 0 ? (
+          <div className="flex flex-wrap gap-1">
+            {row.categories.map((c) => (
+              <Badge key={c.categoryId} variant={c.category.isExpedition ? "default" : "secondary"}>
+                {c.category.name}
+              </Badge>
+            ))}
+          </div>
+        ) : (
+          "-"
+        ),
     },
     {
       header: tc('created'),
@@ -113,22 +136,20 @@ export default function SuppliersPage() {
   // Open create dialog
   function handleCreate() {
     setEditingSupplier(null);
+    setFormCode("");
     setFormName("");
-    setFormContactPerson("");
-    setFormPhone("");
-    setFormEmail("");
     setFormAddress("");
+    setFormCategoryIds([]);
     setDialogOpen(true);
   }
 
   // Open edit dialog
   function handleEdit(supplier: Supplier) {
     setEditingSupplier(supplier);
+    setFormCode(supplier.code);
     setFormName(supplier.name);
-    setFormContactPerson(supplier.contactPerson || "");
-    setFormPhone(supplier.phone || "");
-    setFormEmail(supplier.email || "");
     setFormAddress(supplier.address || "");
+    setFormCategoryIds((supplier.categories ?? []).map((c) => c.categoryId));
     setDialogOpen(true);
   }
 
@@ -140,6 +161,10 @@ export default function SuppliersPage() {
 
   // Submit create/edit
   async function handleSubmit() {
+    if (!formCode.trim()) {
+      toast.error(tc('required', { field: t('code') }));
+      return;
+    }
     if (!formName.trim()) {
       toast.error(tc('required', { field: tc('name') }));
       return;
@@ -148,11 +173,10 @@ export default function SuppliersPage() {
     setIsSubmitting(true);
     try {
       const body = {
+        code: formCode.trim(),
         name: formName.trim(),
-        ...(formContactPerson.trim() && { contactPerson: formContactPerson.trim() }),
-        ...(formPhone.trim() && { phone: formPhone.trim() }),
-        ...(formEmail.trim() && { email: formEmail.trim() }),
         ...(formAddress.trim() && { address: formAddress.trim() }),
+        categoryIds: formCategoryIds,
       };
 
       if (editingSupplier) {
@@ -173,7 +197,11 @@ export default function SuppliersPage() {
       refetch();
     } catch (error) {
       toast.error(
-        editingSupplier ? tc('entityUpdateFailed', { entity: t('entity') }) : tc('entityCreateFailed', { entity: t('entity') })
+        error instanceof Error
+          ? error.message
+          : editingSupplier
+            ? tc('entityUpdateFailed', { entity: t('entity') })
+            : tc('entityCreateFailed', { entity: t('entity') })
       );
     } finally {
       setIsSubmitting(false);
@@ -250,6 +278,15 @@ export default function SuppliersPage() {
 
           <div className="space-y-4">
             <div className="space-y-2">
+              <Label htmlFor="supplier-code">{t('code')}</Label>
+              <Input
+                id="supplier-code"
+                placeholder={tc('enterField', { field: t('code') })}
+                value={formCode}
+                onChange={(e) => setFormCode(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
               <Label htmlFor="supplier-name">{tc('name')}</Label>
               <Input
                 id="supplier-name"
@@ -259,44 +296,39 @@ export default function SuppliersPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="supplier-contact">{t('contactPerson')}</Label>
-              <Input
-                id="supplier-contact"
-                placeholder={tc('enterFieldOptional', { field: t('contactPerson') })}
-                value={formContactPerson}
-                onChange={(e) => setFormContactPerson(e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="supplier-phone">{tc('phone')}</Label>
-              <Input
-                id="supplier-phone"
-                placeholder={tc('enterFieldOptional', { field: tc('phone') })}
-                value={formPhone}
-                onChange={(e) => setFormPhone(e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="supplier-email">{tc('email')}</Label>
-              <Input
-                id="supplier-email"
-                type="email"
-                placeholder={tc('enterFieldOptional', { field: tc('email') })}
-                value={formEmail}
-                onChange={(e) => setFormEmail(e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
               <Label htmlFor="supplier-address">{tc('address')}</Label>
               <Input
                 id="supplier-address"
                 placeholder={tc('enterFieldOptional', { field: tc('address') })}
                 value={formAddress}
                 onChange={(e) => setFormAddress(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") handleSubmit();
-                }}
               />
+            </div>
+            <div className="space-y-2">
+              <Label>{t('categories')}</Label>
+              {categories.length === 0 ? (
+                <p className="text-sm text-muted-foreground">{t('noCategories')}</p>
+              ) : (
+                <div className="grid grid-cols-2 gap-2 rounded-md border p-3">
+                  {categories.map((cat) => (
+                    <div key={cat.id} className="flex items-center gap-2">
+                      <Checkbox
+                        id={`supplier-cat-${cat.id}`}
+                        checked={formCategoryIds.includes(cat.id)}
+                        onCheckedChange={(v) => toggleCategory(cat.id, v === true)}
+                      />
+                      <Label htmlFor={`supplier-cat-${cat.id}`} className="font-normal">
+                        {cat.name}
+                        {cat.isExpedition && (
+                          <span className="ml-1 text-xs text-muted-foreground">
+                            ({tc('expedition')})
+                          </span>
+                        )}
+                      </Label>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 

@@ -52,7 +52,8 @@
     "confirm": "Confirm",
     "totalRecords": "{total} total records",
     "pageOf": "Page {page} of {totalPages}",
-    "noDataFound": "No data found"
+    "noDataFound": "No data found",
+    "expedition": "Expedition"
   },
   "navigation": {
     "Dashboard": "Dashboard",
@@ -132,13 +133,19 @@
     "entity": "category",
     "purchasePurpose": "Purchase Purpose",
     "overheadCategory": "Overhead Category",
-    "priceType": "Price Type"
+    "priceType": "Price Type",
+    "isExpedition": "Expedition / freight service category",
+    "expeditionBadge": "Expedition"
   },
   "suppliers": {
     "title": "Suppliers",
     "description": "Manage your suppliers and vendor contacts",
     "entity": "supplier",
-    "contactPerson": "Contact Person"
+    "code": "Supplier code",
+    "categories": "Category classification",
+    "noCategories": "No categories yet — create them under Product Categories.",
+    "selectExpedition": "Select expedition...",
+    "noExpeditionFound": "No expedition supplier found. Classify a supplier under an expedition category first."
   },
   "customers": {
     "title": "Customers",

@@ -123,6 +123,7 @@ export interface ProductCategory {
   purchasePurpose?: string;
   overheadCategory?: string;
   priceType?: string;
+  isExpedition: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -150,13 +151,19 @@ export interface UnitOfMeasure {
   updatedAt: string;
 }
 
+export interface SupplierCategoryLink {
+  supplierId: string;
+  categoryId: string;
+  category: Pick<ProductCategory, "id" | "name" | "isExpedition">;
+}
+
 export interface Supplier {
   id: string;
+  code: string;
   name: string;
-  contactPerson?: string;
-  phone?: string;
-  email?: string;
   address?: string;
+  status?: string;
+  categories?: SupplierCategoryLink[];
   createdAt: string;
   updatedAt: string;
 }
