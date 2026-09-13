@@ -5,6 +5,13 @@ import Link from "next/link";
 import { useQueryState, parseAsInteger } from "nuqs";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { PageHeader } from "@/components/shared/page-header";
 import { DataTable, Column } from "@/components/shared/data-table";
 import { StatusBadge } from "@/components/shared/status-badge";
@@ -19,6 +26,7 @@ export default function GoodsTransfersPage() {
   const router = useRouter();
   const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(1));
   const [search, setSearch] = useQueryState("search", { defaultValue: "" });
+  const [status, setStatus] = useQueryState("status", { defaultValue: "" });
 
   const columns: Column<GoodsTransfer>[] = [
     {
@@ -49,7 +57,7 @@ export default function GoodsTransfersPage() {
 
   const { data, meta, isLoading } = usePaginated<GoodsTransfer>(
     "/goods-transfers",
-    { page, limit: 20, search }
+    { page, limit: 20, search, extra: { status } }
   );
 
   return (
@@ -66,6 +74,25 @@ export default function GoodsTransfersPage() {
           </Button>
         }
       />
+      <div className="flex justify-end">
+        <Select
+          value={status || "ALL"}
+          onValueChange={(v) => {
+            setStatus(v === "ALL" ? "" : v);
+            setPage(1);
+          }}
+        >
+          <SelectTrigger className="w-[220px]">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="ALL">{t('statusFilterAll')}</SelectItem>
+            {["PREPARING", "IN_TRANSIT", "PARTIAL", "RECEIVED", "DAMAGED_IN_TRANSIT", "CANCELLED"].map((s) => (
+              <SelectItem key={s} value={s}>{s.replace(/_/g, " ")}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
       <DataTable
         columns={columns}
         data={data}
