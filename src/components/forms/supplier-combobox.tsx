@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Check, ChevronsUpDown } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -24,9 +25,12 @@ interface SupplierComboboxProps {
   value: string;
   onChange: (id: string) => void;
   disabled?: boolean;
+  /** Only list suppliers classified under an expedition category. */
+  expeditionOnly?: boolean;
 }
 
-export function SupplierCombobox({ value, onChange, disabled }: SupplierComboboxProps) {
+export function SupplierCombobox({ value, onChange, disabled, expeditionOnly = false }: SupplierComboboxProps) {
+  const t = useTranslations("suppliers");
   const [open, setOpen] = useState(false);
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [search, setSearch] = useState("");
@@ -34,13 +38,19 @@ export function SupplierCombobox({ value, onChange, disabled }: SupplierCombobox
 
   useEffect(() => {
     setIsLoading(true);
-    fetchPaginated<Supplier>("/suppliers", { limit: 50, search })
+    fetchPaginated<Supplier>("/suppliers", {
+      limit: 50,
+      search,
+      ...(expeditionOnly && { extra: { expedition: "true" } }),
+    })
       .then((res) => setSuppliers(res.data))
       .catch(() => {})
       .finally(() => setIsLoading(false));
-  }, [search]);
+  }, [search, expeditionOnly]);
 
   const selected = suppliers.find((s) => s.id === value);
+  const placeholder = expeditionOnly ? t("selectExpedition") : "Select supplier...";
+  const emptyText = expeditionOnly ? t("noExpeditionFound") : "No suppliers found.";
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -52,7 +62,7 @@ export function SupplierCombobox({ value, onChange, disabled }: SupplierCombobox
           className="w-full justify-between font-normal"
           disabled={disabled}
         >
-          {selected ? selected.name : "Select supplier..."}
+          {selected ? selected.name : placeholder}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
@@ -67,7 +77,7 @@ export function SupplierCombobox({ value, onChange, disabled }: SupplierCombobox
             {isLoading ? (
               <CommandEmpty>Loading...</CommandEmpty>
             ) : suppliers.length === 0 ? (
-              <CommandEmpty>No suppliers found.</CommandEmpty>
+              <CommandEmpty>{emptyText}</CommandEmpty>
             ) : (
               <CommandGroup>
                 {suppliers.map((supplier) => (
