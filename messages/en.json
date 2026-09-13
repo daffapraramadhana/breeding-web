@@ -643,7 +643,10 @@
     "selectPo": "Select PO...",
     "additionalNotes": "Additional notes...",
     "addLineItem": "Please add at least one line item",
-    "updated": "Updated"
+    "updated": "Updated",
+    "carrier": "Expedition",
+    "deliveryNoteNumber": "Delivery note no.",
+    "deliveryNotePlaceholder": "Number on the carrier's surat jalan (optional)"
   },
   "goodsReturns": {
     "title": "Goods Returns",

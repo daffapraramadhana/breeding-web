@@ -323,6 +323,9 @@ export interface GoodsReceipt {
   warehouseId: string;
   warehouse?: Warehouse;
   notes?: string;
+  carrierSupplierId?: string;
+  carrierSupplier?: Pick<Supplier, "id" | "name">;
+  deliveryNoteNumber?: string;
   status: ReceiptStatus;
   lines: GoodsReceiptLine[];
   createdAt: string;

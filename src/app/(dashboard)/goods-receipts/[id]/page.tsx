@@ -120,6 +120,16 @@ export default function GoodsReceiptDetailPage({
             </div>
             <Separator />
             <div className="flex justify-between">
+              <span className="text-muted-foreground">{t('carrier')}</span>
+              <span className="font-medium">{gr.carrierSupplier?.name || "—"}</span>
+            </div>
+            <Separator />
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">{t('deliveryNoteNumber')}</span>
+              <span className="font-mono">{gr.deliveryNoteNumber || "—"}</span>
+            </div>
+            <Separator />
+            <div className="flex justify-between">
               <span className="text-muted-foreground">{tc('created')}</span>
               <span>{formatDate(gr.createdAt)}</span>
             </div>

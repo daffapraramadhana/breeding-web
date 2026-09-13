@@ -23,6 +23,7 @@ import {
 import { PageHeader } from "@/components/shared/page-header";
 import { LineItemsField, LineItem } from "@/components/forms/line-items-field";
 import { WarehouseCombobox } from "@/components/forms/warehouse-combobox";
+import { SupplierCombobox } from "@/components/forms/supplier-combobox";
 import { fetchApi, fetchPaginated } from "@/lib/api";
 import { PurchaseOrder } from "@/types/api";
 import { useTranslations } from "next-intl";
@@ -40,6 +41,8 @@ export default function NewGoodsReceiptPage() {
     warehouseId: "",
     receiptDate: "",
     notes: "",
+    carrierSupplierId: "",
+    deliveryNoteNumber: "",
   });
   const [lines, setLines] = useState<LineItem[]>([]);
 
@@ -91,6 +94,8 @@ export default function NewGoodsReceiptPage() {
         warehouseId: form.warehouseId,
         receiptDate: form.receiptDate,
         notes: form.notes || undefined,
+        carrierSupplierId: form.carrierSupplierId || undefined,
+        deliveryNoteNumber: form.deliveryNoteNumber.trim() || undefined,
         lines: validLines.map((l) => ({
           productId: l.productId,
           uomId: l.uomId,
@@ -171,6 +176,24 @@ export default function NewGoodsReceiptPage() {
                   setForm({ ...form, receiptDate: e.target.value })
                 }
                 required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>{t('carrier')}</Label>
+              <SupplierCombobox
+                value={form.carrierSupplierId}
+                onChange={(id) => setForm({ ...form, carrierSupplierId: id })}
+                expeditionOnly
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="deliveryNoteNumber">{t('deliveryNoteNumber')}</Label>
+              <Input
+                id="deliveryNoteNumber"
+                maxLength={100}
+                value={form.deliveryNoteNumber}
+                onChange={(e) => setForm({ ...form, deliveryNoteNumber: e.target.value })}
+                placeholder={t('deliveryNotePlaceholder')}
               />
             </div>
             <div className="md:col-span-2 space-y-2">

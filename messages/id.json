@@ -643,7 +643,10 @@
     "selectPo": "Pilih PO...",
     "additionalNotes": "Catatan tambahan...",
     "addLineItem": "Tambahkan minimal satu item baris",
-    "updated": "Diperbarui"
+    "updated": "Diperbarui",
+    "carrier": "Ekspedisi",
+    "deliveryNoteNumber": "No. surat jalan",
+    "deliveryNotePlaceholder": "Nomor di surat jalan ekspedisi (opsional)"
   },
   "goodsReturns": {
     "title": "Pengembalian Barang",
