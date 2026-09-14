@@ -4,6 +4,7 @@ import { Providers } from "@/components/providers";
 import "./globals.css";
 import {NextIntlClientProvider} from 'next-intl';
 import {getLocale, getMessages} from 'next-intl/server';
+import { APP_DESCRIPTION, APP_NAME, APP_TAGLINE } from "@/lib/constants";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -16,8 +17,16 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Breeding App - Farm Management Dashboard",
-  description: "Farm ERP system for managing breeding operations",
+  applicationName: APP_NAME,
+  title: {
+    default: `${APP_NAME} — Farm Management Dashboard`,
+    template: `%s | ${APP_NAME}`,
+  },
+  description: `${APP_TAGLINE}. ${APP_DESCRIPTION}`,
+  icons: {
+    icon: "/icon.png",
+    apple: "/icon.png",
+  },
 };
 
 export default async function RootLayout({

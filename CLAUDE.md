@@ -1,4 +1,4 @@
-# Breeding Dashboard — Next.js Frontend
+# FARMORA Dashboard — Next.js Frontend
 
 ## Routing
 

@@ -1,9 +1,22 @@
 "use client";
 
 import { User } from "@/types/api";
+import { STORAGE_KEYS } from "@/lib/constants";
 
-const TOKEN_KEY = "token";
-const USER_KEY = "user";
+const LEGACY_TOKEN_KEY = "token";
+const LEGACY_USER_KEY = "user";
+
+function migrateLegacyValue(currentKey: string, legacyKey: string): string | null {
+  const currentValue = localStorage.getItem(currentKey);
+  if (currentValue) return currentValue;
+
+  const legacyValue = localStorage.getItem(legacyKey);
+  if (legacyValue) {
+    localStorage.setItem(currentKey, legacyValue);
+    localStorage.removeItem(legacyKey);
+  }
+  return legacyValue;
+}
 
 interface JwtPayload {
   exp?: number;
@@ -34,21 +47,24 @@ export function isTokenExpired(token?: string | null): boolean {
 
 export function getToken(): string | null {
   if (typeof window === "undefined") return null;
-  return localStorage.getItem(TOKEN_KEY);
+  return migrateLegacyValue(STORAGE_KEYS.accessToken, LEGACY_TOKEN_KEY);
 }
 
 export function setToken(token: string): void {
-  localStorage.setItem(TOKEN_KEY, token);
+  localStorage.setItem(STORAGE_KEYS.accessToken, token);
+  localStorage.removeItem(LEGACY_TOKEN_KEY);
 }
 
 export function removeToken(): void {
-  localStorage.removeItem(TOKEN_KEY);
-  localStorage.removeItem(USER_KEY);
+  localStorage.removeItem(STORAGE_KEYS.accessToken);
+  localStorage.removeItem(STORAGE_KEYS.user);
+  localStorage.removeItem(LEGACY_TOKEN_KEY);
+  localStorage.removeItem(LEGACY_USER_KEY);
 }
 
 export function getUser(): User | null {
   if (typeof window === "undefined") return null;
-  const user = localStorage.getItem(USER_KEY);
+  const user = migrateLegacyValue(STORAGE_KEYS.user, LEGACY_USER_KEY);
   if (!user) return null;
   try {
     return JSON.parse(user);
@@ -58,7 +74,8 @@ export function getUser(): User | null {
 }
 
 export function setUser(user: User): void {
-  localStorage.setItem(USER_KEY, JSON.stringify(user));
+  localStorage.setItem(STORAGE_KEYS.user, JSON.stringify(user));
+  localStorage.removeItem(LEGACY_USER_KEY);
 }
 
 export function isAuthenticated(): boolean {

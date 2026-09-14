@@ -12,6 +12,7 @@ import type {
   ChatMessage,
   AttachedContext,
 } from "@/types/chat";
+import { APP_NAME } from "@/lib/constants";
 
 interface ChatPanelProps {
   view: "list" | "conversation";
@@ -110,7 +111,7 @@ export function ChatPanel({
               </p>
               {view === "list" && (
                 <p className="text-[10px] text-muted-foreground">
-                  Breeding App
+                  {APP_NAME}
                 </p>
               )}
             </div>

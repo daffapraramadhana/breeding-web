@@ -15,6 +15,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { toast } from "sonner";
+import Image from "next/image";
+import { APP_LOGO_PATH, APP_NAME, APP_TAGLINE } from "@/lib/constants";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -43,7 +45,17 @@ export default function LoginPage() {
     <div className="flex min-h-screen items-center justify-center bg-muted/40">
       <Card className="w-full max-w-sm">
         <CardHeader className="text-center">
+          <div className="mx-auto mb-2 flex h-20 w-20 items-center justify-center rounded-2xl bg-white p-1 shadow-sm">
+            <Image
+              src={APP_LOGO_PATH}
+              alt={`${APP_NAME} logo`}
+              width={72}
+              height={72}
+              priority
+            />
+          </div>
           <CardTitle className="text-2xl">{t('title')}</CardTitle>
+          <p className="text-xs font-medium text-[#568c28]">{APP_TAGLINE}</p>
           <CardDescription>
             {t('subtitle')}
           </CardDescription>

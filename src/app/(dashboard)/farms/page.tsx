@@ -240,7 +240,7 @@ export default function FarmsPage() {
         onPageChange={setPage}
         total={meta?.total}
         onRowClick={(farm) => router.push(`/farms/${farm.id}`)}
-        emptyTitle={tc('noResults')}
+        emptyTitle={tc('noResults', { entity: t('entity') })}
         emptyDescription={tc('getStarted', { entity: t('entity') })}
         emptyAction={
           <Button onClick={handleCreate}>

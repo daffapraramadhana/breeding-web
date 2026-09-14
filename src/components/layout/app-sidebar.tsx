@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, useMemo } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { ChevronsLeft, ChevronsRight, Search, X } from "lucide-react";
 import {
@@ -21,6 +22,7 @@ import type { NavItem } from "@/lib/constants";
 import { CollapsibleSidebarGroup } from "./collapsible-sidebar-group";
 import { useTranslations } from "next-intl";
 import { useAuth } from "@/hooks/use-auth";
+import { APP_LOGO_PATH, APP_NAME } from "@/lib/constants";
 
 export function AppSidebar() {
   const pathname = usePathname();
@@ -142,11 +144,17 @@ export function AppSidebar() {
         {/* Expanded: logo + title + collapse button */}
         <div className="flex items-center gap-2.5 group-data-[collapsible=icon]:justify-center">
           <Link href="/" className="flex items-center gap-2.5 flex-1 min-w-0 group-data-[collapsible=icon]:flex-initial">
-            <div className="flex h-[32px] w-[32px] shrink-0 items-center justify-center rounded-[9px] bg-gradient-to-br from-[#3d8c5c] to-[#2d6b44] text-white text-[12px] font-semibold shadow-[0_2px_8px_rgba(61,140,92,0.3)]">
-              B
+            <div className="flex h-[36px] w-[36px] shrink-0 items-center justify-center overflow-hidden rounded-[10px] bg-white/90 p-0.5 shadow-[0_2px_8px_rgba(0,93,62,0.18)]">
+              <Image
+                src={APP_LOGO_PATH}
+                alt={`${APP_NAME} logo`}
+                width={34}
+                height={34}
+                priority
+              />
             </div>
-            <span className="truncate text-[15px] font-medium group-data-[collapsible=icon]:hidden">
-              Breeding
+            <span className="truncate text-[15px] font-semibold tracking-[0.04em] text-[#006039] group-data-[collapsible=icon]:hidden dark:text-[#8fc641]">
+              {APP_NAME}
             </span>
           </Link>
           {/* Collapse button (expanded state) */}

@@ -1,4 +1,4 @@
-# Breeding Dashboard
+# FARMORA Dashboard
 
 [![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)]()
 [![Next.js](https://img.shields.io/badge/Next.js-16-black.svg)]()

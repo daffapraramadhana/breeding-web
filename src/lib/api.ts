@@ -8,7 +8,7 @@ import {
   ProductionForecastRequest,
   DashboardSummaryRequest,
 } from "@/types/api";
-import { forceLogout } from "@/lib/auth";
+import { forceLogout, getToken } from "@/lib/auth";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api";
 
@@ -24,8 +24,7 @@ export async function fetchApi<T>(
   endpoint: string,
   options?: RequestInit
 ): Promise<T> {
-  const token =
-    typeof window !== "undefined" ? localStorage.getItem("token") : null;
+  const token = getToken();
 
   const res = await fetch(`${API_URL}${endpoint}`, {
     ...options,
@@ -94,8 +93,7 @@ export async function fetchPaginated<T>(
   const query = searchParams.toString();
   const url = query ? `${endpoint}?${query}` : endpoint;
 
-  const token =
-    typeof window !== "undefined" ? localStorage.getItem("token") : null;
+  const token = getToken();
 
   const res = await fetch(`${API_URL}${url}`, {
     headers: {

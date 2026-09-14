@@ -28,6 +28,17 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
+export const APP_NAME = "FARMORA";
+export const APP_TAGLINE = "Smart Farming, Better Growing";
+export const APP_DESCRIPTION =
+  "Smart farm management for modern poultry operations.";
+export const APP_LOGO_PATH = "/brand/farmora-mark.png";
+
+export const STORAGE_KEYS = {
+  accessToken: "farmora_access_token",
+  user: "farmora_user",
+} as const;
+
 type NavLink = { title: string; url: string; icon: LucideIcon };
 type NavGroup = { title: string; icon: LucideIcon; items: NavLink[] };
 export type NavItem = NavLink | NavGroup;

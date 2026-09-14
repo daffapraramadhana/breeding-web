@@ -266,7 +266,7 @@ export default function CoopsPage() {
         totalPages={meta?.totalPages || 1}
         onPageChange={setPage}
         total={meta?.total}
-        emptyTitle={tc('noResults')}
+        emptyTitle={tc('noResults', { entity: t('entity') })}
         emptyDescription={tc('getStarted', { entity: t('entity') })}
         emptyAction={
           <Button onClick={handleCreate}>
