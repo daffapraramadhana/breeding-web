@@ -106,9 +106,16 @@ export default function MatureBirdStandardsPage() {
       toast.error(tc('required', { field: t('name') }));
       return;
     }
-    const filled = formRanges.filter((r) => r.valueFrom.trim() && r.valueTo.trim());
-    if (filled.length === 0) {
+    const touched = formRanges.filter((r) => r.valueFrom.trim() || r.valueTo.trim());
+    if (touched.length === 0) {
       toast.error(t('rangeRequired'));
+      return;
+    }
+    // A row with only one side filled would otherwise be dropped silently
+    // under a success toast, leaving a gap in the master data.
+    const filled = touched.filter((r) => r.valueFrom.trim() && r.valueTo.trim());
+    if (filled.length !== touched.length) {
+      toast.error(t('rangeIncomplete'));
       return;
     }
     if (filled.some((r) => Number(r.valueTo) < Number(r.valueFrom))) {

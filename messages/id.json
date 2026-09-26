@@ -971,6 +971,7 @@
     "addRange": "Tambah rentang",
     "rangeRequired": "Tambahkan minimal satu rentang",
     "rangeInvalid": "\"Sampai\" tidak boleh lebih kecil dari \"Dari\"",
-    "searchPlaceholder": "Cari standarisasi..."
+    "searchPlaceholder": "Cari standarisasi...",
+    "rangeIncomplete": "Isi Dari dan Sampai, atau kosongkan barisnya"
   }
 }

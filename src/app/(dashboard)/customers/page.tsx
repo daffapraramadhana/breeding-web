@@ -115,6 +115,14 @@ export default function CustomersPage() {
         ),
     },
     {
+      header: t('contactPerson'),
+      cell: (row) => row.contactPerson || "-",
+    },
+    {
+      header: tc('phone'),
+      cell: (row) => row.phone || "-",
+    },
+    {
       header: t('creditLimit'),
       cell: (row) =>
         row.creditLimitEnabled && row.creditLimit

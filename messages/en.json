@@ -971,6 +971,7 @@
     "addRange": "Add range",
     "rangeRequired": "Add at least one range",
     "rangeInvalid": "\"To\" must not be lower than \"From\"",
-    "searchPlaceholder": "Search standards..."
+    "searchPlaceholder": "Search standards...",
+    "rangeIncomplete": "Fill in both From and To, or clear the row"
   }
 }
