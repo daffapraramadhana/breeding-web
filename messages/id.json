@@ -152,7 +152,25 @@
     "description": "Kelola pelanggan dan informasi kontak mereka",
     "entity": "pelanggan",
     "contactPerson": "Kontak Person",
-    "creditLimit": "Batas Kredit"
+    "creditLimit": "Batas Kredit",
+    "code": "Kode customer",
+    "city": "Kota",
+    "registrationBranch": "Area pendaftaran",
+    "idCardNumber": "No. KTP",
+    "taxNumber": "NPWP",
+    "vehiclePlate": "No. plat mobil",
+    "creditLimitEnabled": "Aktifkan pembatasan plafon",
+    "topDays": "TOP pembayaran (hari)",
+    "savingsPerKg": "Tabungan per kg",
+    "installmentPerKg": "Cicilan per kg",
+    "installmentHint": "Baru disimpan — mekanisme pemotongan belum dibangun.",
+    "operatingBranches": "Area operasional",
+    "noBranches": "Belum ada area — buat dulu di menu Cabang.",
+    "groupIdentity": "Identitas",
+    "groupDocuments": "Dokumen",
+    "groupContact": "Kontak",
+    "groupTerms": "Syarat & ketentuan",
+    "groupOperations": "Operasional"
   },
   "breeders": {
     "title": "Peternak",
@@ -940,5 +958,18 @@
     "population": "Populasi",
     "notes": "Catatan",
     "searchPlaceholder": "Cari rencana chick-in..."
+  },
+  "matureBirdStandards": {
+    "title": "Standarisasi Ayam Besar",
+    "description": "Rentang bobot yang dipakai sebagai acuan bobot minimum di pesanan penjualan.",
+    "entity": "standarisasi",
+    "name": "Nama standarisasi",
+    "ranges": "Rentang bobot",
+    "valueFrom": "Dari",
+    "valueTo": "Sampai",
+    "addRange": "Tambah rentang",
+    "rangeRequired": "Tambahkan minimal satu rentang",
+    "rangeInvalid": "\"Sampai\" tidak boleh lebih kecil dari \"Dari\"",
+    "searchPlaceholder": "Cari standarisasi..."
   }
 }

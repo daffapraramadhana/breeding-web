@@ -152,7 +152,25 @@
     "description": "Manage your customers and their contact information",
     "entity": "customer",
     "contactPerson": "Contact Person",
-    "creditLimit": "Credit Limit"
+    "creditLimit": "Credit Limit",
+    "code": "Customer code",
+    "city": "City",
+    "registrationBranch": "Registration area",
+    "idCardNumber": "ID card no. (KTP)",
+    "taxNumber": "Tax no. (NPWP)",
+    "vehiclePlate": "Vehicle plate no.",
+    "creditLimitEnabled": "Enforce credit limit",
+    "topDays": "Payment terms (days)",
+    "savingsPerKg": "Savings per kg",
+    "installmentPerKg": "Installment per kg",
+    "installmentHint": "Stored only — the deduction flow is not built yet.",
+    "operatingBranches": "Operating areas",
+    "noBranches": "No areas yet — create them under Branches first.",
+    "groupIdentity": "Identity",
+    "groupDocuments": "Documents",
+    "groupContact": "Contact",
+    "groupTerms": "Terms & conditions",
+    "groupOperations": "Operations"
   },
   "breeders": {
     "title": "Breeders",
@@ -940,5 +958,18 @@
     "population": "Population",
     "notes": "Notes",
     "searchPlaceholder": "Search chick-in plans..."
+  },
+  "matureBirdStandards": {
+    "title": "Mature Bird Standards",
+    "description": "Weight ranges used as the minimum-weight reference on sales orders.",
+    "entity": "standard",
+    "name": "Standard name",
+    "ranges": "Weight ranges",
+    "valueFrom": "From",
+    "valueTo": "To",
+    "addRange": "Add range",
+    "rangeRequired": "Add at least one range",
+    "rangeInvalid": "\"To\" must not be lower than \"From\"",
+    "searchPlaceholder": "Search standards..."
   }
 }

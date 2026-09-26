@@ -24,9 +24,11 @@ interface CustomerComboboxProps {
   value: string;
   onChange: (id: string) => void;
   disabled?: boolean;
+  /** Only list customers whose operating areas include this branch. */
+  branchId?: string;
 }
 
-export function CustomerCombobox({ value, onChange, disabled }: CustomerComboboxProps) {
+export function CustomerCombobox({ value, onChange, disabled, branchId }: CustomerComboboxProps) {
   const [open, setOpen] = useState(false);
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [search, setSearch] = useState("");
@@ -34,11 +36,15 @@ export function CustomerCombobox({ value, onChange, disabled }: CustomerCombobox
 
   useEffect(() => {
     setIsLoading(true);
-    fetchPaginated<Customer>("/customers", { limit: 50, search })
+    fetchPaginated<Customer>("/customers", {
+      limit: 50,
+      search,
+      ...(branchId && { extra: { branchId } }),
+    })
       .then((res) => setCustomers(res.data))
       .catch(() => {})
       .finally(() => setIsLoading(false));
-  }, [search]);
+  }, [search, branchId]);
 
   const selected = customers.find((c) => c.id === value);
 

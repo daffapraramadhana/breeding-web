@@ -168,14 +168,50 @@ export interface Supplier {
   updatedAt: string;
 }
 
+export interface CustomerBranchLink {
+  customerId: string;
+  branchId: string;
+  branch: Pick<Branch, "id" | "code" | "name">;
+}
+
 export interface Customer {
   id: string;
+  code: string;
   name: string;
   contactPerson?: string;
   phone?: string;
   email?: string;
   address?: string;
+  city?: string;
   creditLimit?: string;
+  creditLimitEnabled: boolean;
+  performance?: string;
+  collateral?: string;
+  registrationBranchId?: string;
+  registrationBranch?: Pick<Branch, "id" | "code" | "name">;
+  idCardNumber?: string;
+  taxNumber?: string;
+  vehiclePlate?: string;
+  topDays?: number;
+  savingsPerKg?: string;
+  installmentPerKg?: string;
+  lastPaymentDate?: string;
+  operatingBranches?: CustomerBranchLink[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface MatureBirdStandardRange {
+  id: string;
+  standardId: string;
+  valueFrom: string;
+  valueTo: string;
+}
+
+export interface MatureBirdStandard {
+  id: string;
+  name: string;
+  ranges: MatureBirdStandardRange[];
   createdAt: string;
   updatedAt: string;
 }
