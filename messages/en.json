@@ -611,6 +611,7 @@
     "dispatching": "Dispatching...",
     "dispatchSuccess": "Transfer dispatched",
     "carrierRequired": "Select an expedition before dispatching",
+    "deliveryNoteRequired": "Delivery note number is required before dispatch",
     "sourceReceipt": "Source BPB",
     "statusFilterAll": "All statuses"
   },

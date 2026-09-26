@@ -611,6 +611,7 @@
     "dispatching": "Memproses...",
     "dispatchSuccess": "Pindah barang diberangkatkan",
     "carrierRequired": "Pilih ekspedisi dulu sebelum diberangkatkan",
+    "deliveryNoteRequired": "No. surat jalan wajib diisi sebelum berangkat",
     "sourceReceipt": "BPB asal",
     "statusFilterAll": "Semua status"
   },

@@ -45,13 +45,17 @@ export function DispatchDialog({ open, onOpenChange, transfer, onSuccess }: Disp
       toast.error(t("carrierRequired"));
       return;
     }
+    if (!deliveryNoteNumber.trim()) {
+      toast.error(t("deliveryNoteRequired"));
+      return;
+    }
     setIsSubmitting(true);
     try {
       await fetchApi(`/goods-transfers/${transfer.id}/dispatch`, {
         method: "POST",
         body: JSON.stringify({
           carrierSupplierId,
-          deliveryNoteNumber: deliveryNoteNumber.trim() || undefined,
+          deliveryNoteNumber: deliveryNoteNumber.trim(),
         }),
       });
       toast.success(t("dispatchSuccess"));
@@ -80,7 +84,7 @@ export function DispatchDialog({ open, onOpenChange, transfer, onSuccess }: Disp
             )}
           </div>
           <div className="space-y-2">
-            <Label htmlFor="dispatch-delivery-note">{t("deliveryNoteNumber")}</Label>
+            <Label htmlFor="dispatch-delivery-note">{t("deliveryNoteNumber")} *</Label>
             <Input
               id="dispatch-delivery-note"
               maxLength={100}
