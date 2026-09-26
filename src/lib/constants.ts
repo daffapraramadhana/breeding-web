@@ -69,6 +69,7 @@ export const NAV_ITEMS: NavItem[] = [
       { title: "Vehicles", url: "/vehicles", icon: Truck },
       { title: "Units of Measure", url: "/unit-of-measures", icon: Ruler },
       { title: "Mature Bird Types", url: "/mature-bird-types", icon: Target },
+      { title: "Mature Bird Standards", url: "/mature-bird-standards", icon: Target },
     ],
   },
   {

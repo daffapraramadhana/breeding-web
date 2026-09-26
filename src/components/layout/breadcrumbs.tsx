@@ -18,6 +18,7 @@ const ROUTE_LABELS: Record<string, string> = {
   vehicles: "Vehicles",
   "unit-of-measures": "Units of Measure",
   "mature-bird-types": "Mature Bird Types",
+  "mature-bird-standards": "Mature Bird Standards",
   projects: "Projects",
   warehouses: "Warehouses",
   inventory: "Stock Summary",
