@@ -1026,6 +1026,7 @@
     "notes": "Notes",
     "sourceAvailable": "Available at source",
     "sameCoop": "Source and destination must be different coops",
-    "searchPlaceholder": "Search transfer..."
+    "searchPlaceholder": "Search transfer...",
+    "immutableHint": "A transfer cannot be edited or deleted once saved — correct it from the coop population page."
   }
 }

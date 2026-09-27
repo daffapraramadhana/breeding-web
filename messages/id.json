@@ -1026,6 +1026,7 @@
     "notes": "Catatan",
     "sourceAvailable": "Tersedia di kandang asal",
     "sameCoop": "Kandang asal dan tujuan harus berbeda",
-    "searchPlaceholder": "Cari pindah ayam..."
+    "searchPlaceholder": "Cari pindah ayam...",
+    "immutableHint": "Pindah ayam tidak bisa diubah atau dihapus setelah tersimpan — betulkan lewat koreksi di halaman populasi kandang."
   }
 }
