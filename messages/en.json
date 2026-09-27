@@ -1115,6 +1115,7 @@
     "totalSavings": "Total savings",
     "exceedsOrder": "Realized {birds} birds against {ordered} ordered",
     "lineRequired": "Fill in the coop, DTPS number, birds and tonnage",
-    "notStarted": "This order has no realization yet"
+    "notStarted": "This order has no realization yet",
+    "recipient": "Recipient"
   }
 }

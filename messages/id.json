@@ -1115,6 +1115,7 @@
     "totalSavings": "Total tabungan",
     "exceedsOrder": "Realisasi {birds} ekor dari {ordered} ekor yang dipesan",
     "lineRequired": "Isi kandang, No. DTPS, ekor, dan tonase",
-    "notStarted": "Pesanan ini belum punya realisasi"
+    "notStarted": "Pesanan ini belum punya realisasi",
+    "recipient": "Penerima"
   }
 }
