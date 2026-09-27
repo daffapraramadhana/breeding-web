@@ -1,132 +1,177 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
+import { toast } from "sonner";
+import { ArrowLeft, Plus, Trash2 } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PageHeader } from "@/components/shared/page-header";
 import { BranchCombobox } from "@/components/forms/branch-combobox";
-import { ProjectCombobox } from "@/components/forms/project-combobox";
 import { CustomerCombobox } from "@/components/forms/customer-combobox";
-import { BreederCombobox } from "@/components/forms/breeder-combobox";
+import { ProductCombobox } from "@/components/forms/product-combobox";
+import { ProjectCoopCombobox } from "@/components/forms/project-coop-combobox";
+import { MatureBirdStandardCombobox } from "@/components/forms/mature-bird-standard-combobox";
 import { fetchApi } from "@/lib/api";
-import { RecipientType } from "@/types/api";
-import { toast } from "sonner";
-import { ArrowLeft, Plus, Trash2 } from "lucide-react";
+import { Customer, RecommendedPrice } from "@/types/api";
 
 interface SalesLine {
-  productDescription: string;
+  productId: string;
+  sourceProjectCoopId: string;
   birdCount: string;
-  totalWeightKg: string;
+  avgWeightKg: string;
+  isCulled: boolean;
+  standardId: string;
+  minimumWeightKg: number | null;
   unitPrice: string;
-  totalPrice: string;
+  savingsPerKg: string;
+  lineNotes: string;
+  recommended: RecommendedPrice | null;
+}
+
+const EMPTY_LINE: SalesLine = {
+  productId: "", sourceProjectCoopId: "", birdCount: "", avgWeightKg: "",
+  isCulled: false, standardId: "", minimumWeightKg: null,
+  unitPrice: "", savingsPerKg: "", lineNotes: "", recommended: null,
+};
+
+function plusDays(days: number) {
+  const d = new Date();
+  d.setDate(d.getDate() + days);
+  return d.toISOString().slice(0, 10);
+}
+
+/** Tonase selalu turunan, sama seperti backend: birdCount x avgWeightKg. */
+function tonnage(line: SalesLine) {
+  if (!line.birdCount || !line.avgWeightKg) return "";
+  return (Number(line.birdCount) * Number(line.avgWeightKg)).toFixed(2);
 }
 
 export default function NewSalesOrderPage() {
   const router = useRouter();
+  const t = useTranslations("salesOrders");
+  const tc = useTranslations("common");
+
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [form, setForm] = useState({
-    branchId: "",
-    projectId: "",
-    recipientType: "" as RecipientType | "",
-    customerId: "",
-    breederId: "",
-    contractPrice: "",
-    marketPrice: "",
-    paymentMethod: "",
-    notes: "",
-  });
-  const [lines, setLines] = useState<SalesLine[]>([
-    { productDescription: "", birdCount: "", totalWeightKg: "", unitPrice: "", totalPrice: "" },
-  ]);
+  const [branchId, setBranchId] = useState("");
+  const [customerId, setCustomerId] = useState("");
+  const [recipientName, setRecipientName] = useState("");
+  const [recipientAddress, setRecipientAddress] = useState("");
+  const [orderDate, setOrderDate] = useState(plusDays(0));
+  const [validUntil, setValidUntil] = useState(plusDays(2));
+  const [vatPercent, setVatPercent] = useState("0");
+  const [notes, setNotes] = useState("");
+  const [creditLimit, setCreditLimit] = useState<string | null>(null);
+  const [topDays, setTopDays] = useState<number | null>(null);
+  const [lines, setLines] = useState<SalesLine[]>([{ ...EMPTY_LINE }]);
 
-  function addLine() {
-    setLines([...lines, { productDescription: "", birdCount: "", totalWeightKg: "", unitPrice: "", totalPrice: "" }]);
+  // Ganti area → customer yang terpilih bisa jadi tidak lagi sah di area baru.
+  useEffect(() => {
+    setCustomerId("");
+    setRecipientName("");
+    setRecipientAddress("");
+    setCreditLimit(null);
+    setTopDays(null);
+  }, [branchId]);
+
+  useEffect(() => {
+    if (!customerId) return;
+    fetchApi<Customer>(`/customers/${customerId}`)
+      .then((c) => {
+        setRecipientName(c.contactPerson || c.name);
+        setRecipientAddress(c.address ?? "");
+        setCreditLimit(c.creditLimitEnabled ? (c.creditLimit ?? null) : null);
+        setTopDays(c.topDays ?? null);
+      })
+      .catch(() => {});
+  }, [customerId]);
+
+  function updateLine(index: number, patch: Partial<SalesLine>) {
+    setLines((prev) => prev.map((l, i) => (i === index ? { ...l, ...patch } : l)));
   }
 
-  function removeLine(index: number) {
-    if (lines.length <= 1) return;
-    setLines(lines.filter((_, i) => i !== index));
-  }
+  // Harga rekomendasi dimuat saat produk dan customer dua-duanya ada.
+  useEffect(() => {
+    lines.forEach((line, index) => {
+      if (!customerId || !line.productId) {
+        if (line.recommended !== null) updateLine(index, { recommended: null });
+        return;
+      }
+      fetchApi<RecommendedPrice>(
+        `/sales-orders/recommended-price?productId=${line.productId}&customerId=${customerId}`
+      )
+        .then((r) => updateLine(index, { recommended: r }))
+        .catch(() => updateLine(index, { recommended: null }));
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [customerId, lines.map((l) => l.productId).join(",")]);
 
-  function updateLine(index: number, field: keyof SalesLine, value: string) {
-    const updated = [...lines];
-    updated[index] = { ...updated[index], [field]: value };
-    setLines(updated);
-  }
-
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-
-    if (!form.branchId) {
-      toast.error("Please select a branch");
+  async function handleSubmit() {
+    if (!branchId) {
+      toast.error(tc("required", { field: t("branch") }));
       return;
     }
-    if (!form.recipientType) {
-      toast.error("Please select a recipient type");
+    if (!customerId) {
+      toast.error(tc("required", { field: t("customerBreeder") }));
       return;
     }
-    if (form.recipientType === "CUSTOMER" && !form.customerId) {
-      toast.error("Please select a customer");
+    const touched = lines.filter(
+      (l) => l.productId || l.sourceProjectCoopId || l.birdCount || l.avgWeightKg
+    );
+    const filled = touched.filter(
+      (l) => l.productId && l.sourceProjectCoopId && Number(l.birdCount) > 0 && Number(l.avgWeightKg) > 0
+    );
+    if (filled.length === 0 || filled.length !== touched.length) {
+      toast.error(t("lineRequired"));
       return;
     }
-    if (form.recipientType === "BREEDER" && !form.breederId) {
-      toast.error("Please select a breeder");
-      return;
-    }
-
-    const validLines = lines.filter((l) => l.productDescription);
-    if (validLines.length === 0) {
-      toast.error("Please add at least one line item");
+    if (new Date(validUntil) < new Date(orderDate)) {
+      toast.error(tc("required", { field: t("validUntil") }));
       return;
     }
 
     setIsSubmitting(true);
     try {
-      const body = {
-        branchId: form.branchId,
-        projectId: form.projectId || undefined,
-        recipientType: form.recipientType,
-        customerId: form.recipientType === "CUSTOMER" ? form.customerId : undefined,
-        breederId: form.recipientType === "BREEDER" ? form.breederId : undefined,
-        contractPrice: form.contractPrice || undefined,
-        marketPrice: form.marketPrice || undefined,
-        paymentMethod: form.paymentMethod || undefined,
-        notes: form.notes || undefined,
-        lines: validLines.map((l) => ({
-          productDescription: l.productDescription,
-          birdCount: l.birdCount ? Number(l.birdCount) : undefined,
-          totalWeightKg: l.totalWeightKg || undefined,
-          unitPrice: l.unitPrice || undefined,
-          totalPrice: l.totalPrice || undefined,
-        })),
-      };
-
-      const result = await fetchApi<{ id: string }>("/sales-orders", {
+      // totalWeightKg dan totalPrice sengaja tidak dikirim — backend yang
+      // menghitungnya, dan forbidNonWhitelisted menolak 400 kalau ikut terkirim.
+      const created = await fetchApi<{ id: string }>("/sales-orders", {
         method: "POST",
-        body: JSON.stringify(body),
+        body: JSON.stringify({
+          branchId,
+          customerId,
+          recipientType: "CUSTOMER",
+          recipientName: recipientName.trim() || undefined,
+          recipientAddress: recipientAddress.trim() || undefined,
+          orderDate,
+          validUntil,
+          vatPercent: Number(vatPercent || 0),
+          notes: notes.trim() || undefined,
+          lines: filled.map((l) => ({
+            productId: l.productId,
+            sourceProjectCoopId: l.sourceProjectCoopId,
+            birdCount: Number(l.birdCount),
+            avgWeightKg: Number(l.avgWeightKg),
+            isCulled: l.isCulled,
+            minimumWeightKg: l.minimumWeightKg ?? undefined,
+            savingsPerKg: l.savingsPerKg ? Number(l.savingsPerKg) : undefined,
+            unitPrice: l.unitPrice ? Number(l.unitPrice) : undefined,
+            lineNotes: l.lineNotes.trim() || undefined,
+          })),
+        }),
       });
-
-      toast.success("Sales Order created successfully");
-      router.push(`/sales-orders/${result.id}`);
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to create SO");
+      toast.success(tc("entityCreated", { entity: t("entity") }));
+      router.push(`/sales-orders/${created.id}`);
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : tc("entityCreateFailed", { entity: t("entity") })
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -135,212 +180,188 @@ export default function NewSalesOrderPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Create Sales Order"
+        title={tc("newEntity", { entity: t("entity") })}
+        description={t("description")}
         actions={
           <Button variant="outline" asChild>
             <Link href="/sales-orders">
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Back
+              {tc("cancel")}
             </Link>
           </Button>
         }
       />
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Order Details</CardTitle>
-          </CardHeader>
-          <CardContent className="grid gap-4 md:grid-cols-2">
-            <div className="space-y-2">
-              <Label>Branch *</Label>
-              <BranchCombobox
-                value={form.branchId}
-                onChange={(id) => setForm({ ...form, branchId: id })}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Project</Label>
-              <ProjectCombobox
-                value={form.projectId}
-                onChange={(id) => setForm({ ...form, projectId: id })}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Recipient Type *</Label>
-              <Select
-                value={form.recipientType}
-                onValueChange={(v) =>
-                  setForm({ ...form, recipientType: v as RecipientType, customerId: "", breederId: "" })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select recipient type..." />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="CUSTOMER">Customer</SelectItem>
-                  <SelectItem value="BREEDER">Breeder</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            {form.recipientType === "CUSTOMER" && (
-              <div className="space-y-2">
-                <Label>Customer *</Label>
-                <CustomerCombobox
-                  value={form.customerId}
-                  onChange={(id) => setForm({ ...form, customerId: id })}
-                />
-              </div>
-            )}
-            {form.recipientType === "BREEDER" && (
-              <div className="space-y-2">
-                <Label>Breeder *</Label>
-                <BreederCombobox
-                  value={form.breederId}
-                  onChange={(id) => setForm({ ...form, breederId: id })}
-                />
-              </div>
-            )}
-            <div className="space-y-2">
-              <Label htmlFor="contractPrice">Contract Price</Label>
-              <Input
-                id="contractPrice"
-                type="number"
-                step="0.01"
-                value={form.contractPrice}
-                onChange={(e) => setForm({ ...form, contractPrice: e.target.value })}
-                placeholder="0.00"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="marketPrice">Market Price</Label>
-              <Input
-                id="marketPrice"
-                type="number"
-                step="0.01"
-                value={form.marketPrice}
-                onChange={(e) => setForm({ ...form, marketPrice: e.target.value })}
-                placeholder="0.00"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Payment Method</Label>
-              <Select
-                value={form.paymentMethod}
-                onValueChange={(v) => setForm({ ...form, paymentMethod: v })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select payment method..." />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="CASH">Cash</SelectItem>
-                  <SelectItem value="BANK_TRANSFER">Bank Transfer</SelectItem>
-                  <SelectItem value="CHECK">Check</SelectItem>
-                  <SelectItem value="GIRO">Giro</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="md:col-span-2 space-y-2">
-              <Label htmlFor="notes">Notes</Label>
-              <Textarea
-                id="notes"
-                value={form.notes}
-                onChange={(e) => setForm({ ...form, notes: e.target.value })}
-                placeholder="Additional notes..."
-                rows={3}
-              />
-            </div>
-          </CardContent>
-        </Card>
+      <Card>
+        <CardHeader>
+          <CardTitle>{t("title")}</CardTitle>
+        </CardHeader>
+        <CardContent className="grid gap-4 md:grid-cols-2">
+          <div className="space-y-2">
+            <Label>{t("branch")}</Label>
+            <BranchCombobox value={branchId} onChange={setBranchId} />
+          </div>
 
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle>Line Items</CardTitle>
-              <Button type="button" variant="outline" size="sm" onClick={addLine}>
-                <Plus className="mr-2 h-4 w-4" />
-                Add Line
-              </Button>
+          <div className="space-y-2">
+            <Label>{t("customerBreeder")}</Label>
+            <CustomerCombobox
+              value={customerId}
+              onChange={setCustomerId}
+              branchId={branchId || undefined}
+              disabled={!branchId}
+            />
+            <p className="text-xs text-muted-foreground">{t("customerAreaHint")}</p>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="so-recipient">{t("recipientName")}</Label>
+            <Input id="so-recipient" value={recipientName} onChange={(e) => setRecipientName(e.target.value)} />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="so-address">{t("recipientAddress")}</Label>
+            <Input id="so-address" value={recipientAddress} onChange={(e) => setRecipientAddress(e.target.value)} />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="so-order-date">{t("orderDate")}</Label>
+            <Input id="so-order-date" type="date" value={orderDate} onChange={(e) => setOrderDate(e.target.value)} />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="so-valid-until">{t("validUntil")}</Label>
+            <Input id="so-valid-until" type="date" value={validUntil} onChange={(e) => setValidUntil(e.target.value)} />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="so-vat">{t("vatPercent")}</Label>
+            <Input id="so-vat" type="number" min={0} max={100} step="0.01"
+              value={vatPercent} onChange={(e) => setVatPercent(e.target.value)} />
+          </div>
+
+          <div className="space-y-2 rounded-md border p-3 text-sm">
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">{t("creditLimit")}</span>
+              <span>{creditLimit ?? "-"}</span>
             </div>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {lines.map((line, idx) => (
-                <div key={idx} className="grid gap-3 md:grid-cols-6 items-end border-b pb-4 last:border-0">
-                  <div className="md:col-span-2 space-y-1">
-                    <Label className="text-xs">Product Description</Label>
-                    <Input
-                      value={line.productDescription}
-                      onChange={(e) => updateLine(idx, "productDescription", e.target.value)}
-                      placeholder="Product description"
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <Label className="text-xs">Bird Count</Label>
-                    <Input
-                      type="number"
-                      value={line.birdCount}
-                      onChange={(e) => updateLine(idx, "birdCount", e.target.value)}
-                      placeholder="0"
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <Label className="text-xs">Total Weight (kg)</Label>
-                    <Input
-                      type="number"
-                      step="0.01"
-                      value={line.totalWeightKg}
-                      onChange={(e) => updateLine(idx, "totalWeightKg", e.target.value)}
-                      placeholder="0.00"
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <Label className="text-xs">Unit Price</Label>
-                    <Input
-                      type="number"
-                      step="0.01"
-                      value={line.unitPrice}
-                      onChange={(e) => updateLine(idx, "unitPrice", e.target.value)}
-                      placeholder="0.00"
-                    />
-                  </div>
-                  <div className="flex items-end gap-2">
-                    <div className="flex-1 space-y-1">
-                      <Label className="text-xs">Total Price</Label>
-                      <Input
-                        type="number"
-                        step="0.01"
-                        value={line.totalPrice}
-                        onChange={(e) => updateLine(idx, "totalPrice", e.target.value)}
-                        placeholder="0.00"
-                      />
-                    </div>
-                    {lines.length > 1 && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => removeLine(idx)}
-                      >
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                      </Button>
-                    )}
-                  </div>
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">{t("topDays")}</span>
+              <span>{topDays ?? "-"}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">{t("balance")}</span>
+              <span>-</span>
+            </div>
+            <p className="text-xs text-muted-foreground">{t("balanceNotBuilt")}</p>
+          </div>
+
+          <div className="space-y-2 md:col-span-2">
+            <Label htmlFor="so-notes">{t("notes")}</Label>
+            <Textarea id="so-notes" value={notes} onChange={(e) => setNotes(e.target.value)} />
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>{t("lines")}</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {lines.map((line, i) => (
+            <div key={i} className="space-y-3 rounded-md border p-4">
+              <div className="grid gap-3 md:grid-cols-2">
+                <div className="space-y-2">
+                  <Label>{t("product")}</Label>
+                  <ProductCombobox value={line.productId} onChange={(v) => updateLine(i, { productId: v })} />
                 </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+                <div className="space-y-2">
+                  <Label>{t("sourceCoop")}</Label>
+                  <ProjectCoopCombobox
+                    value={line.sourceProjectCoopId}
+                    onChange={(v) => updateLine(i, { sourceProjectCoopId: v })}
+                  />
+                </div>
+              </div>
 
-        <div className="flex justify-end gap-3">
-          <Button type="button" variant="outline" asChild>
-            <Link href="/sales-orders">Cancel</Link>
+              <div className="grid gap-3 md:grid-cols-3">
+                <div className="space-y-2">
+                  <Label htmlFor={`line-birds-${i}`}>{t("birdCount")}</Label>
+                  <Input id={`line-birds-${i}`} type="number" min={1} step="1"
+                    value={line.birdCount} onChange={(e) => updateLine(i, { birdCount: e.target.value })} />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor={`line-avg-${i}`}>{t("avgWeight")}</Label>
+                  <Input id={`line-avg-${i}`} type="number" min={0} step="0.0001"
+                    value={line.avgWeightKg} onChange={(e) => updateLine(i, { avgWeightKg: e.target.value })} />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor={`line-tonnage-${i}`}>{t("totalWeight")}</Label>
+                  <Input id={`line-tonnage-${i}`} value={tonnage(line)} readOnly disabled />
+                </div>
+              </div>
+
+              <div className="grid gap-3 md:grid-cols-3">
+                <div className="space-y-2">
+                  <Label>{t("minimumWeight")}</Label>
+                  <MatureBirdStandardCombobox
+                    value={line.standardId}
+                    onChange={(id, minimum) => updateLine(i, { standardId: id, minimumWeightKg: minimum })}
+                  />
+                  <p className="text-xs text-muted-foreground">{line.minimumWeightKg ?? "-"}</p>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor={`line-price-${i}`}>{t("unitPrice")}</Label>
+                  <Input id={`line-price-${i}`} type="number" min={0} step="0.0001"
+                    value={line.unitPrice} onChange={(e) => updateLine(i, { unitPrice: e.target.value })} />
+                  <p className="text-xs text-muted-foreground">
+                    {t("recommendedPrice")}:{" "}
+                    {line.recommended?.unitPrice ?? t("noRecommendation")}
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor={`line-savings-${i}`}>{t("savingsPerKg")}</Label>
+                  <Input id={`line-savings-${i}`} type="number" min={0} step="0.01"
+                    value={line.savingsPerKg} onChange={(e) => updateLine(i, { savingsPerKg: e.target.value })} />
+                </div>
+              </div>
+
+              <div className="flex items-end gap-4">
+                <div className="flex-1 space-y-2">
+                  <Label htmlFor={`line-notes-${i}`}>{t("lineNotes")}</Label>
+                  <Input id={`line-notes-${i}`} value={line.lineNotes}
+                    onChange={(e) => updateLine(i, { lineNotes: e.target.value })} />
+                </div>
+                <div className="flex items-center gap-2 pb-2">
+                  <Checkbox
+                    id={`line-culled-${i}`}
+                    checked={line.isCulled}
+                    onCheckedChange={(checked) => updateLine(i, { isCulled: checked === true })}
+                  />
+                  <Label htmlFor={`line-culled-${i}`}>{t("culled")}</Label>
+                </div>
+                <Button variant="ghost" size="sm" disabled={lines.length === 1}
+                  onClick={() => setLines((prev) => prev.filter((_, idx) => idx !== i))}>
+                  <Trash2 className="h-4 w-4 text-destructive" />
+                </Button>
+              </div>
+            </div>
+          ))}
+
+          <Button variant="outline" size="sm" onClick={() => setLines((prev) => [...prev, { ...EMPTY_LINE }])}>
+            <Plus className="mr-2 h-4 w-4" />
+            {t("addLine")}
           </Button>
-          <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "Creating..." : "Create Sales Order"}
-          </Button>
-        </div>
-      </form>
+        </CardContent>
+      </Card>
+
+      <div className="flex justify-end gap-2">
+        <Button variant="outline" asChild disabled={isSubmitting}>
+          <Link href="/sales-orders">{tc("cancel")}</Link>
+        </Button>
+        <Button onClick={handleSubmit} disabled={isSubmitting}>
+          {isSubmitting ? tc("saving") : tc("createEntity", { entity: t("entity") })}
+        </Button>
+      </div>
     </div>
   );
 }

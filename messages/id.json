@@ -623,7 +623,8 @@
     "product": "Produk",
     "total": "Total",
     "lines": "Baris",
-    "addLine": "Tambah baris"
+    "addLine": "Tambah baris",
+    "notes": "Catatan"
   },
   "goodsTransfers": {
     "title": "Transfer Barang",

@@ -623,7 +623,8 @@
     "product": "Product",
     "total": "Total",
     "lines": "Lines",
-    "addLine": "Add line"
+    "addLine": "Add line",
+    "notes": "Notes"
   },
   "goodsTransfers": {
     "title": "Goods Transfers",
