@@ -999,7 +999,8 @@
     "reason": "Reason",
     "reasonRequired": "A reason is required for a manual correction",
     "searchPlaceholder": "Search coop...",
-    "noMovements": "No movements recorded yet"
+    "noMovements": "No movements recorded yet",
+    "movementsLoadFailed": "Could not load the movement history"
   },
   "coopDepletions": {
     "title": "Daily Depletion",

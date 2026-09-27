@@ -999,7 +999,8 @@
     "reason": "Alasan",
     "reasonRequired": "Koreksi manual wajib menyertakan alasan",
     "searchPlaceholder": "Cari kandang...",
-    "noMovements": "Belum ada gerakan tercatat"
+    "noMovements": "Belum ada gerakan tercatat",
+    "movementsLoadFailed": "Riwayat gerakan gagal dimuat"
   },
   "coopDepletions": {
     "title": "Deplesi Harian",
