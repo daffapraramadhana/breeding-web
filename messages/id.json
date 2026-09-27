@@ -636,7 +636,14 @@
     "total": "Total",
     "lines": "Baris",
     "addLine": "Tambah baris",
-    "notes": "Catatan"
+    "notes": "Catatan",
+    "allStatuses": "Semua status",
+    "dateFrom": "Dari",
+    "dateTo": "Sampai",
+    "toCustomer": "Ke customer",
+    "toBreeder": "Ke peternak",
+    "quantity": "Kuantitas",
+    "breederHint": "Sapronak dijual dari gudang — tanpa kandang, tanpa rata-rata bobot"
   },
   "goodsTransfers": {
     "title": "Transfer Barang",
@@ -1043,7 +1050,8 @@
     "noMovements": "Belum ada gerakan tercatat",
     "movementsLoadFailed": "Riwayat gerakan gagal dimuat",
     "overAllocated": "Kurang {count}",
-    "overAllocatedHint": "Ayam yang dijanjikan pesanan lebih banyak dari yang tersisa di kandang"
+    "overAllocatedHint": "Ayam yang dijanjikan pesanan lebih banyak dari yang tersisa di kandang",
+    "outstandingHint": "Pesanan berikut masih menahan ekor di kandang ini — lepaskan salah satunya agar kandang bisa dipesan lagi"
   },
   "coopDepletions": {
     "title": "Deplesi Harian",

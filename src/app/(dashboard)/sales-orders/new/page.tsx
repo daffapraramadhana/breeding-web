@@ -13,9 +13,13 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
 import { PageHeader } from "@/components/shared/page-header";
 import { BranchCombobox } from "@/components/forms/branch-combobox";
 import { CustomerCombobox } from "@/components/forms/customer-combobox";
+import { BreederCombobox } from "@/components/forms/breeder-combobox";
 import { ProductCombobox } from "@/components/forms/product-combobox";
 import { ProjectCoopCombobox } from "@/components/forms/project-coop-combobox";
 import { MatureBirdStandardCombobox } from "@/components/forms/mature-bird-standard-combobox";
@@ -61,7 +65,10 @@ export default function NewSalesOrderPage() {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [branchId, setBranchId] = useState("");
+  const [recipientType, setRecipientType] = useState<"CUSTOMER" | "BREEDER">("CUSTOMER");
   const [customerId, setCustomerId] = useState("");
+  const [breederId, setBreederId] = useState("");
+  const isBreeder = recipientType === "BREEDER";
   const [recipientName, setRecipientName] = useState("");
   const [recipientAddress, setRecipientAddress] = useState("");
   const [orderDate, setOrderDate] = useState(plusDays(0));
@@ -75,11 +82,12 @@ export default function NewSalesOrderPage() {
   // Ganti area → customer yang terpilih bisa jadi tidak lagi sah di area baru.
   useEffect(() => {
     setCustomerId("");
+    setBreederId("");
     setRecipientName("");
     setRecipientAddress("");
     setCreditLimit(null);
     setTopDays(null);
-  }, [branchId]);
+  }, [branchId, recipientType]);
 
   useEffect(() => {
     if (!customerId) return;
@@ -118,15 +126,18 @@ export default function NewSalesOrderPage() {
       toast.error(tc("required", { field: t("branch") }));
       return;
     }
-    if (!customerId) {
+    if (isBreeder ? !breederId : !customerId) {
       toast.error(tc("required", { field: t("customerBreeder") }));
       return;
     }
     const touched = lines.filter(
       (l) => l.productId || l.sourceProjectCoopId || l.birdCount || l.avgWeightKg
     );
-    const filled = touched.filter(
-      (l) => l.productId && l.sourceProjectCoopId && Number(l.birdCount) > 0 && Number(l.avgWeightKg) > 0
+    // Sapronak ke peternak datang dari gudang, tanpa kandang dan tanpa AVG.
+    const filled = touched.filter((l) =>
+      isBreeder
+        ? l.productId && Number(l.birdCount) > 0
+        : l.productId && l.sourceProjectCoopId && Number(l.birdCount) > 0 && Number(l.avgWeightKg) > 0
     );
     if (filled.length === 0 || filled.length !== touched.length) {
       toast.error(t("lineRequired"));
@@ -145,8 +156,8 @@ export default function NewSalesOrderPage() {
         method: "POST",
         body: JSON.stringify({
           branchId,
-          customerId,
-          recipientType: "CUSTOMER",
+          ...(isBreeder ? { breederId } : { customerId }),
+          recipientType,
           recipientName: recipientName.trim() || undefined,
           recipientAddress: recipientAddress.trim() || undefined,
           orderDate,
@@ -155,14 +166,20 @@ export default function NewSalesOrderPage() {
           notes: notes.trim() || undefined,
           lines: filled.map((l) => ({
             productId: l.productId,
-            sourceProjectCoopId: l.sourceProjectCoopId,
             birdCount: Number(l.birdCount),
-            avgWeightKg: Number(l.avgWeightKg),
-            isCulled: l.isCulled,
-            minimumWeightKg: l.minimumWeightKg ?? undefined,
-            savingsPerKg: l.savingsPerKg ? Number(l.savingsPerKg) : undefined,
             unitPrice: l.unitPrice ? Number(l.unitPrice) : undefined,
             lineNotes: l.lineNotes.trim() || undefined,
+            // Bidang khusus ayam hidup tidak dikirim pada pesanan peternak:
+            // backend menolak baris peternak yang menyebut kandang.
+            ...(isBreeder
+              ? {}
+              : {
+                  sourceProjectCoopId: l.sourceProjectCoopId,
+                  avgWeightKg: Number(l.avgWeightKg),
+                  isCulled: l.isCulled,
+                  minimumWeightKg: l.minimumWeightKg ?? undefined,
+                  savingsPerKg: l.savingsPerKg ? Number(l.savingsPerKg) : undefined,
+                }),
           })),
         }),
       });
@@ -203,14 +220,36 @@ export default function NewSalesOrderPage() {
           </div>
 
           <div className="space-y-2">
+            <Label>{t("recipientType")}</Label>
+            <Select
+              value={recipientType}
+              onValueChange={(v) => setRecipientType(v as "CUSTOMER" | "BREEDER")}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="CUSTOMER">{t("toCustomer")}</SelectItem>
+                <SelectItem value="BREEDER">{t("toBreeder")}</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
             <Label>{t("customerBreeder")}</Label>
-            <CustomerCombobox
-              value={customerId}
-              onChange={setCustomerId}
-              branchId={branchId || undefined}
-              disabled={!branchId}
-            />
-            <p className="text-xs text-muted-foreground">{t("customerAreaHint")}</p>
+            {isBreeder ? (
+              <BreederCombobox value={breederId} onChange={setBreederId} disabled={!branchId} />
+            ) : (
+              <CustomerCombobox
+                value={customerId}
+                onChange={setCustomerId}
+                branchId={branchId || undefined}
+                disabled={!branchId}
+              />
+            )}
+            <p className="text-xs text-muted-foreground">
+              {isBreeder ? t("breederHint") : t("customerAreaHint")}
+            </p>
           </div>
 
           <div className="space-y-2">
@@ -239,7 +278,7 @@ export default function NewSalesOrderPage() {
               value={vatPercent} onChange={(e) => setVatPercent(e.target.value)} />
           </div>
 
-          <div className="space-y-2 rounded-md border p-3 text-sm">
+          <div className={`space-y-2 rounded-md border p-3 text-sm ${isBreeder ? "hidden" : ""}`}>
             <div className="flex justify-between">
               <span className="text-muted-foreground">{t("creditLimit")}</span>
               <span>{creditLimit ?? "-"}</span>
@@ -274,41 +313,49 @@ export default function NewSalesOrderPage() {
                   <Label>{t("product")}</Label>
                   <ProductCombobox value={line.productId} onChange={(v) => updateLine(i, { productId: v })} />
                 </div>
-                <div className="space-y-2">
-                  <Label>{t("sourceCoop")}</Label>
-                  <ProjectCoopCombobox
-                    value={line.sourceProjectCoopId}
-                    onChange={(v) => updateLine(i, { sourceProjectCoopId: v })}
-                  />
-                </div>
+                {!isBreeder && (
+                  <div className="space-y-2">
+                    <Label>{t("sourceCoop")}</Label>
+                    <ProjectCoopCombobox
+                      value={line.sourceProjectCoopId}
+                      onChange={(v) => updateLine(i, { sourceProjectCoopId: v })}
+                    />
+                  </div>
+                )}
               </div>
 
               <div className="grid gap-3 md:grid-cols-3">
                 <div className="space-y-2">
-                  <Label htmlFor={`line-birds-${i}`}>{t("birdCount")}</Label>
+                  <Label htmlFor={`line-birds-${i}`}>{isBreeder ? t("quantity") : t("birdCount")}</Label>
                   <Input id={`line-birds-${i}`} type="number" min={1} step="1"
                     value={line.birdCount} onChange={(e) => updateLine(i, { birdCount: e.target.value })} />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor={`line-avg-${i}`}>{t("avgWeight")}</Label>
-                  <Input id={`line-avg-${i}`} type="number" min={0} step="0.0001"
-                    value={line.avgWeightKg} onChange={(e) => updateLine(i, { avgWeightKg: e.target.value })} />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor={`line-tonnage-${i}`}>{t("totalWeight")}</Label>
-                  <Input id={`line-tonnage-${i}`} value={tonnage(line)} readOnly disabled />
-                </div>
+                {!isBreeder && (
+                  <>
+                    <div className="space-y-2">
+                      <Label htmlFor={`line-avg-${i}`}>{t("avgWeight")}</Label>
+                      <Input id={`line-avg-${i}`} type="number" min={0} step="0.0001"
+                        value={line.avgWeightKg} onChange={(e) => updateLine(i, { avgWeightKg: e.target.value })} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor={`line-tonnage-${i}`}>{t("totalWeight")}</Label>
+                      <Input id={`line-tonnage-${i}`} value={tonnage(line)} readOnly disabled />
+                    </div>
+                  </>
+                )}
               </div>
 
               <div className="grid gap-3 md:grid-cols-3">
-                <div className="space-y-2">
-                  <Label>{t("minimumWeight")}</Label>
-                  <MatureBirdStandardCombobox
-                    value={line.standardId}
-                    onChange={(id, minimum) => updateLine(i, { standardId: id, minimumWeightKg: minimum })}
-                  />
-                  <p className="text-xs text-muted-foreground">{line.minimumWeightKg ?? "-"}</p>
-                </div>
+                {!isBreeder && (
+                  <div className="space-y-2">
+                    <Label>{t("minimumWeight")}</Label>
+                    <MatureBirdStandardCombobox
+                      value={line.standardId}
+                      onChange={(id, minimum) => updateLine(i, { standardId: id, minimumWeightKg: minimum })}
+                    />
+                    <p className="text-xs text-muted-foreground">{line.minimumWeightKg ?? "-"}</p>
+                  </div>
+                )}
                 <div className="space-y-2">
                   <Label htmlFor={`line-price-${i}`}>{t("unitPrice")}</Label>
                   <Input id={`line-price-${i}`} type="number" min={0} step="0.0001"
@@ -318,11 +365,13 @@ export default function NewSalesOrderPage() {
                     {line.recommended?.unitPrice ?? t("noRecommendation")}
                   </p>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor={`line-savings-${i}`}>{t("savingsPerKg")}</Label>
-                  <Input id={`line-savings-${i}`} type="number" min={0} step="0.01"
-                    value={line.savingsPerKg} onChange={(e) => updateLine(i, { savingsPerKg: e.target.value })} />
-                </div>
+                {!isBreeder && (
+                  <div className="space-y-2">
+                    <Label htmlFor={`line-savings-${i}`}>{t("savingsPerKg")}</Label>
+                    <Input id={`line-savings-${i}`} type="number" min={0} step="0.01"
+                      value={line.savingsPerKg} onChange={(e) => updateLine(i, { savingsPerKg: e.target.value })} />
+                  </div>
+                )}
               </div>
 
               <div className="flex items-end gap-4">
@@ -331,14 +380,16 @@ export default function NewSalesOrderPage() {
                   <Input id={`line-notes-${i}`} value={line.lineNotes}
                     onChange={(e) => updateLine(i, { lineNotes: e.target.value })} />
                 </div>
-                <div className="flex items-center gap-2 pb-2">
-                  <Checkbox
-                    id={`line-culled-${i}`}
-                    checked={line.isCulled}
-                    onCheckedChange={(checked) => updateLine(i, { isCulled: checked === true })}
-                  />
-                  <Label htmlFor={`line-culled-${i}`}>{t("culled")}</Label>
-                </div>
+                {!isBreeder && (
+                  <div className="flex items-center gap-2 pb-2">
+                    <Checkbox
+                      id={`line-culled-${i}`}
+                      checked={line.isCulled}
+                      onCheckedChange={(checked) => updateLine(i, { isCulled: checked === true })}
+                    />
+                    <Label htmlFor={`line-culled-${i}`}>{t("culled")}</Label>
+                  </div>
+                )}
                 <Button variant="ghost" size="sm" disabled={lines.length === 1}
                   onClick={() => setLines((prev) => prev.filter((_, idx) => idx !== i))}>
                   <Trash2 className="h-4 w-4 text-destructive" />

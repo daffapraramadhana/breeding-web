@@ -13,9 +13,16 @@ import { StatusBadge } from "@/components/shared/status-badge";
 import { usePaginated } from "@/hooks/use-api";
 import { SalesOrder } from "@/types/api";
 import { formatDate } from "@/lib/utils";
+import { SALES_STATUSES } from "@/lib/constants";
 import { fetchApi } from "@/lib/api";
 import { toast } from "sonner";
 import { useState } from "react";
+import { BranchCombobox } from "@/components/forms/branch-combobox";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
 
 export default function SalesOrdersPage() {
   const t = useTranslations('salesOrders');
@@ -24,6 +31,10 @@ export default function SalesOrdersPage() {
   const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(1));
   const [search, setSearch] = useQueryState("search", { defaultValue: "" });
   const [isExpiring, setIsExpiring] = useState(false);
+  const [branchId, setBranchId] = useQueryState("branchId", { defaultValue: "" });
+  const [statusFilter, setStatusFilter] = useQueryState("status", { defaultValue: "" });
+  const [dateFrom, setDateFrom] = useQueryState("dateFrom", { defaultValue: "" });
+  const [dateTo, setDateTo] = useQueryState("dateTo", { defaultValue: "" });
 
   const columns: Column<SalesOrder>[] = [
     {
@@ -66,7 +77,17 @@ export default function SalesOrdersPage() {
 
   const { data, meta, isLoading, refetch } = usePaginated<SalesOrder>(
     "/sales-orders",
-    { page, limit: 20, search }
+    {
+      page,
+      limit: 20,
+      search,
+      extra: {
+        ...(branchId && { branchId }),
+        ...(statusFilter && { status: statusFilter }),
+        ...(dateFrom && { dateFrom }),
+        ...(dateTo && { dateTo }),
+      },
+    }
   );
 
   async function handleExpireOverdue() {
@@ -104,6 +125,45 @@ export default function SalesOrdersPage() {
           </div>
         }
       />
+      <div className="grid gap-3 rounded-md border p-4 md:grid-cols-4">
+        <div className="space-y-2">
+          <Label>{t('branch')}</Label>
+          <BranchCombobox
+            value={branchId}
+            onChange={(v) => { setBranchId(v); setPage(1); }}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label>{tc('status')}</Label>
+          <Select
+            value={statusFilter || "ALL"}
+            onValueChange={(v) => { setStatusFilter(v === "ALL" ? "" : v); setPage(1); }}
+          >
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ALL">{t('allStatuses')}</SelectItem>
+              {SALES_STATUSES.map((s) => (
+                <SelectItem key={s} value={s}>
+                  {s.replace(/_/g, " ")}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="so-date-from">{t('dateFrom')}</Label>
+          <Input id="so-date-from" type="date" value={dateFrom}
+            onChange={(e) => { setDateFrom(e.target.value); setPage(1); }} />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="so-date-to">{t('dateTo')}</Label>
+          <Input id="so-date-to" type="date" value={dateTo}
+            onChange={(e) => { setDateTo(e.target.value); setPage(1); }} />
+        </div>
+      </div>
+
       <DataTable
         columns={columns}
         data={data}

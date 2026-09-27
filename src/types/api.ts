@@ -1079,3 +1079,13 @@ export interface RecommendedPrice {
   lastOrderDate: string | null;
   lastDoNumber: string | null;
 }
+
+export interface CoopOutstandingOrder {
+  id: string;
+  doNumber: string | null;
+  status: SalesStatus;
+  orderDate: string;
+  validUntil: string | null;
+  birdCount: number;
+  customer: { id: string; code: string | null; name: string } | null;
+}

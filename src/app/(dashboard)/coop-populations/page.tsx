@@ -11,7 +11,7 @@ import { PageHeader } from "@/components/shared/page-header";
 import { usePaginated } from "@/hooks/use-api";
 import { fetchApi, fetchPaginated } from "@/lib/api";
 import { formatDate } from "@/lib/utils";
-import { CoopPopulationRow, CoopPopulationMovement } from "@/types/api";
+import { CoopPopulationRow, CoopPopulationMovement, CoopOutstandingOrder } from "@/types/api";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -42,6 +42,7 @@ export default function CoopPopulationsPage() {
   const [historyRow, setHistoryRow] = useState<CoopPopulationRow | null>(null);
   const [movements, setMovements] = useState<CoopPopulationMovement[]>([]);
   const [isLoadingMovements, setIsLoadingMovements] = useState(false);
+  const [outstanding, setOutstanding] = useState<CoopOutstandingOrder[]>([]);
 
   const [adjustOpen, setAdjustOpen] = useState(false);
   const [adjustRow, setAdjustRow] = useState<CoopPopulationRow | null>(null);
@@ -111,9 +112,16 @@ export default function CoopPopulationsPage() {
         { limit: 50 }
       );
       setMovements(res.data);
+      // Kandang yang kelebihan alokasi menolak pesanan baru; operator perlu tahu
+      // DO mana yang menahannya, bukan cuma angka kurangnya.
+      const holds = await fetchApi<CoopOutstandingOrder[]>(
+        `/coop-populations/${row.id}/outstanding-orders`
+      );
+      setOutstanding(holds);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : t("movementsLoadFailed"));
       setMovements([]);
+      setOutstanding([]);
     } finally {
       setIsLoadingMovements(false);
     }
@@ -193,6 +201,27 @@ export default function CoopPopulationsPage() {
               {historyRow ? `${historyRow.coop.code} — ${historyRow.coop.name}` : ""}
             </DialogDescription>
           </DialogHeader>
+
+          {historyRow?.population.overAllocated && outstanding.length > 0 && (
+            <div className="rounded-md border border-destructive/40 p-3 text-sm">
+              <p className="mb-2 font-medium text-destructive">
+                {t("overAllocated", { count: historyRow.population.allocationShortfall ?? 0 })}
+              </p>
+              <p className="mb-2 text-xs text-muted-foreground">{t("outstandingHint")}</p>
+              <ul className="space-y-1">
+                {outstanding.map((o) => (
+                  <li key={o.id} className="flex justify-between gap-4">
+                    <span>
+                      {o.doNumber ?? o.id.slice(0, 8)} · {o.customer?.name ?? "-"}
+                    </span>
+                    <span className="text-muted-foreground">
+                      {formatDate(o.orderDate)} · {o.birdCount.toLocaleString()}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
 
           {isLoadingMovements ? (
             <p className="text-sm text-muted-foreground">{tc("loading")}</p>

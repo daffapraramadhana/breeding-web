@@ -636,7 +636,14 @@
     "total": "Total",
     "lines": "Lines",
     "addLine": "Add line",
-    "notes": "Notes"
+    "notes": "Notes",
+    "allStatuses": "All statuses",
+    "dateFrom": "From",
+    "dateTo": "To",
+    "toCustomer": "To customer",
+    "toBreeder": "To breeder",
+    "quantity": "Quantity",
+    "breederHint": "Sapronak is sold from a warehouse — no coop, no average weight"
   },
   "goodsTransfers": {
     "title": "Goods Transfers",
@@ -1043,7 +1050,8 @@
     "noMovements": "No movements recorded yet",
     "movementsLoadFailed": "Could not load the movement history",
     "overAllocated": "Short {count}",
-    "overAllocatedHint": "More birds are promised to orders than the coop still holds"
+    "overAllocatedHint": "More birds are promised to orders than the coop still holds",
+    "outstandingHint": "These orders are still holding birds in this coop — release one to make the coop orderable again"
   },
   "coopDepletions": {
     "title": "Daily Depletion",
