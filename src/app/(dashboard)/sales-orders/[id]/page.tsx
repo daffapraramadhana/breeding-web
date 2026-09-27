@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/table";
 import { Separator } from "@/components/ui/separator";
 import { PageHeader } from "@/components/shared/page-header";
+import { Badge } from "@/components/ui/badge";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { StatusAction } from "@/components/shared/status-action";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
@@ -111,6 +112,25 @@ export default function SalesOrderDetailPage({
               <span className="text-muted-foreground">{t("doNumber")}</span>
               <span className="font-medium">{so.doNumber || "—"}</span>
             </div>
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">{t("orderDate")}</span>
+              <span className="font-medium">
+                {so.orderDate ? formatDate(so.orderDate) : "—"}
+                {so.validUntil ? ` s/d ${formatDate(so.validUntil)}` : ""}
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">{t("recipientName")}</span>
+              <span className="font-medium">{so.recipientName || "—"}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">{t("recipientAddress")}</span>
+              <span className="font-medium">{so.recipientAddress || "—"}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">{t("vatPercent")}</span>
+              <span className="font-medium">{so.vatPercent ? Number(so.vatPercent) : 0}</span>
+            </div>
             <Separator />
             <div className="flex justify-between">
               <span className="text-muted-foreground">{t("branch")}</span>
@@ -178,9 +198,13 @@ export default function SalesOrderDetailPage({
               <TableHeader>
                 <TableRow>
                   <TableHead>#</TableHead>
-                  <TableHead>{t("productDescription")}</TableHead>
+                  <TableHead>{t("product")}</TableHead>
+                  <TableHead>{t("sourceCoop")}</TableHead>
                   <TableHead className="text-right">{t("birdCount")}</TableHead>
+                  <TableHead className="text-right">{t("avgWeight")}</TableHead>
                   <TableHead className="text-right">{t("weightKg")}</TableHead>
+                  <TableHead className="text-right">{t("minimumWeight")}</TableHead>
+                  <TableHead className="text-right">{t("savingsPerKg")}</TableHead>
                   <TableHead className="text-right">{t("unitPrice")}</TableHead>
                   <TableHead className="text-right">{t("totalPrice")}</TableHead>
                 </TableRow>
@@ -190,13 +214,35 @@ export default function SalesOrderDetailPage({
                   <TableRow key={line.id || idx}>
                     <TableCell>{idx + 1}</TableCell>
                     <TableCell className="font-medium">
-                      {line.productDescription || "—"}
+                      <div className="flex items-center gap-2">
+                        {/* Baris sebelum S-B tidak punya produk — teksnya yang ditampilkan. */}
+                        <span>
+                          {line.product
+                            ? `${line.product.code} — ${line.product.name}`
+                            : line.productDescription || "—"}
+                        </span>
+                        {line.isCulled && <Badge variant="secondary">{t("culled")}</Badge>}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      {line.sourceProjectCoop
+                        ? `${line.sourceProjectCoop.coop.code} — ${line.sourceProjectCoop.coop.name}`
+                        : "—"}
                     </TableCell>
                     <TableCell className="text-right">
                       {line.birdCount ?? "—"}
                     </TableCell>
                     <TableCell className="text-right">
-                      {line.totalWeightKg || "—"}
+                      {line.avgWeightKg ? Number(line.avgWeightKg) : "—"}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {line.totalWeightKg ? Number(line.totalWeightKg) : "—"}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {line.minimumWeightKg ? Number(line.minimumWeightKg) : "—"}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {line.savingsPerKg ? formatCurrency(line.savingsPerKg) : "—"}
                     </TableCell>
                     <TableCell className="text-right">
                       {line.unitPrice ? formatCurrency(line.unitPrice) : "—"}

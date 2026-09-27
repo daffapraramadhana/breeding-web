@@ -421,7 +421,18 @@
     "deleteTitle": "Hapus Pesanan Penjualan",
     "deleteDescription": "Apakah Anda yakin ingin menghapus pesanan penjualan ini?",
     "deleted": "Pesanan Penjualan dihapus",
-    "deleteFailed": "Gagal menghapus"
+    "deleteFailed": "Gagal menghapus",
+    "orderDate": "Tanggal pesan",
+    "validUntil": "Berlaku sampai",
+    "recipientName": "Nama penerima",
+    "recipientAddress": "Alamat kirim",
+    "vatPercent": "PPN %",
+    "product": "Produk",
+    "sourceCoop": "Kandang asal",
+    "avgWeight": "AVG (kg)",
+    "minimumWeight": "Bobot minimum",
+    "savingsPerKg": "Tabungan / kg",
+    "culled": "Afkir"
   },
   "goodsTransferNew": {
     "title": "Buat Transfer Barang",
