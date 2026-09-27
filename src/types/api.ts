@@ -384,6 +384,7 @@ export interface SalesOrderLine {
   avgWeightKg?: string | null;
   savingsPerKg?: string | null;
   minimumWeightKg?: string | null;
+  lineNotes?: string | null;
   product?: { id: string; code: string; name: string } | null;
   sourceProjectCoop?: { id: string; coop: { code: string; name: string } } | null;
 }
@@ -1022,6 +1023,9 @@ export interface CoopPopulationBalance {
   quantityOnHand: number;
   quantityAllocated: number;
   quantityAvailable: number;
+  /** Ayam yang sudah dijanjikan pesanan melebihi yang tersisa di kandang. */
+  overAllocated?: boolean;
+  allocationShortfall?: number;
 }
 
 export interface CoopPopulationRow {

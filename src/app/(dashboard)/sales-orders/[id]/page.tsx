@@ -205,6 +205,7 @@ export default function SalesOrderDetailPage({
                   <TableHead className="text-right">{t("weightKg")}</TableHead>
                   <TableHead className="text-right">{t("minimumWeight")}</TableHead>
                   <TableHead className="text-right">{t("savingsPerKg")}</TableHead>
+                  <TableHead>{t("lineNotes")}</TableHead>
                   <TableHead className="text-right">{t("unitPrice")}</TableHead>
                   <TableHead className="text-right">{t("totalPrice")}</TableHead>
                 </TableRow>
@@ -243,6 +244,9 @@ export default function SalesOrderDetailPage({
                     </TableCell>
                     <TableCell className="text-right">
                       {line.savingsPerKg ? formatCurrency(line.savingsPerKg) : "—"}
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {line.lineNotes || "—"}
                     </TableCell>
                     <TableCell className="text-right">
                       {line.unitPrice ? formatCurrency(line.unitPrice) : "—"}

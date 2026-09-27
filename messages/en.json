@@ -432,7 +432,8 @@
     "avgWeight": "Avg weight (kg)",
     "minimumWeight": "Minimum weight",
     "savingsPerKg": "Savings / kg",
-    "culled": "Culled"
+    "culled": "Culled",
+    "lineNotes": "Line notes"
   },
   "goodsTransferNew": {
     "title": "Create Goods Transfer",
@@ -1040,7 +1041,9 @@
     "reasonRequired": "A reason is required for a manual correction",
     "searchPlaceholder": "Search coop...",
     "noMovements": "No movements recorded yet",
-    "movementsLoadFailed": "Could not load the movement history"
+    "movementsLoadFailed": "Could not load the movement history",
+    "overAllocated": "Short {count}",
+    "overAllocatedHint": "More birds are promised to orders than the coop still holds"
   },
   "coopDepletions": {
     "title": "Daily Depletion",

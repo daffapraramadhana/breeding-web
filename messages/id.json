@@ -432,7 +432,8 @@
     "avgWeight": "AVG (kg)",
     "minimumWeight": "Bobot minimum",
     "savingsPerKg": "Tabungan / kg",
-    "culled": "Afkir"
+    "culled": "Afkir",
+    "lineNotes": "Keterangan baris"
   },
   "goodsTransferNew": {
     "title": "Buat Transfer Barang",
@@ -1040,7 +1041,9 @@
     "reasonRequired": "Koreksi manual wajib menyertakan alasan",
     "searchPlaceholder": "Cari kandang...",
     "noMovements": "Belum ada gerakan tercatat",
-    "movementsLoadFailed": "Riwayat gerakan gagal dimuat"
+    "movementsLoadFailed": "Riwayat gerakan gagal dimuat",
+    "overAllocated": "Kurang {count}",
+    "overAllocatedHint": "Ayam yang dijanjikan pesanan lebih banyak dari yang tersisa di kandang"
   },
   "coopDepletions": {
     "title": "Deplesi Harian",
