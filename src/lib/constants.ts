@@ -77,6 +77,9 @@ export const NAV_ITEMS: NavItem[] = [
     icon: ClipboardList,
     items: [
       { title: "Projects", url: "/projects", icon: ClipboardList },
+      { title: "Coop Population", url: "/coop-populations", icon: Layers },
+      { title: "Daily Depletion", url: "/coop-depletions", icon: ClipboardList },
+      { title: "Bird Transfers", url: "/coop-bird-transfers", icon: Layers },
     ],
   },
   {

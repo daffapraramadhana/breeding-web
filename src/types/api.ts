@@ -1003,3 +1003,55 @@ export interface DashboardTrends {
     orderCount: number;
   }>;
 }
+
+export interface CoopPopulationBalance {
+  quantityOnHand: number;
+  quantityAllocated: number;
+  quantityAvailable: number;
+}
+
+export interface CoopPopulationRow {
+  id: string;
+  coopName: string | null;
+  coop: { id: string; code: string; name: string };
+  project: { id: string; startDate: string; isActive: boolean };
+  population: CoopPopulationBalance;
+}
+
+export interface CoopPopulationMovement {
+  id: string;
+  movementType: "IN" | "OUT";
+  movementSource:
+    | "CHICK_IN" | "MORTALITY" | "CULLING"
+    | "SALES_REALIZATION" | "TRANSFER_IN" | "TRANSFER_OUT" | "ADJUSTMENT";
+  sourceDocId: string | null;
+  sourceDocType: string | null;
+  quantityBefore: number;
+  quantity: number;
+  quantityAfter: number;
+  movementDate: string;
+  notes: string | null;
+  createdAt: string;
+}
+
+export interface CoopDepletionEntry {
+  id: string;
+  projectCoopId: string;
+  entryDate: string;
+  mortalityCount: number;
+  cullingCount: number;
+  notes: string | null;
+  createdAt: string;
+  projectCoop: { id: string; coopName: string | null; coop: { id: string; code: string; name: string } };
+}
+
+export interface CoopBirdTransfer {
+  id: string;
+  transferNumber: string;
+  quantity: number;
+  transferDate: string;
+  notes: string | null;
+  createdAt: string;
+  sourceProjectCoop: { id: string; coopName: string | null; coop: { code: string; name: string } };
+  destinationProjectCoop: { id: string; coopName: string | null; coop: { code: string; name: string } };
+}
