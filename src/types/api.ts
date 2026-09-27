@@ -1089,3 +1089,36 @@ export interface CoopOutstandingOrder {
   birdCount: number;
   customer: { id: string; code: string | null; name: string } | null;
 }
+
+export type WeighingLocation = "ORIGIN_COOP" | "DESTINATION_CUSTOMER";
+
+export interface SalesRealizationLine {
+  id: string;
+  sourceProjectCoopId: string;
+  pickupDate: string;
+  dtpsNumber: string;
+  birdCount: number;
+  totalWeightKg: string;
+  avgWeightKg: string;
+  isCulled: boolean;
+  unitPrice: string | null;
+  discountPerKg: string | null;
+  adminFeePerKg: string | null;
+  savingsPerKg: string | null;
+  installmentPerKg: string | null;
+  totalPrice: string | null;
+  allocationReleased: number;
+  lineNotes: string | null;
+  sourceProjectCoop?: { id: string; coop: { code: string; name: string } } | null;
+}
+
+export interface SalesRealization {
+  id: string;
+  salesOrderId: string;
+  realizationDate: string;
+  weighingLocation: WeighingLocation;
+  vehiclePlate: string | null;
+  notes: string | null;
+  createdAt: string;
+  lines: SalesRealizationLine[];
+}
