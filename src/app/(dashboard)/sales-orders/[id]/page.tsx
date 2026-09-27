@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useState } from "react";
+import { use, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -27,7 +27,7 @@ import { StatusAction } from "@/components/shared/status-action";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { PageSkeleton } from "@/components/shared/loading-skeleton";
 import { useApi } from "@/hooks/use-api";
-import { SalesOrder } from "@/types/api";
+import { SalesOrder, SalesRealization } from "@/types/api";
 import { SALES_STATUS_TRANSITIONS } from "@/lib/constants";
 import { fetchApi } from "@/lib/api";
 import { formatDate, formatCurrency } from "@/lib/utils";
@@ -41,12 +41,22 @@ export default function SalesOrderDetailPage({
 }) {
   const t = useTranslations("salesOrderDetail");
   const tc = useTranslations("common");
+  const tr = useTranslations("salesRealization");
   const { id } = use(params);
   const router = useRouter();
   const { data: so, isLoading, refetch } = useApi<SalesOrder>(
     `/sales-orders/${id}`
   );
   const [showDelete, setShowDelete] = useState(false);
+  const [realized, setRealized] = useState<SalesRealization | null>(null);
+
+  // Pesanan yang belum direalisasi menjawab 400, bukan 200 dengan badan
+  // kosong, jadi tidak adanya realisasi sampai ke sini sebagai galat.
+  useEffect(() => {
+    fetchApi<SalesRealization>(`/sales-orders/${id}/realization`)
+      .then(setRealized)
+      .catch(() => setRealized(null));
+  }, [id]);
 
   if (isLoading) return <PageSkeleton />;
   if (!so) return <div>{t("notFound")}</div>;
@@ -87,6 +97,9 @@ export default function SalesOrderDetailPage({
                 {tc("delete")}
               </Button>
             )}
+            <Button variant="outline" asChild>
+              <Link href={`/sales-orders/${id}/realization`}>{tr("open")}</Link>
+            </Button>
             <StatusAction
               currentStatus={so.status}
               transitions={SALES_STATUS_TRANSITIONS}
@@ -259,6 +272,54 @@ export default function SalesOrderDetailPage({
               </TableBody>
             </Table>
           </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>{tr("title")}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {!realized ? (
+            <p className="text-sm text-muted-foreground">{tr("notStarted")}</p>
+          ) : (
+            <dl className="grid gap-4 text-sm sm:grid-cols-3 lg:grid-cols-6">
+              <div>
+                <dt className="text-muted-foreground">{tr("realizationDate")}</dt>
+                <dd className="font-medium">{formatDate(realized.realizationDate)}</dd>
+              </div>
+              <div>
+                <dt className="text-muted-foreground">{tr("weighingLocation")}</dt>
+                <dd className="font-medium">
+                  {realized.weighingLocation === "ORIGIN_COOP"
+                    ? tr("originCoop")
+                    : tr("destinationCustomer")}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-muted-foreground">{tr("vehiclePlate")}</dt>
+                <dd className="font-medium">{realized.vehiclePlate || "\u2014"}</dd>
+              </div>
+              <div>
+                <dt className="text-muted-foreground">{tr("lines")}</dt>
+                <dd className="font-medium">{realized.lines.length}</dd>
+              </div>
+              <div>
+                <dt className="text-muted-foreground">{tr("birdCount")}</dt>
+                <dd className="font-medium">
+                  {realized.lines.reduce((sum, l) => sum + l.birdCount, 0).toLocaleString()}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-muted-foreground">{tr("totalWeight")}</dt>
+                <dd className="font-medium">
+                  {realized.lines
+                    .reduce((sum, l) => sum + Number(l.totalWeightKg), 0)
+                    .toFixed(2)}
+                </dd>
+              </div>
+            </dl>
+          )}
         </CardContent>
       </Card>
 
