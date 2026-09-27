@@ -70,10 +70,17 @@ export default function CoopPopulationsPage() {
     },
     {
       header: t("available"),
-      cell: (row) => (
-        <Badge variant="secondary">{row.population.quantityAvailable.toLocaleString()}</Badge>
-      ),
-      className: "w-[110px]",
+      cell: (row) =>
+        row.population.overAllocated ? (
+          // Deplesi bisa memakan ayam yang sudah dijanjikan pesanan. Tanpa penanda
+          // ini pengguna hanya melihat angka negatif tanpa tahu apa artinya.
+          <Badge variant="destructive" title={t("overAllocatedHint")}>
+            {t("overAllocated", { count: row.population.allocationShortfall ?? 0 })}
+          </Badge>
+        ) : (
+          <Badge variant="secondary">{row.population.quantityAvailable.toLocaleString()}</Badge>
+        ),
+      className: "w-[160px]",
     },
     {
       header: tc("actions"),
