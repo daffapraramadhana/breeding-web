@@ -371,12 +371,21 @@ export interface GoodsReceipt {
 // --- Sales & Marketing ---
 export interface SalesOrderLine {
   id: string;
+  /** Baris sebelum S-B: teks bebas, tanpa kunci produk. */
   productCode?: string;
   productDescription?: string;
   birdCount?: number;
   totalWeightKg?: string;
   unitPrice?: string;
   totalPrice?: string;
+  productId?: string | null;
+  sourceProjectCoopId?: string | null;
+  isCulled?: boolean;
+  avgWeightKg?: string | null;
+  savingsPerKg?: string | null;
+  minimumWeightKg?: string | null;
+  product?: { id: string; code: string; name: string } | null;
+  sourceProjectCoop?: { id: string; coop: { code: string; name: string } } | null;
 }
 
 export interface SalesOrder {
@@ -390,6 +399,11 @@ export interface SalesOrder {
   breederId?: string;
   breeder?: Breeder;
   recipientType?: RecipientType;
+  recipientName?: string | null;
+  recipientAddress?: string | null;
+  orderDate?: string;
+  validUntil?: string | null;
+  vatPercent?: string | null;
   contractPrice?: string;
   marketPrice?: string;
   paymentMethod?: PaymentMethod;
@@ -1054,4 +1068,10 @@ export interface CoopBirdTransfer {
   createdAt: string;
   sourceProjectCoop: { id: string; coopName: string | null; coop: { code: string; name: string } };
   destinationProjectCoop: { id: string; coopName: string | null; coop: { code: string; name: string } };
+}
+
+export interface RecommendedPrice {
+  unitPrice: string | null;
+  lastOrderDate: string | null;
+  lastDoNumber: string | null;
 }
