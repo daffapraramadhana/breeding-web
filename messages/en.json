@@ -112,7 +112,10 @@
     "Bank Accounts": "Bank Accounts",
     "Cash Accounts": "Cash Accounts",
     "Analytics": "Analytics",
-    "AI Insights": "AI Insights"
+    "AI Insights": "AI Insights",
+    "Coop Population": "Coop Population",
+    "Daily Depletion": "Daily Depletion",
+    "Bird Transfers": "Bird Transfers"
   },
   "products": {
     "title": "Products",
@@ -973,5 +976,55 @@
     "rangeInvalid": "\"To\" must not be lower than \"From\"",
     "searchPlaceholder": "Search standards...",
     "rangeIncomplete": "Fill in both From and To, or clear the row"
+  },
+  "coopPopulations": {
+    "title": "Coop Population",
+    "description": "Running bird population per rearing cycle",
+    "entity": "Coop Population",
+    "coop": "Coop",
+    "cycleStart": "Cycle start",
+    "onHand": "On hand",
+    "allocated": "Allocated",
+    "available": "Available",
+    "movements": "Movement history",
+    "movementDate": "Date",
+    "movementSource": "Source",
+    "quantityAfter": "Balance after",
+    "adjust": "Correct",
+    "adjustTitle": "Correct population",
+    "direction": "Direction",
+    "directionIn": "Add",
+    "directionOut": "Subtract",
+    "quantity": "Birds",
+    "reason": "Reason",
+    "reasonRequired": "A reason is required for a manual correction",
+    "searchPlaceholder": "Search coop...",
+    "noMovements": "No movements recorded yet"
+  },
+  "coopDepletions": {
+    "title": "Daily Depletion",
+    "description": "Mortality and culling per coop per day",
+    "entity": "Depletion Entry",
+    "coop": "Coop",
+    "entryDate": "Date",
+    "mortality": "Mortality",
+    "culling": "Culling",
+    "notes": "Notes",
+    "searchPlaceholder": "Search coop...",
+    "countRequired": "Record at least one bird under mortality or culling"
+  },
+  "coopBirdTransfers": {
+    "title": "Bird Transfers",
+    "description": "Birds moved between coops",
+    "entity": "Bird Transfer",
+    "transferNumber": "Number",
+    "source": "From",
+    "destination": "To",
+    "quantity": "Birds",
+    "transferDate": "Date",
+    "notes": "Notes",
+    "sourceAvailable": "Available at source",
+    "sameCoop": "Source and destination must be different coops",
+    "searchPlaceholder": "Search transfer..."
   }
 }

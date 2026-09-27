@@ -112,7 +112,10 @@
     "Bank Accounts": "Rekening Bank",
     "Cash Accounts": "Akun Kas",
     "Analytics": "Analitik",
-    "AI Insights": "Wawasan AI"
+    "AI Insights": "Wawasan AI",
+    "Coop Population": "Populasi Kandang",
+    "Daily Depletion": "Deplesi Harian",
+    "Bird Transfers": "Pindah Ayam"
   },
   "products": {
     "title": "Produk",
@@ -973,5 +976,55 @@
     "rangeInvalid": "\"Sampai\" tidak boleh lebih kecil dari \"Dari\"",
     "searchPlaceholder": "Cari standarisasi...",
     "rangeIncomplete": "Isi Dari dan Sampai, atau kosongkan barisnya"
+  },
+  "coopPopulations": {
+    "title": "Populasi Kandang",
+    "description": "Populasi ayam berjalan per siklus pemeliharaan",
+    "entity": "Populasi Kandang",
+    "coop": "Kandang",
+    "cycleStart": "Mulai siklus",
+    "onHand": "Masuk",
+    "allocated": "Dipesan",
+    "available": "Tersedia",
+    "movements": "Riwayat gerakan",
+    "movementDate": "Tanggal",
+    "movementSource": "Sumber",
+    "quantityAfter": "Saldo sesudah",
+    "adjust": "Koreksi",
+    "adjustTitle": "Koreksi populasi",
+    "direction": "Arah",
+    "directionIn": "Tambah",
+    "directionOut": "Kurangi",
+    "quantity": "Ekor",
+    "reason": "Alasan",
+    "reasonRequired": "Koreksi manual wajib menyertakan alasan",
+    "searchPlaceholder": "Cari kandang...",
+    "noMovements": "Belum ada gerakan tercatat"
+  },
+  "coopDepletions": {
+    "title": "Deplesi Harian",
+    "description": "Mortalitas dan afkir per kandang per hari",
+    "entity": "Entri Deplesi",
+    "coop": "Kandang",
+    "entryDate": "Tanggal",
+    "mortality": "Mortalitas",
+    "culling": "Afkir",
+    "notes": "Catatan",
+    "searchPlaceholder": "Cari kandang...",
+    "countRequired": "Isi minimal satu ekor di mortalitas atau afkir"
+  },
+  "coopBirdTransfers": {
+    "title": "Pindah Ayam",
+    "description": "Ayam yang dipindah antar kandang",
+    "entity": "Pindah Ayam",
+    "transferNumber": "Nomor",
+    "source": "Dari",
+    "destination": "Ke",
+    "quantity": "Ekor",
+    "transferDate": "Tanggal",
+    "notes": "Catatan",
+    "sourceAvailable": "Tersedia di kandang asal",
+    "sameCoop": "Kandang asal dan tujuan harus berbeda",
+    "searchPlaceholder": "Cari pindah ayam..."
   }
 }
