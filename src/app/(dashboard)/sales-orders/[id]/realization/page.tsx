@@ -24,7 +24,7 @@ import {
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { PageHeader } from "@/components/shared/page-header";
 import { useApi } from "@/hooks/use-api";
-import { fetchApi } from "@/lib/api";
+import { fetchApi, ApiError } from "@/lib/api";
 import { formatDate, formatCurrency } from "@/lib/utils";
 import {
   SalesOrder, SalesRealization, SalesRealizationLine, WeighingLocation,
@@ -67,13 +67,30 @@ export default function SalesRealizationPage() {
   const [realization, setRealization] = useState<SalesRealization | null>(null);
   const [notStarted, setNotStarted] = useState(false);
 
-  const load = useCallback(() => {
-    fetchApi<SalesRealization>(`/sales-orders/${id}/realization`)
-      .then((r) => { setRealization(r); setNotStarted(false); })
-      .catch(() => { setRealization(null); setNotStarted(true); });
-  }, [id]);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
-  useEffect(() => { load(); }, [load]);
+  // I3: hanya 404 yang berarti "belum ada realisasi". Kegagalan lain —
+  // sesi habis, server mati, koneksi putus — kalau ikut ditampilkan sebagai
+  // keadaan kosong akan menawarkan tombol "buka realisasi" yang lalu 409.
+  const load = useCallback(async () => {
+    try {
+      const r = await fetchApi<SalesRealization>(`/sales-orders/${id}/realization`);
+      setRealization(r);
+      setNotStarted(false);
+      setLoadError(null);
+    } catch (error) {
+      if (error instanceof ApiError && error.status === 404) {
+        setRealization(null);
+        setNotStarted(true);
+        setLoadError(null);
+        return;
+      }
+      setNotStarted(false);
+      setLoadError(error instanceof Error ? error.message : t("loadFailed"));
+    }
+  }, [id, t]);
+
+  useEffect(() => { void load(); }, [load]);
 
   const [startOpen, setStartOpen] = useState(false);
   const [headerDate, setHeaderDate] = useState(new Date().toISOString().slice(0, 10));
@@ -121,7 +138,7 @@ export default function SalesRealizationPage() {
       });
       toast.success(tc("entityCreated", { entity: t("entity") }));
       setStartOpen(false);
-      load();
+      await load();
     } catch (error) {
       toast.error(error instanceof Error ? error.message : tc("entityCreateFailed", { entity: t("entity") }));
     } finally {
@@ -138,12 +155,12 @@ export default function SalesRealizationPage() {
         body: JSON.stringify({
           realizationDate: headerDate,
           weighingLocation: weighing,
-          vehiclePlate: plate.trim() || undefined,
-          notes: headerNotes.trim() || undefined,
+          vehiclePlate: plate.trim() || null,
+          notes: headerNotes.trim() || null,
         }),
       });
       toast.success(tc("entityUpdated", { entity: t("entity") }));
-      load();
+      await load();
     } catch (error) {
       toast.error(error instanceof Error ? error.message : tc("entityUpdateFailed", { entity: t("entity") }));
     } finally {
@@ -193,11 +210,14 @@ export default function SalesRealizationPage() {
       birdCount: Number(draft.birdCount),
       totalWeightKg: Number(draft.totalWeightKg),
       isCulled: draft.isCulled,
-      unitPrice: draft.unitPrice ? Number(draft.unitPrice) : undefined,
-      discountPerKg: draft.discountPerKg ? Number(draft.discountPerKg) : undefined,
-      adminFeePerKg: draft.adminFeePerKg ? Number(draft.adminFeePerKg) : undefined,
-      savingsPerKg: draft.savingsPerKg ? Number(draft.savingsPerKg) : undefined,
-      lineNotes: draft.lineNotes.trim() || undefined,
+      // I1: bidang yang dikosongkan dikirim sebagai null. Kalau kuncinya
+      // dihilangkan, backend menganggapnya "tidak diubah" dan angka lama
+      // bertahan — pengguna mengira diskonnya hilang padahal masih ditagihkan.
+      unitPrice: draft.unitPrice ? Number(draft.unitPrice) : null,
+      discountPerKg: draft.discountPerKg ? Number(draft.discountPerKg) : null,
+      adminFeePerKg: draft.adminFeePerKg ? Number(draft.adminFeePerKg) : null,
+      savingsPerKg: draft.savingsPerKg ? Number(draft.savingsPerKg) : null,
+      lineNotes: draft.lineNotes.trim() || null,
     };
 
     setIsSaving(true);
@@ -216,7 +236,7 @@ export default function SalesRealizationPage() {
         toast.success(tc("entityCreated", { entity: t("entity") }));
       }
       setLineOpen(false);
-      load();
+      await load();
     } catch (error) {
       toast.error(error instanceof Error ? error.message : tc("entityCreateFailed", { entity: t("entity") }));
     } finally {
@@ -231,7 +251,7 @@ export default function SalesRealizationPage() {
       toast.success(tc("entityDeleted", { entity: t("entity") }));
       setDeleteOpen(false);
       setDeleting(null);
-      load();
+      await load();
     } catch (error) {
       toast.error(error instanceof Error ? error.message : tc("entityDeleteFailed", { entity: t("entity") }));
     }
@@ -263,7 +283,14 @@ export default function SalesRealizationPage() {
         }
       />
 
-      {notStarted ? (
+      {loadError ? (
+        <Card>
+          <CardContent className="space-y-4 py-8 text-center">
+            <p className="text-destructive">{loadError}</p>
+            <Button variant="outline" onClick={() => void load()}>{t("retry")}</Button>
+          </CardContent>
+        </Card>
+      ) : notStarted ? (
         <Card>
           <CardContent className="space-y-4 py-8 text-center">
             <p className="text-muted-foreground">{t("notStarted")}</p>

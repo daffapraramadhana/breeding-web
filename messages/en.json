@@ -1116,6 +1116,8 @@
     "exceedsOrder": "Realized {birds} birds against {ordered} ordered",
     "lineRequired": "Fill in the coop, DTPS number, birds and tonnage",
     "notStarted": "This order has no realization yet",
-    "recipient": "Recipient"
+    "recipient": "Recipient",
+    "loadFailed": "Could not load this realization",
+    "retry": "Try again"
   }
 }

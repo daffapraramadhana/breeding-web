@@ -1116,6 +1116,8 @@
     "exceedsOrder": "Realisasi {birds} ekor dari {ordered} ekor yang dipesan",
     "lineRequired": "Isi kandang, No. DTPS, ekor, dan tonase",
     "notStarted": "Pesanan ini belum punya realisasi",
-    "recipient": "Penerima"
+    "recipient": "Penerima",
+    "loadFailed": "Realisasi ini tidak bisa dimuat",
+    "retry": "Coba lagi"
   }
 }
