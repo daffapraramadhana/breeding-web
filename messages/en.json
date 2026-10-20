@@ -1249,7 +1249,8 @@
       "TRANSFER": "Bank transfer",
       "PAYABLE": "Payable / deferred",
       "OTHER_EXPENSE": "Other expense"
-    }
+    },
+    "cancelPaidWarning": "This document has already been paid. Cancelling it posts a reversal and the money comes back into the account."
   },
   "chartOfAccounts": {
     "title": "Chart of Accounts",
@@ -1261,6 +1262,8 @@
     "newAccount": "New account",
     "searchPlaceholder": "Search code or name",
     "emptyTitle": "No accounts",
-    "emptyDescription": "Add the accounts this tenant books against."
+    "emptyDescription": "Add the accounts this tenant books against.",
+    "active": "Active",
+    "inactive": "Inactive"
   }
 }

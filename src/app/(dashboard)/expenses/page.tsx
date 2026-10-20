@@ -65,6 +65,17 @@ export default function ExpensesPage() {
       className: "w-[220px] font-mono text-xs",
     },
     { header: t("expenseDate"), cell: (row) => formatDate(row.expenseDate), className: "w-[120px]" },
+    {
+      header: t("project"),
+      // `Project` tidak punya kolom nama; yang menamainya adalah farm-nya plus
+      // bulan mulai, sedekat yang bisa kita tiru dari "<Farm> (Periode n)".
+      cell: (row) =>
+        row.project?.farm?.name
+          ? `${row.project.farm.name}${
+              row.project.startDate ? ` · ${formatDate(row.project.startDate)}` : ""
+            }`
+          : "—",
+    },
     { header: t("branch"), cell: (row) => row.branch?.name ?? "—" },
     { header: t("category"), cell: (row) => t(`categories.${row.category}`), className: "w-[140px]" },
     {

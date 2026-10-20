@@ -1239,6 +1239,11 @@ export interface Expense {
   notes: string | null;
   lines: ExpenseLine[];
   branch?: { id: string; code: string; name: string } | null;
+  project?: {
+    id: string;
+    startDate?: string;
+    farm?: { id: string; name: string } | null;
+  } | null;
   chartOfAccount?: { id: string; code: string; name: string } | null;
   cashAccount?: { id: string; name: string } | null;
   bankAccount?: { id: string; bankName: string; accountNumber: string } | null;
