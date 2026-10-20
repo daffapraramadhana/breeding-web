@@ -78,6 +78,47 @@ export default function ExpenseDetailPage() {
   const [isCoopRepair, setIsCoopRepair] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Header dokumen yang ditolak harus bisa diperbaiki; tanpa ini jalur
+  // REJECTED → DRAFT tidak ada gunanya.
+  const [headerEdit, setHeaderEdit] = useState(false);
+  const [expenseDate, setExpenseDate] = useState("");
+  const [notes, setNotes] = useState("");
+  const [destinationBank, setDestinationBank] = useState("");
+  const [destinationAccountNumber, setDestinationAccountNumber] = useState("");
+  const [senderName, setSenderName] = useState("");
+
+  useEffect(() => {
+    if (!expense) return;
+    setExpenseDate(expense.expenseDate.slice(0, 10));
+    setNotes(expense.notes ?? "");
+    setDestinationBank(expense.destinationBank ?? "");
+    setDestinationAccountNumber(expense.destinationAccountNumber ?? "");
+    setSenderName(expense.senderName ?? "");
+  }, [expense]);
+
+  async function saveHeader() {
+    setIsSubmitting(true);
+    try {
+      await fetchApi(`/expenses/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify({
+          expenseDate,
+          notes,
+          ...(expense?.paymentType === "TRANSFER"
+            ? { destinationBank, destinationAccountNumber, senderName }
+            : {}),
+        }),
+      });
+      toast.success(t("saved"));
+      setHeaderEdit(false);
+      refetch();
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : tc("noResults"));
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
   // Detail baris ikut jenis yang dipilih, persis seperti form acuan.
   useEffect(() => {
     setProjectBudgetId("");
@@ -161,6 +202,16 @@ export default function ExpenseDetailPage() {
             <Button variant="outline" onClick={() => router.push("/expenses")}>
               {tc("cancel")}
             </Button>
+            {editable && !headerEdit && (
+              <Button variant="outline" onClick={() => setHeaderEdit(true)}>
+                {tc("update")}
+              </Button>
+            )}
+            {headerEdit && (
+              <Button disabled={isSubmitting} onClick={saveHeader}>
+                {isSubmitting ? tc("saving") : tc("update")}
+              </Button>
+            )}
             {NEXT[expense.status].map((target) => (
               <Button
                 key={target}
@@ -184,9 +235,32 @@ export default function ExpenseDetailPage() {
           <h2 className="text-sm font-medium">{t("projectPanel")}</h2>
           <div className="flex justify-between"><span>{tc("status")}</span><StatusBadge status={expense.status} /></div>
           <div className="flex justify-between"><span>{t("branch")}</span><span>{expense.branch?.name ?? "—"}</span></div>
-          <div className="flex justify-between"><span>{t("expenseDate")}</span><span>{formatDate(expense.expenseDate)}</span></div>
+          <div className="flex items-center justify-between gap-3">
+            <span>{t("expenseDate")}</span>
+            {headerEdit ? (
+              <Input
+                type="date"
+                className="w-[180px]"
+                value={expenseDate}
+                onChange={(e) => setExpenseDate(e.target.value)}
+              />
+            ) : (
+              <span>{formatDate(expense.expenseDate)}</span>
+            )}
+          </div>
           <div className="flex justify-between"><span>{t("category")}</span><span>{t(`categories.${expense.category}`)}</span></div>
-          <div className="flex justify-between"><span>{t("notes")}</span><span>{expense.notes ?? "—"}</span></div>
+          <div className="flex items-center justify-between gap-3">
+            <span>{t("notes")}</span>
+            {headerEdit ? (
+              <Input
+                className="w-[220px]"
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+              />
+            ) : (
+              <span>{expense.notes ?? "—"}</span>
+            )}
+          </div>
         </Card>
         <Card className="p-4 space-y-2 text-sm">
           <h2 className="text-sm font-medium">{t("typePanel")}</h2>
@@ -203,6 +277,25 @@ export default function ExpenseDetailPage() {
                 : (expense.cashAccount?.name ?? "—")}
             </span>
           </div>
+          {headerEdit && expense.paymentType === "TRANSFER" && (
+            <div className="space-y-2 pt-2">
+              <Input
+                placeholder={t("destinationBank")}
+                value={destinationBank}
+                onChange={(e) => setDestinationBank(e.target.value)}
+              />
+              <Input
+                placeholder={t("destinationAccountNumber")}
+                value={destinationAccountNumber}
+                onChange={(e) => setDestinationAccountNumber(e.target.value)}
+              />
+              <Input
+                placeholder={t("senderName")}
+                value={senderName}
+                onChange={(e) => setSenderName(e.target.value)}
+              />
+            </div>
+          )}
           {expense.paymentType !== "CASH" && expense.paymentType !== "TRANSFER" && (
             <p className="text-xs text-[var(--muted-foreground)]">{t("noMoneyLeaves")}</p>
           )}

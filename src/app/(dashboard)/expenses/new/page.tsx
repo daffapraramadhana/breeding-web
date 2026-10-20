@@ -7,6 +7,7 @@ import { toast } from "sonner";
 
 import { PageHeader } from "@/components/shared/page-header";
 import { ProjectCombobox } from "@/components/forms/project-combobox";
+import { BranchCombobox } from "@/components/forms/branch-combobox";
 import { useApi } from "@/hooks/use-api";
 import { fetchApi, ApiError } from "@/lib/api";
 import type {
@@ -52,6 +53,7 @@ export default function NewExpensePage() {
   const { data: bankAccounts } = useApi<PaginatedResponse<BankAccount>>("/bank-accounts?limit=100");
 
   const [projectId, setProjectId] = useState("");
+  const [branchId, setBranchId] = useState("");
   const [expenseDate, setExpenseDate] = useState(today());
   const [category, setCategory] = useState<ExpenseCategory>("HPP");
   const [paymentType, setPaymentType] = useState<ExpensePaymentType>("CASH");
@@ -75,7 +77,7 @@ export default function NewExpensePage() {
         category,
         paymentType,
         chartOfAccountId,
-        ...(projectId ? { projectId } : {}),
+        ...(projectId ? { projectId } : { branchId }),
         ...(paymentType === "CASH" && cashAccountId ? { cashAccountId } : {}),
         ...(paymentType === "TRANSFER" && bankAccountId ? { bankAccountId } : {}),
         ...(destinationBank ? { destinationBank } : {}),
@@ -112,6 +114,15 @@ export default function NewExpensePage() {
               <p className="mt-1 text-xs text-[var(--muted-foreground)]">{t("hppNeedsProject")}</p>
             )}
           </div>
+          {!projectId && (
+            <div>
+              {/* Tanpa project, dokumen tetap harus menyebut area penanggungnya. */}
+              <Label>
+                {t("branch")} <span className="text-destructive">*</span>
+              </Label>
+              <BranchCombobox value={branchId} onChange={setBranchId} />
+            </div>
+          )}
           <div>
             <Label>{t("category")}</Label>
             <Select value={category} onValueChange={(v) => setCategory(v as ExpenseCategory)}>
@@ -221,6 +232,7 @@ export default function NewExpensePage() {
             isSubmitting ||
             !chartOfAccountId ||
             (needsProject && !projectId) ||
+            (!projectId && !branchId) ||
             (paymentType === "CASH" && !cashAccountId) ||
             (paymentType === "TRANSFER" && !bankAccountId)
           }
