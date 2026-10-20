@@ -27,6 +27,7 @@ import {
   Warehouse,
   type LucideIcon,
   BookOpen,
+  ReceiptText,
 } from "lucide-react";
 
 export const APP_NAME = "FARMORA";
@@ -144,6 +145,14 @@ export const NAV_ITEMS: NavItem[] = [
       { title: "IP", url: "/bonus-ip", icon: Award },
       { title: "Mortality", url: "/bonus-mortality", icon: Award },
       { title: "TS Incentives", url: "/ts-incentives", icon: Award },
+    ],
+  },
+  {
+    title: "Costs",
+    icon: ReceiptText,
+    items: [
+      { title: "Expenses", url: "/expenses", icon: ReceiptText },
+      { title: "Chart of Accounts", url: "/chart-of-accounts", icon: FolderTree },
     ],
   },
   {

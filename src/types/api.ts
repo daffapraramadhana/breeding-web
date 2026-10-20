@@ -1169,3 +1169,87 @@ export interface CashBankMovement {
   branch?: { name: string } | null;
   reversedBy?: { id: string } | null;
 }
+
+// ─── Expenses (B-2) ──────────────────────────────────────────────────────────
+
+export type ExpenseStatus =
+  | "DRAFT" | "SUBMITTED" | "APPROVED" | "PAID" | "REJECTED" | "CANCELLED";
+export type ExpenseCategory = "HPP" | "BEBAN";
+export type ExpensePaymentType = "CASH" | "TRANSFER" | "PAYABLE" | "OTHER_EXPENSE";
+
+export interface ChartOfAccount {
+  id: string;
+  code: string;
+  name: string;
+  isActive: boolean;
+  isSystem: boolean;
+}
+
+export interface BudgetType {
+  value: string;
+  label: string;
+}
+
+export interface ProjectBudgetRow {
+  id: string;
+  type: string | null;
+  description: string | null;
+  stdPricePerUnit: string | null;
+  stdRequirement: string | null;
+  stdTotal: string | null;
+}
+
+export interface ExpenseLine {
+  id: string;
+  expenseId: string;
+  projectBudgetId: string | null;
+  budgetTypeName: string | null;
+  description: string | null;
+  stdPricePerUnit: string | null;
+  stdQuantity: string | null;
+  stdTotal: string | null;
+  pricePerUnit: string;
+  quantity: string;
+  total: string;
+  isExpedition: boolean;
+  expeditionSupplierId: string | null;
+  isCoopRepair: boolean;
+  lineNotes: string | null;
+  projectBudget?: { id: string; type: string | null; description: string | null } | null;
+  expeditionSupplier?: { id: string; name: string } | null;
+}
+
+export interface Expense {
+  id: string;
+  branchId: string;
+  projectId: string | null;
+  expenseNumber: string | null;
+  expenseDate: string;
+  status: ExpenseStatus;
+  category: ExpenseCategory;
+  paymentType: ExpensePaymentType;
+  chartOfAccountId: string;
+  cashAccountId: string | null;
+  bankAccountId: string | null;
+  destinationBank: string | null;
+  destinationAccountNumber: string | null;
+  senderName: string | null;
+  totalAmount: string;
+  paidAt: string | null;
+  notes: string | null;
+  lines: ExpenseLine[];
+  branch?: { id: string; code: string; name: string } | null;
+  chartOfAccount?: { id: string; code: string; name: string } | null;
+  cashAccount?: { id: string; name: string } | null;
+  bankAccount?: { id: string; bankName: string; accountNumber: string } | null;
+}
+
+export interface BudgetRealizationRow {
+  projectBudgetId: string | null;
+  budgetTypeName: string;
+  description: string;
+  stdTotal: string;
+  realizedTotal: string;
+  variance: string;
+  lineCount: number;
+}
