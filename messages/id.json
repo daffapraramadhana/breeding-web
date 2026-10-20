@@ -1171,6 +1171,8 @@
       "INTERNAL_TRANSFER": "Pindah internal",
       "REVERSAL": "Pembalikan",
       "MANUAL_ADJUSTMENT": "Penyesuaian manual"
-    }
+    },
+    "dateFrom": "Dari tanggal",
+    "dateTo": "Sampai tanggal"
   }
 }

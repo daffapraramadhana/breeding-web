@@ -1171,6 +1171,8 @@
       "INTERNAL_TRANSFER": "Internal transfer",
       "REVERSAL": "Reversal",
       "MANUAL_ADJUSTMENT": "Manual adjustment"
-    }
+    },
+    "dateFrom": "From",
+    "dateTo": "To"
   }
 }

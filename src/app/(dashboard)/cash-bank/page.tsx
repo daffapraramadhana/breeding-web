@@ -11,6 +11,7 @@ import { PageHeader } from "@/components/shared/page-header";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { Currency } from "@/components/shared/currency";
 import { useApi, usePaginated } from "@/hooks/use-api";
+import { useAuth } from "@/hooks/use-auth";
 import { fetchApi, ApiError } from "@/lib/api";
 import { formatDate } from "@/lib/utils";
 import type {
@@ -49,14 +50,26 @@ const SOURCES: CashBankSource[] = [
   "MANUAL_ADJUSTMENT",
 ];
 
-/** Mutasi yang diposting dokumen dibatalkan lewat dokumennya, bukan dari sini. */
-const NOT_REVERSIBLE_HERE: CashBankSource[] = [
-  "SALES_PAYMENT",
-  "EXPENSE_PAYMENT",
-  "REVERSAL",
+/**
+ * Hanya mutasi yang tidak lahir dari dokumen boleh dibalik dari buku; yang
+ * lain dibatalkan lewat dokumennya. Ditulis sebagai daftar-boleh supaya sumber
+ * baru aman secara bawaan.
+ */
+const REVERSIBLE_HERE: CashBankSource[] = [
+  "OPENING_BALANCE",
+  "INTERNAL_TRANSFER",
+  "MANUAL_ADJUSTMENT",
 ];
 
-const today = () => new Date().toISOString().slice(0, 10);
+/**
+ * Tanggal hari ini menurut kalender setempat. `toISOString()` memberi tanggal
+ * UTC, yang di WIB berarti kemarin sepanjang 00:00–07:00.
+ */
+function today() {
+  const now = new Date();
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+}
 
 /** Rekening dipilih sebagai "CASH:<id>" / "BANK:<id>" dan dipecah saat dikirim. */
 function accountPayload(value: string, prefix: "" | "from" | "to" = "") {
@@ -86,6 +99,16 @@ export default function CashBankPage() {
   const [sourceFilter, setSourceFilter] = useQueryState("source", {
     defaultValue: "ALL",
   });
+  const [dateFrom, setDateFrom] = useQueryState("from", { defaultValue: "" });
+  const [dateTo, setDateTo] = useQueryState("to", { defaultValue: "" });
+
+  // Saldo awal, penyesuaian dan pembalikan milik TENANT_ADMIN; pindah uang
+  // sampai MANAGER. Menampilkan tombol yang pasti ditolak backend hanya
+  // menukar penjelasan dengan 403.
+  const { user } = useAuth();
+  const canAdmin = ["SUPER_ADMIN", "TENANT_ADMIN"].includes(user?.role ?? "");
+  const canTransfer =
+    canAdmin || ["MANAGER"].includes(user?.role ?? "");
 
   const {
     data: balances,
@@ -101,8 +124,10 @@ export default function CashBankPage() {
     }
     if (directionFilter !== "ALL") params.direction = directionFilter;
     if (sourceFilter !== "ALL") params.source = sourceFilter;
+    if (dateFrom) params.dateFrom = dateFrom;
+    if (dateTo) params.dateTo = dateTo;
     return params;
-  }, [accountFilter, directionFilter, sourceFilter]);
+  }, [accountFilter, directionFilter, sourceFilter, dateFrom, dateTo]);
 
   const {
     data: movements,
@@ -224,7 +249,9 @@ export default function CashBankPage() {
     {
       header: tc("actions"),
       cell: (row) =>
-        NOT_REVERSIBLE_HERE.includes(row.source) || row.reversedBy ? null : (
+        !canAdmin ||
+        !REVERSIBLE_HERE.includes(row.source) ||
+        row.reversedBy ? null : (
           <Button
             variant="ghost"
             size="sm"
@@ -253,18 +280,24 @@ export default function CashBankPage() {
         sectionLabel={t("sectionLabel")}
         actions={
           <>
-            <Button variant="outline" onClick={() => setOpeningOpen(true)}>
-              <Scale className="h-4 w-4 mr-2" />
-              {t("openingBalance")}
-            </Button>
-            <Button variant="outline" onClick={() => setAdjustmentOpen(true)}>
-              <Plus className="h-4 w-4 mr-2" />
-              {t("adjustment")}
-            </Button>
-            <Button onClick={() => setTransferOpen(true)}>
-              <ArrowLeftRight className="h-4 w-4 mr-2" />
-              {t("transfer")}
-            </Button>
+            {canAdmin && (
+              <Button variant="outline" onClick={() => setOpeningOpen(true)}>
+                <Scale className="h-4 w-4 mr-2" />
+                {t("openingBalance")}
+              </Button>
+            )}
+            {canAdmin && (
+              <Button variant="outline" onClick={() => setAdjustmentOpen(true)}>
+                <Plus className="h-4 w-4 mr-2" />
+                {t("adjustment")}
+              </Button>
+            )}
+            {canTransfer && (
+              <Button onClick={() => setTransferOpen(true)}>
+                <ArrowLeftRight className="h-4 w-4 mr-2" />
+                {t("transfer")}
+              </Button>
+            )}
           </>
         }
       />
@@ -356,6 +389,27 @@ export default function CashBankPage() {
             ))}
           </SelectContent>
         </Select>
+
+        <Input
+          type="date"
+          aria-label={t("dateFrom")}
+          className="w-[160px]"
+          value={dateFrom}
+          onChange={(e) => {
+            setDateFrom(e.target.value);
+            setPage(1);
+          }}
+        />
+        <Input
+          type="date"
+          aria-label={t("dateTo")}
+          className="w-[160px]"
+          value={dateTo}
+          onChange={(e) => {
+            setDateTo(e.target.value);
+            setPage(1);
+          }}
+        />
       </div>
 
       <DataTable
