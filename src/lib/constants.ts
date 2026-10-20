@@ -26,6 +26,7 @@ import {
   Users,
   Warehouse,
   type LucideIcon,
+  BookOpen,
 } from "lucide-react";
 
 export const APP_NAME = "FARMORA";
@@ -149,6 +150,7 @@ export const NAV_ITEMS: NavItem[] = [
     title: "Finance",
     icon: CreditCard,
     items: [
+      { title: "Cash & Bank Book", url: "/cash-bank", icon: BookOpen },
       { title: "Bank Accounts", url: "/bank-accounts", icon: CreditCard },
       { title: "Cash Accounts", url: "/cash-accounts", icon: DollarSign },
     ],

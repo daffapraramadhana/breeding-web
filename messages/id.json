@@ -115,7 +115,8 @@
     "AI Insights": "Wawasan AI",
     "Coop Population": "Populasi Kandang",
     "Daily Depletion": "Deplesi Harian",
-    "Bird Transfers": "Pindah Ayam"
+    "Bird Transfers": "Pindah Ayam",
+    "Cash & Bank Book": "Buku Kas & Bank"
   },
   "products": {
     "title": "Produk",
@@ -1119,5 +1120,59 @@
     "recipient": "Penerima",
     "loadFailed": "Realisasi ini tidak bisa dimuat",
     "retry": "Coba lagi"
+  },
+  "cashBank": {
+    "title": "Buku Kas & Bank",
+    "sectionLabel": "Keuangan",
+    "bookNote": "Saldo hanya menghitung mutasi yang tercatat di buku ini — dimulai dari saldo awal yang Anda isi untuk setiap rekening.",
+    "balances": "Saldo",
+    "movements": "Mutasi",
+    "openingBalance": "Saldo awal",
+    "transfer": "Pindah uang",
+    "adjustment": "Penyesuaian",
+    "reverse": "Balikkan",
+    "reverseTitle": "Balikkan mutasi ini?",
+    "reverseDescription": "Pembalikan diposting sebagai baris baru; tidak ada yang diubah atau dihapus. Pindah uang dibalik kedua kakinya.",
+    "account": "Rekening",
+    "fromAccount": "Rekening asal",
+    "toAccount": "Rekening tujuan",
+    "cashAccount": "Rekening kas",
+    "bankAccount": "Rekening bank",
+    "amount": "Nominal",
+    "movementDate": "Tanggal",
+    "direction": "Arah",
+    "source": "Sumber",
+    "reason": "Alasan",
+    "reasonRequired": "Penyesuaian wajib punya alasan",
+    "note": "Keterangan",
+    "balance": "Saldo",
+    "totalIn": "Uang masuk",
+    "totalOut": "Uang keluar",
+    "cash": "Kas",
+    "bank": "Bank",
+    "branch": "Cabang",
+    "searchPlaceholder": "Cari mutasi",
+    "emptyTitle": "Belum ada mutasi",
+    "emptyDescription": "Isi saldo awal sebuah rekening untuk memulai buku ini.",
+    "allAccounts": "Semua rekening",
+    "allDirections": "Semua arah",
+    "allSources": "Semua sumber",
+    "saved": "Tersimpan",
+    "reversed": "Mutasi dibalik",
+    "directions": {
+      "IN": "Masuk",
+      "OUT": "Keluar"
+    },
+    "sources": {
+      "OPENING_BALANCE": "Saldo awal",
+      "EXPENSE_PAYMENT": "Pembayaran biaya",
+      "SALES_PAYMENT": "Pembayaran penjualan",
+      "CUSTOMER_REFUND": "Refund customer",
+      "INTERNAL_TRANSFER": "Pindah internal",
+      "REVERSAL": "Pembalikan",
+      "MANUAL_ADJUSTMENT": "Penyesuaian manual"
+    },
+    "dateFrom": "Dari tanggal",
+    "dateTo": "Sampai tanggal"
   }
 }

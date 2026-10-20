@@ -115,7 +115,8 @@
     "AI Insights": "AI Insights",
     "Coop Population": "Coop Population",
     "Daily Depletion": "Daily Depletion",
-    "Bird Transfers": "Bird Transfers"
+    "Bird Transfers": "Bird Transfers",
+    "Cash & Bank Book": "Cash & Bank Book"
   },
   "products": {
     "title": "Products",
@@ -1119,5 +1120,59 @@
     "recipient": "Recipient",
     "loadFailed": "Could not load this realization",
     "retry": "Try again"
+  },
+  "cashBank": {
+    "title": "Cash & Bank Book",
+    "sectionLabel": "Finance",
+    "bookNote": "Balances count movements recorded in this book only — they start from the opening balance you enter for each account.",
+    "balances": "Balances",
+    "movements": "Movements",
+    "openingBalance": "Opening balance",
+    "transfer": "Move money",
+    "adjustment": "Adjustment",
+    "reverse": "Reverse",
+    "reverseTitle": "Reverse this movement?",
+    "reverseDescription": "A reversal is posted as a new row; nothing is edited or deleted. A transfer reverses both of its legs.",
+    "account": "Account",
+    "fromAccount": "From account",
+    "toAccount": "To account",
+    "cashAccount": "Cash account",
+    "bankAccount": "Bank account",
+    "amount": "Amount",
+    "movementDate": "Date",
+    "direction": "Direction",
+    "source": "Source",
+    "reason": "Reason",
+    "reasonRequired": "An adjustment needs a reason",
+    "note": "Note",
+    "balance": "Balance",
+    "totalIn": "Money in",
+    "totalOut": "Money out",
+    "cash": "Cash",
+    "bank": "Bank",
+    "branch": "Branch",
+    "searchPlaceholder": "Search movements",
+    "emptyTitle": "No movements yet",
+    "emptyDescription": "Enter an opening balance for an account to start the book.",
+    "allAccounts": "All accounts",
+    "allDirections": "All directions",
+    "allSources": "All sources",
+    "saved": "Saved",
+    "reversed": "Movement reversed",
+    "directions": {
+      "IN": "In",
+      "OUT": "Out"
+    },
+    "sources": {
+      "OPENING_BALANCE": "Opening balance",
+      "EXPENSE_PAYMENT": "Expense payment",
+      "SALES_PAYMENT": "Sales payment",
+      "CUSTOMER_REFUND": "Customer refund",
+      "INTERNAL_TRANSFER": "Internal transfer",
+      "REVERSAL": "Reversal",
+      "MANUAL_ADJUSTMENT": "Manual adjustment"
+    },
+    "dateFrom": "From",
+    "dateTo": "To"
   }
 }
