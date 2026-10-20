@@ -14,6 +14,7 @@ import { fetchApi, ApiError } from "@/lib/api";
 import type { ChartOfAccount } from "@/types/api";
 
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -42,12 +43,14 @@ export default function ChartOfAccountsPage() {
   const [deleting, setDeleting] = useState<ChartOfAccount | null>(null);
   const [code, setCode] = useState("");
   const [name, setName] = useState("");
+  const [isActive, setIsActive] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   function openCreate() {
     setEditing(null);
     setCode("");
     setName("");
+    setIsActive(true);
     setDialogOpen(true);
   }
 
@@ -55,6 +58,7 @@ export default function ChartOfAccountsPage() {
     setEditing(row);
     setCode(row.code);
     setName(row.name);
+    setIsActive(row.isActive);
     setDialogOpen(true);
   }
 
@@ -62,7 +66,7 @@ export default function ChartOfAccountsPage() {
     setIsSubmitting(true);
     try {
       // Kode akun sistem tidak boleh ikut dikirim — backend menolaknya 409.
-      const body = editing?.isSystem ? { name } : { code, name };
+      const body = editing?.isSystem ? { name, isActive } : { code, name, isActive };
       await fetchApi(editing ? `/chart-of-accounts/${editing.id}` : "/chart-of-accounts", {
         method: editing ? "PATCH" : "POST",
         body: JSON.stringify(body),
@@ -95,7 +99,12 @@ export default function ChartOfAccountsPage() {
     { header: t("name"), accessorKey: "name" },
     {
       header: "",
-      cell: (row) => (row.isSystem ? <Badge variant="secondary">{t("system")}</Badge> : null),
+      cell: (row) => (
+        <div className="flex gap-1">
+          {row.isSystem && <Badge variant="secondary">{t("system")}</Badge>}
+          {!row.isActive && <Badge variant="outline">{t("inactive")}</Badge>}
+        </div>
+      ),
       className: "w-[140px]",
     },
     {
@@ -163,6 +172,10 @@ export default function ChartOfAccountsPage() {
               <Label>{t("name")}</Label>
               <Input value={name} onChange={(e) => setName(e.target.value)} />
             </div>
+            <label className="flex items-center gap-2 text-sm">
+              <Checkbox checked={isActive} onCheckedChange={(v) => setIsActive(!!v)} />
+              {t("active")}
+            </label>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDialogOpen(false)}>

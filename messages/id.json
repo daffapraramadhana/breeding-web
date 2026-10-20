@@ -1249,7 +1249,8 @@
       "TRANSFER": "Transfer rekening",
       "PAYABLE": "Hutang / biaya ditangguhkan",
       "OTHER_EXPENSE": "Beban lain-lain"
-    }
+    },
+    "cancelPaidWarning": "Dokumen ini sudah dibayar. Membatalkannya memposting pembalikan dan uangnya kembali ke rekening."
   },
   "chartOfAccounts": {
     "title": "Bagan Akun",
@@ -1261,6 +1262,8 @@
     "newAccount": "Akun baru",
     "searchPlaceholder": "Cari kode atau nama",
     "emptyTitle": "Belum ada akun",
-    "emptyDescription": "Tambahkan akun yang dipakai tenant ini."
+    "emptyDescription": "Tambahkan akun yang dipakai tenant ini.",
+    "active": "Aktif",
+    "inactive": "Nonaktif"
   }
 }

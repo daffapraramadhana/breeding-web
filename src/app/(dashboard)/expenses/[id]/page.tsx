@@ -8,9 +8,11 @@ import { Plus, Trash2 } from "lucide-react";
 
 import { PageHeader } from "@/components/shared/page-header";
 import { StatusBadge } from "@/components/shared/status-badge";
+import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { Currency } from "@/components/shared/currency";
 import { SupplierCombobox } from "@/components/forms/supplier-combobox";
 import { useApi } from "@/hooks/use-api";
+import { useAuth } from "@/hooks/use-auth";
 import { fetchApi, ApiError } from "@/lib/api";
 import { formatDate } from "@/lib/utils";
 import type {
@@ -59,6 +61,13 @@ export default function ExpenseDetailPage() {
   const tc = useTranslations("common");
   const router = useRouter();
   const { id } = useParams<{ id: string }>();
+
+  // Tombol yang pasti ditolak backend hanya menukar penjelasan dengan 403.
+  const { user } = useAuth();
+  const role = user?.role ?? "";
+  const canApprove = ["SUPER_ADMIN", "TENANT_ADMIN", "MANAGER"].includes(role);
+  const canCancelPaid = ["SUPER_ADMIN", "TENANT_ADMIN"].includes(role);
+  const [confirmCancel, setConfirmCancel] = useState(false);
 
   const { data: expense, isLoading, refetch } = useApi<Expense>(`/expenses/${id}`);
   const editable = expense?.status === "DRAFT" || expense?.status === "REJECTED";
@@ -212,11 +221,24 @@ export default function ExpenseDetailPage() {
                 {isSubmitting ? tc("saving") : tc("update")}
               </Button>
             )}
-            {NEXT[expense.status].map((target) => (
+            {NEXT[expense.status]
+              .filter((target) => {
+                if (target === "CANCELLED" && expense.status === "PAID") return canCancelPaid;
+                if (["APPROVED", "PAID", "REJECTED", "CANCELLED"].includes(target))
+                  return canApprove;
+                return true;
+              })
+              .map((target) => (
               <Button
                 key={target}
                 variant={target === "CANCELLED" || target === "REJECTED" ? "outline" : "default"}
-                onClick={() => move(target)}
+                onClick={() =>
+                  // Membatalkan dokumen yang sudah dibayar menarik uang kembali;
+                  // itu pantas ditanya dulu.
+                  target === "CANCELLED" && expense.status === "PAID"
+                    ? setConfirmCancel(true)
+                    : move(target)
+                }
               >
                 {target === "SUBMITTED" && t("submit")}
                 {target === "APPROVED" && t("approve")}
@@ -441,6 +463,18 @@ export default function ExpenseDetailPage() {
           </TableBody>
         </Table>
       </Card>
+
+      <ConfirmDialog
+        open={confirmCancel}
+        onOpenChange={setConfirmCancel}
+        title={t("cancel")}
+        description={t("cancelPaidWarning")}
+        onConfirm={() => {
+          setConfirmCancel(false);
+          move("CANCELLED");
+        }}
+        variant="destructive"
+      />
     </div>
   );
 }
