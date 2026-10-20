@@ -1122,3 +1122,50 @@ export interface SalesRealization {
   createdAt: string;
   lines: SalesRealizationLine[];
 }
+
+// ─── Cash & Bank Book ────────────────────────────────────────────────────────
+
+export type MoneyDirection = "IN" | "OUT";
+
+export type CashBankSource =
+  | "OPENING_BALANCE"
+  | "EXPENSE_PAYMENT"
+  | "SALES_PAYMENT"
+  | "CUSTOMER_REFUND"
+  | "INTERNAL_TRANSFER"
+  | "REVERSAL"
+  | "MANUAL_ADJUSTMENT";
+
+export interface CashBankAccountBalance {
+  accountType: "CASH" | "BANK";
+  accountId: string;
+  name: string;
+  branchId: string;
+  branchName: string;
+  totalIn: string;
+  totalOut: string;
+  balance: string;
+}
+
+export interface CashBankMovement {
+  id: string;
+  tenantId: string;
+  branchId: string;
+  movementDate: string;
+  direction: MoneyDirection;
+  cashAccountId: string | null;
+  bankAccountId: string | null;
+  amount: string;
+  source: CashBankSource;
+  referenceId: string | null;
+  referenceNumber: string | null;
+  description: string | null;
+  reversalOfId: string | null;
+  pairedMovementId: string | null;
+  createdBy: string | null;
+  createdAt: string;
+  cashAccount?: { name: string } | null;
+  bankAccount?: { bankName: string; accountNumber: string } | null;
+  branch?: { name: string } | null;
+  reversedBy?: { id: string } | null;
+}
