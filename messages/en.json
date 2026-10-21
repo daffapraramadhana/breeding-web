@@ -1250,7 +1250,9 @@
       "PAYABLE": "Payable / deferred",
       "OTHER_EXPENSE": "Other expense"
     },
-    "cancelPaidWarning": "This document has already been paid. Cancelling it posts a reversal and the money comes back into the account."
+    "cancelPaidWarning": "This document has already been paid. Cancelling it posts a reversal and the money comes back into the account.",
+    "farm": "Farm",
+    "allFarms": "All farms"
   },
   "chartOfAccounts": {
     "title": "Chart of Accounts",

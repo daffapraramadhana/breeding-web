@@ -11,6 +11,7 @@ import { PageHeader } from "@/components/shared/page-header";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { Currency } from "@/components/shared/currency";
 import { usePaginated } from "@/hooks/use-api";
+import { FarmCombobox } from "@/components/forms/farm-combobox";
 import { formatDate } from "@/lib/utils";
 import type { Expense, ExpenseCategory, ExpensePaymentType, ExpenseStatus } from "@/types/api";
 
@@ -39,14 +40,16 @@ export default function ExpensesPage() {
   const [status, setStatus] = useQueryState("status", { defaultValue: "ALL" });
   const [category, setCategory] = useQueryState("category", { defaultValue: "ALL" });
   const [paymentType, setPaymentType] = useQueryState("paymentType", { defaultValue: "ALL" });
+  const [farmId, setFarmId] = useQueryState("farmId", { defaultValue: "" });
 
   const extra = useMemo(() => {
     const p: Record<string, string> = {};
     if (status !== "ALL") p.status = status;
     if (category !== "ALL") p.category = category;
     if (paymentType !== "ALL") p.paymentType = paymentType;
+    if (farmId) p.farmId = farmId;
     return p;
-  }, [status, category, paymentType]);
+  }, [status, category, paymentType, farmId]);
 
   const { data, meta, isLoading } = usePaginated<Expense>("/expenses", {
     page,
@@ -65,6 +68,12 @@ export default function ExpensesPage() {
       className: "w-[220px] font-mono text-xs",
     },
     { header: t("expenseDate"), cell: (row) => formatDate(row.expenseDate), className: "w-[120px]" },
+    {
+      header: t("farm"),
+      // Farm tersimpan di dokumennya; tidak dibaca ulang lewat project.
+      cell: (row) => row.farm?.name ?? "—",
+      className: "w-[150px]",
+    },
     {
       header: t("project"),
       // `Project` tidak punya kolom nama; yang menamainya adalah farm-nya plus
@@ -132,6 +141,14 @@ export default function ExpensesPage() {
             ))}
           </SelectContent>
         </Select>
+
+        <div className="w-[220px]">
+          <FarmCombobox
+            value={farmId}
+            onChange={(v) => { setFarmId(v); setPage(1); }}
+            placeholder={t("allFarms")}
+          />
+        </div>
 
         <Select value={paymentType} onValueChange={(v) => { setPaymentType(v); setPage(1); }}>
           <SelectTrigger className="w-[220px]">

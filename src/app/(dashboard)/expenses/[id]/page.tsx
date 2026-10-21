@@ -257,6 +257,7 @@ export default function ExpenseDetailPage() {
           <h2 className="text-sm font-medium">{t("projectPanel")}</h2>
           <div className="flex justify-between"><span>{tc("status")}</span><StatusBadge status={expense.status} /></div>
           <div className="flex justify-between"><span>{t("branch")}</span><span>{expense.branch?.name ?? "—"}</span></div>
+          <div className="flex justify-between"><span>{t("farm")}</span><span>{expense.farm?.name ?? "—"}</span></div>
           <div className="flex items-center justify-between gap-3">
             <span>{t("expenseDate")}</span>
             {headerEdit ? (

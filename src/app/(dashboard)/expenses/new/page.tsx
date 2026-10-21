@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { PageHeader } from "@/components/shared/page-header";
 import { ProjectCombobox } from "@/components/forms/project-combobox";
 import { BranchCombobox } from "@/components/forms/branch-combobox";
+import { FarmCombobox } from "@/components/forms/farm-combobox";
 import { useApi } from "@/hooks/use-api";
 import { fetchApi, ApiError } from "@/lib/api";
 import type {
@@ -54,6 +55,7 @@ export default function NewExpensePage() {
 
   const [projectId, setProjectId] = useState("");
   const [branchId, setBranchId] = useState("");
+  const [farmId, setFarmId] = useState("");
   const [expenseDate, setExpenseDate] = useState(today());
   const [category, setCategory] = useState<ExpenseCategory>("HPP");
   const [paymentType, setPaymentType] = useState<ExpensePaymentType>("CASH");
@@ -77,7 +79,7 @@ export default function NewExpensePage() {
         category,
         paymentType,
         chartOfAccountId,
-        ...(projectId ? { projectId } : { branchId }),
+        ...(projectId ? { projectId } : { branchId, ...(farmId ? { farmId } : {}) }),
         ...(paymentType === "CASH" && cashAccountId ? { cashAccountId } : {}),
         ...(paymentType === "TRANSFER" && bankAccountId ? { bankAccountId } : {}),
         ...(destinationBank ? { destinationBank } : {}),
@@ -114,6 +116,16 @@ export default function NewExpensePage() {
               <p className="mt-1 text-xs text-[var(--muted-foreground)]">{t("hppNeedsProject")}</p>
             )}
           </div>
+          {!projectId && (
+            <div>
+              {/* Tanpa project, farm-nya disebut sendiri — boleh juga dikosongkan
+                  untuk beban yang memang milik perusahaan. */}
+              <Label>
+                {t("farm")} ({tc("optional")})
+              </Label>
+              <FarmCombobox value={farmId} onChange={setFarmId} branchId={branchId || undefined} />
+            </div>
+          )}
           {!projectId && (
             <div>
               {/* Tanpa project, dokumen tetap harus menyebut area penanggungnya. */}

@@ -1223,6 +1223,7 @@ export interface Expense {
   id: string;
   branchId: string;
   projectId: string | null;
+  farmId: string | null;
   expenseNumber: string | null;
   expenseDate: string;
   status: ExpenseStatus;
@@ -1244,6 +1245,7 @@ export interface Expense {
     startDate?: string;
     farm?: { id: string; name: string } | null;
   } | null;
+  farm?: { id: string; name: string } | null;
   chartOfAccount?: { id: string; code: string; name: string } | null;
   cashAccount?: { id: string; name: string } | null;
   bankAccount?: { id: string; bankName: string; accountNumber: string } | null;

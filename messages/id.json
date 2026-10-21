@@ -1250,7 +1250,9 @@
       "PAYABLE": "Hutang / biaya ditangguhkan",
       "OTHER_EXPENSE": "Beban lain-lain"
     },
-    "cancelPaidWarning": "Dokumen ini sudah dibayar. Membatalkannya memposting pembalikan dan uangnya kembali ke rekening."
+    "cancelPaidWarning": "Dokumen ini sudah dibayar. Membatalkannya memposting pembalikan dan uangnya kembali ke rekening.",
+    "farm": "Farm",
+    "allFarms": "Semua farm"
   },
   "chartOfAccounts": {
     "title": "Bagan Akun",
