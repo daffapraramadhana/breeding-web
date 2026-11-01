@@ -56,7 +56,7 @@ export type PurchaseDestinationType = "BRANCH" | "FARM" | "COOP";
 export type PurchaseSalesTarget = "INTERNAL" | "EXTERNAL";
 export type RecipientType = "CUSTOMER" | "BREEDER";
 export type ConsumptionPurpose = "PRODUCTION" | "MAINTENANCE" | "OTHER";
-export type PaymentMethod = "CASH" | "BANK_TRANSFER" | "CHECK" | "GIRO";
+export type PaymentMethod = "CASH" | "TRANSFER" | "CHECK" | "GIRO";
 export type BonusUnitOption = "PER_KG" | "PER_BIRD" | "FLAT";
 
 // --- Organization ---
@@ -455,6 +455,7 @@ export interface Delivery {
 export interface SalesInvoice {
   id: string;
   invoiceNumber: string;
+  branchId: string;
   salesOrderId?: string;
   deliveryId?: string;
   customerId?: string;
@@ -473,14 +474,20 @@ export interface SalesInvoice {
 
 export interface SalesPayment {
   id: string;
-  invoiceId: string;
-  invoice?: SalesInvoice;
+  branchId: string;
+  salesInvoiceId: string;
+  salesInvoice?: Pick<SalesInvoice, "id" | "invoiceNumber">;
+  customerId?: string;
+  customer?: Pick<Customer, "id" | "name">;
+  breederId?: string;
+  breeder?: { id: string; name: string };
   amount: string;
   paymentDate: string;
-  paymentMethod?: PaymentMethod;
-  reference?: string;
+  paymentMethod: PaymentMethod;
+  proofOfPayment?: string;
+  bankAccountId?: string;
+  cashAccountId?: string;
   status: PaymentStatus;
-  notes?: string;
   createdAt: string;
   updatedAt: string;
 }
